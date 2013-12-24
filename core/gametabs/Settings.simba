@@ -1,0 +1,407 @@
+{
+========
+Settings
+========
+}
+
+(*
+SetBrightness
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function setBrightness(Brightness: Integer): Boolean;
+
+Sets the Brightness level, returns true if changed.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function setBrightness(Brightness: Integer): Boolean;
+var
+  PA : TPointArray;
+  P  : TPoint;
+begin
+  if (not isLoggedIn()) then
+    exit(false);
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if (not inRange(Brightness, 0, 4)) then
+  begin
+    Writeln('SetBrightness must be between 0 and 4');
+    exit(false);
+  end else
+  begin
+    if (Brightness=0) then
+      exit(false);
+    setLength(PA,4);
+    PA:= [Point(610,226),Point(641,226),Point(672,226),Point(706,226)];
+    P := PA[(Brightness - 1)];
+    if (not (getColor(P.X, P.Y) = 16777215)) then
+    begin
+      mouseBox(intToBox(P.X,P.Y,P.X+4,P.Y+4), MOUSE_LEFT);
+      exit(true);
+    end;
+  end;
+end;
+
+(*
+SetVolumeMusic
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function setVolumeMusic(Volume: Integer): Boolean;
+
+Sets the SoundEffects Volume, returns true if changed.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function setVolumeMusic(Volume: Integer): Boolean;
+var
+  PA : TPointArray;
+  P  : TPoint;
+begin
+  if (not isLoggedIn()) then
+    exit(false);
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if (not InRange(Volume, 0, 5)) then
+  begin
+    Writeln('SetVolumeMusic must be between 0 and 5');
+    exit(false);
+  end else
+  begin
+    if (Volume=0) then
+      exit(false);
+    setLength(PA,5);
+    PA:= [Point(607,263),Point(631,263),Point(658,263),Point(684,263),Point(709,263)];
+    P := PA[(Volume - 1)];
+    if (not (getColor(P.X, P.Y) = 16777215)) then
+    begin
+      mouseBox(intToBox(P.X,P.Y,P.X+4,P.Y+4), MOUSE_LEFT);
+      exit(true);
+    end;
+  end;
+end;
+
+(*
+SetVolumeSoundEffect
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function setVolumeSoundEffect(Volume: Integer): Boolean;
+
+Sets the SoundEffects Volume, returns true if changed.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function setVolumeSoundEffect(Volume:Integer): Boolean;
+var
+  PA : TPointArray;
+  P  : TPoint;
+begin
+  if (not isLoggedIn()) then
+    exit(false);
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if (not inRange(Volume, 0, 5)) then
+  begin
+    Writeln('SetVolumeSoundEffect must be between 0 and 5');
+    exit(false);
+  end else
+  begin
+    if (Volume=0) then
+      exit(false);
+    SetLength(PA,5);
+    PA:= [Point(607,299),Point(631,299),Point(658,299),Point(684,299),Point(709,299)];
+    P := PA[(Volume - 1)];
+    if (not (getColor(P.X, P.Y) = 16777215)) then
+    begin
+      mouseBox(intToBox(P.X,P.Y,P.X+4,P.Y+4), MOUSE_LEFT);
+      Exit(True);
+    end;
+  end;
+end;
+
+(*
+SetVolumeAreaSoundEffect
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function setVolumeAreaSoundEffect(Volume: Integer): Boolean;
+
+Sets the AreaSoundEffect Volume, returns true if changed.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function setVolumeAreaSoundEffect(Volume: Integer): Boolean;
+var
+  PA : TPointArray;
+  P  : TPoint;
+begin
+  if (not isLoggedIn()) then
+    exit(false);
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if (not InRange(Volume, 0, 5)) then
+  begin
+    Writeln('SetVolumeAreaSoundEffect must be between 0 and 5');
+    exit(false);
+  end else
+  begin
+    if (Volume=0) then
+      exit(false);
+    setLength(PA,5);
+    PA:= [Point(607,336),Point(631,336),Point(658,336),Point(684,336),Point(709,336)];
+    P := PA[(Volume - 1)];
+    if (not (getColor(P.X, P.Y) = 16777215)) then
+    begin
+      mouseBox(intToBox(P.X,P.Y,P.X+4,P.Y+4), MOUSE_LEFT);
+      exit(true);
+    end;
+  end;
+end;
+
+function setMouseButtons(Num: Integer): Boolean;
+begin
+  if (not gameTab(TAB_OPTIONS)) then
+    Exit(false);
+
+  if not inRange(Num, 1, 2) then
+  begin
+    Writeln('Invalid number: ' + intToStr(Num) + ', please use 1/2');
+    Exit;
+  end;
+
+  if (Num = 2) then
+  begin
+    if (cs_countColorTolerance(1777019, 555, 361, 593, 400, 15, cs_CTS1) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(intToBox(555,361,593,400), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else if (Num = 1) then
+    if (cs_countColorTolerance(1777019, 555, 361, 593, 400, 15, cs_CTS1) > 50) then
+    begin
+      mouseBox(intToBox(555,362,593,400), MOUSE_LEFT);
+      exit(false);
+    end;
+end;
+
+function toggleChatEffects(Enable: Boolean): Boolean;
+begin
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if Enable then
+  begin
+    if (cs_countColorTolerance(1777019, 601, 362, 638, 400, 15, cs_CTS1) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(intToBox(601,362,638,400), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else
+    if (cs_countColorTolerance(1777019, 601, 362, 638, 400, 15, cs_CTS1) > 50) then
+    begin
+      mouseBox(intToBox(601,362,638,400), MOUSE_LEFT);
+      exit(true);
+    end;
+end;
+
+function toggleSplitChat(Enable: Boolean): Boolean;
+begin
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if Enable then
+  begin
+    if (cs_countColorTolerance(1777019, 646, 362, 683, 400, 15, cs_CTS1) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(intToBox(646,362,683,400), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else
+    if (cs_countColorTolerance(1777019, 646, 362, 683, 400, 15, cs_CTS1) > 50) then
+    begin
+      mouseBox(intToBox(646,362,683,400), MOUSE_LEFT);
+      exit(true);
+    end;
+end;
+
+function toggleChatFilter(Enable: Boolean): Boolean;
+begin
+  if (not gameTab(TAB_OPTIONS)) then
+    exit(false);
+
+  if Enable then
+  begin
+    if (cs_countColorTolerance(1777019, 691, 362, 728, 400, 15, cs_CTS1) > 50) then
+      exit(true)
+    else
+    begin
+      MouseBox(691, 362, 728, 400, mouse_left);  // Here
+      Result := True;
+      Exit;
+    end;
+  end else if not Enable then
+    if (countColorTolerance(1777019, 691, 362, 728, 400, 15) > 50) then
+    begin
+      MouseBox(691, 362, 728, 400, mouse_left);
+      Result := True;
+      Exit;
+    end;
+end;
+
+//by Flight (17-10-2013)
+function toggleAcceptAid(Enable: Boolean): Boolean;
+begin
+  Result := False;
+  if not loggedin() then
+    Exit;
+
+  if (not gameTab(tab_Options)) then
+    Exit;
+
+  if Enable then
+  begin
+    if (countColorTolerance(1777019, 568, 413, 603, 449, 15) > 50) then
+    begin
+      Result := True;
+      Exit;
+    end else
+    begin
+      MouseBox(568, 413, 603, 449, mouse_left);
+      Result := True;
+      Exit;
+    end;
+  end else if not Enable then
+    if (countColorTolerance(1777019, 568, 413, 603, 449, 15) > 50) then
+    begin
+      MouseBox(568, 413, 603, 449, mouse_left);
+      Result := True;
+      Exit;
+    end;
+end;
+
+(*
+SetGraphics
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SetGraphics(Bright,MVol,SEVol,ASEVol: Integer; TNMB,TCE,TSPC,TAA: Boolean);
+
+Sets graphic options through the Graphics Screen in GameTab 12.
+Use: Enter the desired Setting for the desired Option.
+
+
+Parameter    Option                     Setting
+Bright       Screen Brightness          Level: 1-4 (0 no change)
+MVol         Music Volume               Level: 1-4 (0 no change)
+SEVol        Sound Effect Volume        Level: 1-4 (0 no change)
+ASEVol       Area Sound Effect Volume   Level: 1-4 (0 no change)
+TNMB         Toggle MouseButton Num     Off / On
+TCE          Toggle Chat Effects        Off / On
+TSPC         Toggle SPrivate Chat       Off / On
+TAA          Toggle Accept Aid          Off / On
+
+|                    1   2   3   4
+|  Brightness :   <--o---o---o---o-->
+
+|                    1  2  3  4  5
+|  Volumes :      <--o--o--o--o--o-->
+
+.. note::
+
+    by DannyRS
+    Last Modified: Oct. 17th, 2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    SetGraphics(4,1,1,1,True,True,True,False);
+
+*)
+procedure SetGraphics(Bright,MVol,SEVol,ASEVol,MBN: Integer; TCE,TSC,TCF,TAA: Boolean);
+begin
+  if (not LoggedIn) then exit;
+  if SetBrightness(Bright) then Wait(90 + Random(200));
+  if SetVolumeMusic(MVol) then Wait(90 + Random(200));
+  if SetVolumeSoundEffect(SEVol) then Wait(90 + Random(200));
+  if SetVolumeAreaSoundEffect(ASEVol) then Wait(90 + Random(200));
+  if setMouseButtons(MBN) then Wait(90 + Random(200));
+  if toggleChatEffects(TCE) then Wait(90 + Random(200));
+  if toggleSplitChat(TSC) then Wait(90 + Random(200));
+  if toggleChatFilter(TCF) then Wait(90 + Random(200));
+  if toggleAcceptAid(TAA) then Wait(90 + Random(200));
+end;
+
+(*
+FixGraphics
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure FixGraphics;
+
+Fixes the Graphic Options if LoggedIn
+
+.. note::
+
+    by DannyRS
+    Last Modified: Oct. 17th, 2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+procedure FixGraphics;
+begin
+  SetGraphics(4,0,0,0,2,True,True,False,False);
+end;

@@ -1,0 +1,172 @@
+{
+==========
+Interfaces
+==========
+}
+
+type TInterface = record
+  Text       : String;
+  TxtBounds  : TBox;
+  FontType   : String;
+  FontColor,
+  ColorTol   : Integer;
+end;
+
+var
+  Interfaces: Array [0..9] of TInterface;
+
+{
+~To-add~
+  -Crafting screen
+  -Smithing screen
+}
+
+const
+  BANKSCREEN      = 0;
+  PINSCREEN       = 1;
+  PINPENDING      = 2;
+  DEPOSITSCREEN   = 3;
+  SHOPSCREEN      = 4;
+  TRADESCREEN     = 5;
+  TRADECSCREEN    = 6;
+  DUELSCREEN      = 7;
+  DUELCSCREEN     = 8;
+  TELEOTHERSCREEN = 9;
+
+procedure setupInterfaces();
+begin
+  with Interfaces[BANKSCREEN] do
+  begin
+    FontType  := 'SmallChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'mode';
+    TxtBounds := intToBox(119, 287, 149, 302);
+  end;
+  with Interfaces[PINSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'Please';
+    TxtBounds := intToBox(105, 62, 150, 75);
+  end;
+  with Interfaces[PINPENDING] do
+  begin
+    FontType  := 'CharsNPC07';
+    FontColor := 65535;
+    ColorTol  := 10;
+    Text      := 'asked';
+    TxtBounds := intToBox(114, 135, 204, 158);
+  end;
+  with Interfaces[DEPOSITSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'Box';
+    TxtBounds := intToBox(365, 33, 393, 48);
+  end;
+  with Interfaces[SHOPSCREEN] do
+  begin
+    FontType  := 'SmallChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'shop';
+    TxtBounds := intToBox(145, 295, 175, 314);
+  end;
+end;
+
+function TInterface.isVisible(): boolean;
+begin
+  result := findTextTPA(Self.FontColor, Self.ColorTol, Self.TxtBounds,Self.Text, Self.FontType, -1);
+end;
+
+(*
+    by NaumanAkhlaQ, Narcle, Nava2, and Flight
+    Updated: 18 December 2013 by Flight
+*)
+
+function closeInterface(): boolean;
+var
+  Pa         : TBox;
+  T          : Timer;
+  i,ii,l,x,y : Integer;
+  Col        : TIntegerArray;
+  a          : T2DPointArray;
+  b          : array[0..1] of TPointArray;
+begin
+  if menuOpen() then
+  begin
+    T.start();
+    while (T.timeElapsed() < 3000) do
+    begin
+      getMousePos(X, Y);
+      missMouse(Point(x,y-10), 0, 0);
+      if not menuOpen() then
+        break;
+    end;
+  end;
+
+  for i:=0 to high(Interfaces) do
+    if i=high(Interfaces) then
+      if not Interfaces[i].isVisible() then
+        Exit(True);
+
+  // handles the advanced skill guide window
+  if (cs_findColorTolerance(x, y, 2994428, 20, intToBox(728,8,753,30), cs_CTS)) then
+  begin
+    BrakeMMouse(Point(X,Y), 3, 3, False);
+    fastClick(MOUSE_LEFT);
+    Exit(True);
+  end;
+
+  if Interfaces[PINSCREEN].isVisible() then
+  begin
+    T.start();
+    while (Interfaces[PINSCREEN].isVisible() and (T.timeElapsed() < 10000)) do
+    begin
+      gaussMouseBox(332, 258, 489, 281, MOUSE_LEFT);
+      Wait(500);
+    end;
+    if not Interfaces[PINSCREEN].isVisible() then
+      Exit(True);
+  end;
+
+  Col := [1118997,  1449250,  {Main typ 1}
+          3912691,  1973857,  {Quest}
+          4282212,  2503226,  {Main typ 2}
+          39423,    13567,    {Red X}
+          1514271,  1580837,  {Deposit Box}
+          1383457,  2107437];
+
+  for i:=0 to 5 do
+  begin
+    cs_findColorsTolerance(b[0], Col[i * 2], 5, intToBox(MSCX,MSY1,MSX2,MSCY), cs_CTS);
+    cs_findColorsTolerance(b[1], Col[i * 2 + 1], 5, intToBox(MSCX,MSY1,MSX2,MSCY), cs_CTS);
+    l := (High(b[0]) + High(b[1]));
+
+    if inRange(l, 6, 53) or inRange(l, 94, 250) then
+    begin
+      a := clusterTPA(combineTPA(b[0], b[1]), 5);
+      sortATPAFromFirstPoint(a, Point(507, 14));
+
+      if (length(a) < 1) then
+        Continue;
+
+      for ii:=0 to high(a) do
+      begin
+        Pa := getTPABounds(a[ii]);
+        if ((Pa.x2 - Pa.x1) > 50) or ((Pa.y2 - Pa.y1) > 50) then
+          Continue;
+
+        gaussMouseBox(Pa.x1, Pa.y1, Pa.x2, Pa.y2, mouse_move);
+        if (waitUptextMulti(['lose','ack','Cl','se'], 400)) then
+        begin
+          fastClick(MOUSE_LEFT);
+          Exit(True);
+        end;
+      end;
+    end;
+  end;
+end;

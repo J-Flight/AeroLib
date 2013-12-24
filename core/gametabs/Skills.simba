@@ -1,0 +1,538 @@
+{
+======
+Skills
+======
+}
+
+(*
+
+getCombatLevel
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getCombatLevel(): Integer;
+
+Returns the players combat level.
+
+.. note::
+
+    by Nielsie95 & Narcle
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getCombatLevel(): Integer;
+begin
+  Result := -1;
+  if not FTab(TAB_COMBAT) then
+    exit(-1);
+
+  Result := strToIntDef(ExtractFromStr(cs_GetTextAtEx(intToBox(662,230,700,240), 0, 3, 1, 2070783, 0, 'StatChars07', cs_CTS1), Numbers), -1);
+end;
+
+(*
+
+SkillBoxCoords
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function skillBoxCoords(Row, Column : ShortInt): TBox;
+
+Returns TBox of Skill's Box (Used for GetSkill functions)
+
+.. note::
+
+    by NaumanAkhlaQ
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function skillBoxCoords(Row,Column: ShortInt): TBox;
+begin
+  Result := intToBox(549+(63*(Row-1)),208+(31*(Column-1)),608+(63*(Row-1)),237+(31*(Column-1)));
+end;
+
+(*
+
+SkillBoxHalf
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function skillBoxHalf(Row,Column: ShortInt; TopHalf: Boolean): TBox;
+
+Returns TBox of Skill's Box (Used for GetSkill functions)
+
+.. note::
+
+    by NaumanAkhlaQ
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function skillBoxHalf(Row,Column: ShortInt; TopHalf: Boolean): TBox;
+var
+  ResBox : TBox;
+begin
+  ResBox := skillBoxCoords(Row, Column);
+  if TopHalf then
+    Result := intToBox(ResBox.X1,ResBox.Y1,ResBox.X2,ResBox.Y1+13)
+  else
+    Result := intToBox(ResBox.X1,ResBox.Y2-13,ResBox.X2,ResBox.Y2)
+end;
+
+(*
+
+SkillCoords
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function skillCoords(Row,Column : ShortInt): TPoint;
+
+Returns Coords of Skill's Row and Column (Used for ?Parent)
+
+.. note::
+
+    by NaumanAkhlaQ
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function skillCoords(Row,Column: ShortInt): TPoint;
+var
+  ResPoint : TPoint;
+  SkillBox : TBox;
+begin
+  SkillBox := skillBoxCoords(Row, Column);
+  ResPoint.X := Round(((SkillBox.X2-SkillBox.X1)/2)+SkillBox.X1);
+  ResPoint.Y := Round(((SkillBox.Y2-SkillBox.Y1)/2)+SkillBox.Y1);
+  Result := ResPoint;
+end;
+
+(*
+
+SkillToPoint
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function skillToPoint(Skill: Variant): TPoint;
+
+Turns global skill integer / raw string into TPoint position.
+
+.. note::
+
+    by NaumanAkhlaQ
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function skillToPoint(Skill: Variant): TPoint;
+var
+  SkillPT: TPoint;
+begin
+  if (not isLoggedIn()) then
+    Exit;
+
+  if variantIsString(Skill) then
+  begin
+    case Lowercase(Skill) of
+      'attack','attk'     : SkillPT := Point(1,1);
+      'strength','str'    : SkillPT := Point(1,2);
+      'defence','def'     : SkillPT := Point(1,3);
+      'ranged','range'    : SkillPT := Point(1,4);
+      'prayer','pray'     : SkillPT := Point(1,5);
+      'magic','mage'      : SkillPT := Point(1,6);
+      'runecrafting','rc' : SkillPT := Point(1,7);
+      'construction'      : SkillPT := Point(1,8);
+      'hitpoints','hp'    : SkillPT := Point(2,1);
+      'agility','agil'    : SkillPT := Point(2,2);
+      'herblore','herb'   : SkillPT := Point(2,3);
+      'thieving'          : SkillPT := Point(2,4);
+      'crafting','craft'  : SkillPT := Point(2,5);
+      'fletching','fletch': SkillPT := Point(2,6);
+      'slayer','slay'     : SkillPT := Point(2,7);
+      'hunter','hunt'     : SkillPT := Point(2,8);
+      'mining','mine'     : SkillPT := Point(3,1);
+      'smithing','smith'  : SkillPT := Point(3,2);
+      'fishing','fish'    : SkillPT := Point(3,3);
+      'cooking','cook'    : SkillPT := Point(3,4);
+      'firemaking','fm'   : SkillPT := Point(3,5);
+      'woodcutting','wc'  : SkillPT := Point(3,6);
+      'farming','farm'    : SkillPT := Point(3,7);
+      else
+      begin
+        Writeln('Invalid Skill Name: ''' + tostr(Skill) + '''');
+        Exit;
+      end;
+    end;
+  end
+  else
+  if variantIsInteger(Skill) then
+  begin
+    case Skill of
+      Skill_Attack        : SkillPT := Point(1,1);
+      Skill_Strength      : SkillPT := Point(1,2);
+      Skill_Defence       : SkillPT := Point(1,3);
+      Skill_Range         : SkillPT := Point(1,4);
+      Skill_Prayer        : SkillPT := Point(1,5);
+      Skill_Magic         : SkillPT := Point(1,6);
+      Skill_Runecrafting  : SkillPT := Point(1,7);
+      Skill_Construction  : SkillPT := Point(1,8);
+      Skill_Hitpoints     : SkillPT := Point(2,1);
+      Skill_Agility       : SkillPT := Point(2,2);
+      Skill_Herblore      : SkillPT := Point(2,3);
+      Skill_Thieving      : SkillPT := Point(2,4);
+      Skill_Crafting      : SkillPT := Point(2,5);
+      Skill_Fletching     : SkillPT := Point(2,6);
+      Skill_Slayer        : SkillPT := Point(2,7);
+      Skill_Hunter        : SkillPT := Point(2,8);
+      Skill_Mining        : SkillPT := Point(3,1);
+      Skill_Smithing      : SkillPT := Point(3,2);
+      Skill_Fishing       : SkillPT := Point(3,3);
+      Skill_Cooking       : SkillPT := Point(3,4);
+      Skill_FireMaking    : SkillPT := Point(3,5);
+      Skill_WoodCutting   : SkillPT := Point(3,6);
+      Skill_Farming       : SkillPT := Point(3,7);
+      else
+      begin
+        Writeln('Invalid Skill Number: ''' + tostr(Skill) + '''');
+        Exit;
+      end;
+    end;
+  end
+  else
+  begin
+    Writeln('Invalid Skill Variant : ''' + tostr(Skill) + '''');
+    Exit;
+  end;
+  Result := SkillPT;
+end;
+
+(*
+
+SkillToCoords
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function skillToCoords(Skill: variant): TPoint;
+
+Turns a skill String into TPoint position
+in the middle of the skill on the game grid.
+
+.. note::
+
+    by Masquerader et. al.
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function skillToCoords(Skill: variant): TPoint;
+var
+  TP : TPoint;
+begin
+  TP := skillToPoint(Skill);
+  Result := SkillCoords(TP.X,TP.Y);
+end;
+
+(*
+GetSkillInfo
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getSkillInfo(Skill: Variant; Amount : Boolean): Integer;
+
+Gets the amount / level of a skill.
+E.G.
+0/15
+Amount = True will return 0.
+Amount = False will return 15 (The actual level).
+Returns -1 if the level couln't be grabbed succesfully
+
+.. note::
+
+    by Raymond
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function getSkillInfo(Skill: Variant; Amount: Boolean): Integer;
+var
+  TP  : TPoint;
+  Box : TBox;
+  TPA : TPointArray;
+begin
+  if not gameTab(TAB_STATS) then
+    Exit(-1);
+  TP := skillToPoint(Skill);
+  if (Amount) then
+    Box := skillBoxHalf(TP.X,TP.Y,True)
+  else
+    Box := skillBoxHalf(TP.X,TP.Y,False);
+  if (not cs_findColors(TPA, 65535, Box, cs_CTS0)) then
+    exit(-1);
+
+  Box    := getTPABounds(TPA);
+  Result := strToIntDef(cs_getTextAtEx(intToBox(Box.X1-2,Box.Y1-2,Box.X2+2,Box.Y2+2),0,5,1,65535,0,'StatChars07', cs_CTS1),-1);
+end;
+
+(*
+GetSkillCurrentLevel
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    Function getSkillCurrentLevel(skill: Variant): Integer;
+
+Gets the current player level for a particular skill.
+
+.. note::
+
+    by Raymond
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function getSkillCurrentLevel(Skill: Variant): Integer;
+begin
+  Result := getSkillInfo(Skill, False);
+end;
+
+(*
+GetSkillMaxLevel
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    Function getSkillMaxLevel(skill: Variant): Integer;
+
+Gets the player max level for a particular skill.
+
+.. note::
+
+    by Raymond
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function getSkillMaxLevel(Skill: Variant): Integer;
+begin
+  Result := getSkillInfo(Skill, True);
+end;
+
+(*
+GetTotalLevel
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getTotalLevel(): Integer;
+
+Gets the player total level from skills tab.
+
+.. note::
+
+    by Raymond
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function getTotalLevel(): Integer;
+begin
+  if (not FTab(TAB_STATS)) then
+    Exit(-1);
+
+  Wait(100 + Random(100));
+  Result := strToIntDef(Trim(cs_getTextAtEx(intToBox(705,442,735,452),0,5,1,65535,0,'StatChars07', cs_CTS1)),-1);
+end;
+
+(*
+GetSkillXP
+~~~~~
+
+.. code-block:: pascal
+
+    function getSkillXP(Skill: Variant): Integer;
+
+Returns current XP for a skill. Returns -1 if failed.
+
+.. note::
+
+    by Nielsie95
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function getSkillXP(skill: variant): integer;
+var
+  MouseTB,b: TBox;
+  rc: TPoint;
+  tpa: TPointArray;
+begin
+  if(not gameTab(TAB_STATS)) then
+    exit(-1);
+
+  rc := skillToPoint(skill);
+  MouseTB := skillBoxCoords(rc.x,rc.y);
+  if (MouseTB.X1 < 1) then
+    exit(-1);
+
+  brakeMMouse(Point(MouseTB.X1+3,MouseTB.Y1+3), 55, 25, True);
+  wait(400 + random(200));
+
+  if (waitFindColors(tpa, 10551295, 0, Area_Inv, 3000)) then
+  begin
+    b := getTPABounds(tpa);
+    wait(450 + random(150));
+    result := strToIntDef(getNumbers(cs_getTextAtEx(intToBox(b.x1+15, b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+  end;
+end;
+
+(*
+XPTillNextLevel
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function XpTillNextLevel(Skill: Variant): Integer;
+
+Returns current xp until you level up in a skill.
+Returns -1 if failed.
+
+.. note::
+
+    by Nielsie95
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function XPTillNextLevel(Skill: Variant): Integer;
+var
+  MouseTB,b: TBox;
+  rc: TPoint;
+  tpa: TPointArray;
+  CXP,XPNLA: Integer;
+begin
+  if(not gameTab(tab_Stats)) then
+    exit(-1);
+
+  rc:= skillToPoint(skill);
+  MouseTB := skillBoxCoords(rc.x,rc.y);
+  if (MouseTB.X1 < 1) then
+    exit(-1);
+
+  brakeMMouse(Point(MouseTB.X1+3,MouseTB.Y1+3), 55, 25, True);
+  wait(400 + random(200));
+
+  if (waitFindColors(tpa, 10551295, 0, Area_Inv, 3000)) then
+  begin
+    b := getTPABounds(tpa);
+    wait(450 + random(150));
+    CXP    := strToIntDef(getNumbers(cs_getTextAtEx(intToBox(b.x1+15,b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    XPNLA  := strToIntDef(getNumbers(cs_getTextAtEx(intToBox(b.x1+15, b.y2-15,b.x2-2,b.y2-2), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    result := XPNLA-CXP;
+    if (result < 0) then
+      result := -1;
+  end;
+end;
+
+(*
+GetPlayerLevels
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure getPlayerLevels();
+
+Sets all 25 skilllevels to Players.Level[0..24]:
+Refer to the 'GameTab 2 Related Functions' above for the order.
+
+.. note::
+
+    by WT-Fakawi & ZephyrsFury
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+procedure getPlayerLevels();
+var
+  II : Integer;
+begin
+  try
+    for II := 0 to High(Me.Level) do
+      Me.Level[II] := getSkillCurrentLevel(II);
+  except
+    Writeln('Error grabbing player levels...');
+  end;
+end;
+
+(*
+HPPercent
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function HpPercent(): Integer;
+
+Returns HP left as a percentage from skill panel
+returns -1 is unsuccessful.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+*)
+function HPPercent(): Integer;
+var
+  OrigTab,CHP,CMHP: Integer;
+begin
+  Result := -1;
+  if gameTab(TAB_STATS) then
+  begin
+    CHP := getSkillCurrentLevel('hp');
+    CMHP := getSkillMaxLevel('hp');
+    Result := Round((CHP*100/CMHP));
+    gameTab(TAB_INV);
+  end;
+end;

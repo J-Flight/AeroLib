@@ -1,0 +1,14 @@
+{
+===
+NPC
+===
+}
+
+{ type TNPC;
+  Description: A record containting NPC information. }
+type TNPC = record
+  Name    : TStringArray;
+  Level   : integer;
+//Model   : TEntity;
+  Busy    : boolean;
+end;

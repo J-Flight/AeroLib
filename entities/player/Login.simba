@@ -1,0 +1,457 @@
+{
+=====
+Login
+=====
+}
+
+const
+  SM_Color = 8115338;
+
+  // Existing User - box
+  EUX1 = 389;
+  EUY1 = 271;
+  EUX2 = 535;
+  EUY2 = 311;
+
+  // Current World / click to switch - box
+  CWX1 = 5;
+  CWY1 = 463;
+  CWX2 = 104;
+  CWY2 = 497;
+
+const
+// Username box
+  UBx1 = 313;
+  UBy1 = 254;
+  UBx2 = 435;
+  UBy2 = 260;
+// Password box
+  PBx1 = 346;
+  PBy1 = 271;
+  PBx2 = 435;
+  PBy2 = 281;
+// Click to login
+  GBx1 = 229;
+  GBy1 = 301;
+  GBx2 = 375;
+  GBy2 = 341;
+// Click to play button
+  WDx1 = 276;
+  WDy1 = 298;
+  WDx2 = 499;
+  WDy2 = 381;
+// Logout box
+  LOx1 = 596;
+  LOy1 = 367;
+  LOx2 = 689;
+  LOy2 = 386;
+
+  WHITE_TEXT    = 16777215; // white text color
+  MESSAGE_BOX   = 11452366; // The "helpful message" box color
+  INFO_BOX      = 7428416;  // Blue information box color
+  LOGIN_COLOR   = 6865381;  // Login button color
+  ERROR_BOX     = 2044518;  // Error box (comes up on incorrect pw/un or banned acc
+
+const                       //GetScreen
+  LOGIN_TA_X1 = 210;        //Text check area
+  LOGIN_TA_Y1 = 54;
+  LOGIN_TA_X2 = 556;
+  LOGIN_TA_Y2 = 228;
+
+  LOGIN_TEXTCOLOUR = 16777215; //Color of text
+  LOGIN_STATUSCOLOUR = 65535;  //Color of text
+
+
+(*
+SetAudioOff
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function SetAudioOff(): boolean;
+
+Turns offs the music on the login screen.
+Should default turn off, upon loading old school RS.
+
+.. note::
+
+    by Ashaman88/Le Jingle
+
+Example:
+
+.. code-block:: pascal
+
+    SetAudioOff;
+
+*)
+
+function setAudioOff(): boolean;
+var
+  c : integer;
+begin
+  c := countColor(65536, 725, 463, 760, 498);
+  // 346 = Turned Off Already
+  // 284 = Turned On...
+
+  result := inrange(c, 340, 350);
+  if not result then
+    mouse(Point(742,481), 10, 10, MOUSE_LEFT);
+end;
+
+function isLoggedIn(): Boolean;
+begin
+  result := Me.getLoginState() = LS_LOGGEDIN;
+end;
+
+function isSplashScreen(): Boolean;
+begin
+  result := Me.getLoginState() = LS_SPLASHSCREEN;
+end;
+
+(*
+RSReady
+~~~~~~~
+
+.. code-block:: pascal
+
+    function RSReady: Boolean;
+
+Returns true if we are ready to auto (on loginscreen or logged in).
+Useful for waiting until RS has fully loaded.
+
+.. note::
+
+    by ZephyrsFury
+    Last modified 05/12/2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    while not RSReady() do
+      SleepAndMoveMouse(100 + Random(500));
+
+*)
+
+function RSReady(): boolean;
+var
+  T : Timer;
+begin
+  if isLoggedIn() then
+    exit(true);
+
+  T.start();
+  while (T.timeElapsed < 120000) do
+  begin
+    if (getColor(31,488) = 16777215) then
+    begin
+      setAudioOff();
+      exit(true);
+    end;
+    wait(20+random(10));
+  end;
+
+  Writeln('Could not start up Old School RuneScape or RSReady was not detected!');
+  terminateScript();
+end;
+
+function gameTab(Tab: Integer): Boolean; forward;
+(*
+LogoutPlayer
+~~~~~~
+
+.. code-block:: pascal
+
+    function logoutPlayer: Boolean;
+
+Logs you all the way out from ingame.
+
+.. note::
+
+    by Ashaman88/Justin/Le Jingle - modified by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    if (not findTree()) then
+      logoutPlayer();
+
+*)
+function logoutPlayer(): Boolean;
+var
+  T : Timer;
+begin
+  if not isLoggedIn() then
+    exit(true);
+
+  if not gametab(TAB_LOGOUT) then
+    exit(false);
+
+  mousebox(intToBox(LOx1,LOy1,LOx2,LOy2), MOUSE_LEFT);
+  T.start();
+  repeat
+    wait(randomRange(400,500));
+    if (not isLoggedIn()) then
+      exit(true);
+  until(T.timeElapsed > 11000);
+end;
+
+function loginPlayer(Safe: Boolean): Boolean;
+var
+  T              : Timer;
+  Box            : TBox;
+  p              : TPoint;
+  c,w,typtmp,uL,
+  uH,pL,pH,uLen,
+  pLen,i,j,
+  Attempts       : integer;
+  foundLogin,
+  retryLogin     : boolean;
+  TPA            : TPointArray;
+  Actions        : TVariantArray;
+label
+  ProcStart;
+begin
+  //ActivateClient;
+  if (isSplashScreen() or isLoggedIn()) then
+    exit(true);
+
+  if not Me.Active then
+  begin
+    WriteLn('Player inactive...');
+    Exit;
+  end;
+
+  T.start();
+  repeat
+    if (T.timeElapsed > 180000) then
+    begin
+      WriteLn('It has been 3 minutes and Runescape is not yet ready... Terminating.');
+      terminateScript();
+    end;
+    Wait(RandomRange(1000,2000));
+  until (RSReady);
+
+  WriteLn('Logging player in...');
+
+  if (isSplashScreen() or isLoggedIn()) then
+    exit(true);
+
+  if Length(Me.WorldList) > 0 then
+    selectWorld(Me.WorldList[0]);
+
+  if not cs_findColors(TPA, WHITE_TEXT, intToBox(439,313,484,327), cs_CTS1) then
+  begin
+    mouseBox(intToBox(EUX1,EUY1,EUX2,EUY2), MOUSE_LEFT);
+    T.start();
+    while (T.timeElapsed < 60000) do
+    begin
+      c := countColor(65535, 238, 215, 526, 230);
+      if c > 1 then
+      begin
+        foundLogin := true;
+        break;
+      end;
+      wait(500 + random(500));
+    end;
+    if not FoundLogin then
+    begin
+      writeln('Unable to detect login interface...');
+      exit;
+    end;
+  end;
+
+  ProcStart:
+
+  for W:=0 to 1 do
+  begin
+    if W = 0 then
+      Box := intToBox(PBX1, PBY1, PBX2, PBY2)
+    else
+      Box := intToBox(UBX1, UBY1, UBX2, UBY2);
+
+    cs_findColors(TPA, LOGIN_TEXTCOLOUR, Box, cs_CTS1);
+
+    T.start();
+    repeat
+      if (Length(TPA) > 0) then
+      begin
+        sortTPAFrom(TPA, Point(Box.X2, Box.Y1 + (Box.Y2 - Box.X2) div 2));
+        p := point(TPA[0].X + 20, TPA[0].Y);
+        if (not pointInBox(p, Box)) then
+          p := point(UBX2 - (10 + random(10)), p.y);
+        mouse(p, 5, 5, MOUSE_LEFT);
+      end else
+        mouseBox(Box, MOUSE_LEFT);
+
+      typtmp := 0;
+      if (countColor(LOGIN_TEXTCOLOUR, Box.X1, Box.Y1, Box.X2, Box.Y2) > 0) then
+      begin
+        keyDown(VK_BACK);
+        while (countColor(LOGIN_TEXTCOLOUR, Box.X1, Box.Y1, Box.X2, Box.Y2) > 0) do
+        begin
+          Inc(typtmp);
+          Wait(50+Random(50));
+          if (typtmp >= RandomRange(20, 24)) then
+            Break;
+        end;
+        keyUp(VK_BACK);
+      end;
+    until(not cs_findColors(TPA, LOGIN_TEXTCOLOUR, Box, cs_CTS1) or (T.timeElapsed > 120000));
+
+  end;
+
+  Wait(100 + Random(200));
+
+  if not Safe then
+  begin
+    if W = 0 then
+    begin
+      WriteLn(Capitalize(Me.Name));
+      TypeSend(Me.Name);
+    end else
+      TypeSend(Me.Pass);
+  end else
+  begin
+    uL := 0;
+    pL := 0;
+    uLen := length(Me.Name);
+    pLen := length(Me.Pass);
+
+    repeat
+      if (not (uH = uLen)) then
+      begin
+        // prevents "Out of string range" errors
+        uH := (uL + randomRange(1, 3));
+        if (uH > uLen) then
+          uH := uLen;
+
+        for i := uL to uH do
+        begin
+          wait(100 + random(100));
+          typeSend(Me.Name[i], false);
+        end;
+
+        uL := (uH + 1);
+
+        // press enter if entering the password isn't complete
+        if (not (pH = pLen)) then
+          typeByte(VK_ENTER);
+      end;
+
+      if (not (pH = pLen)) then
+      begin
+        // prevents "Out of string range" errors
+        pH := (pL + randomRange(1, 3));
+        if (pH > pLen) then
+          pH := pLen;
+
+        for j := pL to pH do
+        begin
+          wait(100 + random(100));
+          typeSend(Me.Pass[j], false);
+        end;
+
+        pL := (pH + 1);
+
+        // click the end of the username box only if entering the username isn't complete
+        if (not (uH = uLen)) then
+        begin
+          wait(250 + random(250));
+          mouseBox(intToBox(UBX1,UBY1,UBX2,UBY2), MOUSE_LEFT);
+        end;
+      end;
+
+    until((uH = uLen) and (pH = pLen));
+  end;
+
+  mouseBox(intToBox(GBx1,GBy1,GBx2,GBy2), MOUSE_LEFT);
+
+  T.start();
+  repeat
+    if (isSplashScreen() or isLoggedIn()) then
+      break;
+
+    SetLength(Actions, 0);
+
+    if (T.timeElapsed > 60000) then
+      Actions :=       ['One minute has passed... Debug: ' + ToStr(CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)),              0,    5,    'PlayerFalse',   'Login Failed']
+    else
+    case (CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)) of
+                        // WriteLn Error                  Wait for   Retrys     Action
+      738:  Actions := ['Invalid Username / Password',           0,    0,    'Terminate'];
+      1539: Actions := ['Your account has been disabled',        0,    0,    'Terminate'];
+      1073: Actions := ['Your account is already logged in',  5000,    5,    'Retry'];
+       492: Actions := ['Error Connecting.',                 20000,    9,    'Terminate'];
+      1721: Actions := ['Too many incorrect logins.',    5 * 60000,    2,    'Retry'];
+       906: Actions := ['This world is full.',                5000,   10,    'Switch'];
+      1136: Actions := ['Runescape has been updated.',           0,    0,    'RSUpdate'];
+       777: Actions := ['Login limit exceeded.',             20000,   10,    ''];
+      1700: Actions := ['You will need a members account to login to this world. Please subscribe, or use a different world.',        0,    0,    'PlayerFalse',   'Acc Disabled'];
+    end;
+                             {Respond}
+
+    if (Length(Actions) > 0) then
+    begin
+      WriteLn(Actions[0]);
+      Wait(1000 + Random(500));
+      TypeByte(vk_Escape);
+      Wait(Actions[1] + Random(100));
+
+      if (Actions[2] > 0) then
+      begin
+        if (Attempts < Actions[2])then
+        begin
+          RetryLogin := True;
+          Wait(2000 + Random(1000));
+          Break;
+        end else
+          terminateScript();
+      end;
+
+      case Actions[3] of
+        'Terminate': terminateScript();
+
+        'RSUpdate':
+          begin
+            if AL_HasProc(al_OnRSUpdate) then
+            begin
+              case actions[0] of
+                'Runescape has been updated.':
+                  begin
+                    Writeln('Runescape has been updated! Waiting 5 minutes to restart SMART!');
+                    Wait(300000);
+                  end;
+              end;
+              AL_Procs[al_OnRSUpdate]();
+              Exit;
+            end;
+            Writeln('Runescape has been updated! Please restart Simba.');
+            terminateScript();
+          end;
+      end;
+    end;
+  until(Result);
+
+  if isSplashScreen() then
+  begin
+    //takeScreen('LOGIN', includePath+'AeroLib/screenshots/login/');  // IP address removed, why?
+    mouseBox(intToBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
+    i := 0;
+    repeat
+      i := i+1;
+      Wait(100 + Random(100));
+    until (isLoggedIn() or (i > 30));
+  end;
+
+  Wait(100 + Random(100));
+
+{Back to main screen if needed}
+  if RetryLogin then
+  begin
+    RetryLogin := False;
+    Inc(Attempts);
+    goto ProcStart;
+  end;
+end;

@@ -1,0 +1,273 @@
+{
+=======
+GameTab
+=======
+}
+
+(*
+getCurrentTab
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getCurrentTab(): Integer;
+
+Returns current tab as int constant, see globals for full constant list.
+
+.. note::
+
+    by Flight
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+
+function getCurrentTab(): Integer;
+var
+  TNB:TBox;
+  TabNum,X,Y:Integer;
+begin
+  Result := -1;
+  if (not isLoggedIn()) then
+    Exit;
+
+  for TabNum := 1 to 14 do
+  begin
+    case TabNum of
+    1: TNB:=IntToBox(535,172,540,176);
+    2: TNB:=IntToBox(564,172,571,176);
+    3: TNB:=IntToBox(596,172,600,176);
+    4: TNB:=IntToBox(630,172,635,176);
+    5: TNB:=IntToBox(663,172,670,176);
+    6: TNB:=IntToBox(696,172,703,176);
+    7: TNB:=IntToBox(730,173,736,180);
+    8: TNB:=IntToBox(525,469,534,473);
+    9: TNB:=IntToBox(563,469,570,473);
+    10:TNB:=IntToBox(596,469,602,473);
+    11:TNB:=IntToBox(629,469,634,473);
+    12:TNB:=IntToBox(662,469,669,473);
+    13:TNB:=IntToBox(695,469,700,473);
+    14:TNB:=IntToBox(728,469,733,473);
+    end;
+
+    if cs_FindColorTolerance(X, Y, 1910383, 13, TNB, cs_CTS1) then
+      break;
+
+  end;
+
+  if TabNum<15 then
+  begin
+    case TabNum of
+    //return global constants
+    1: Result := tab_Combat;
+    2: Result := tab_Stats;
+    3: Result := tab_Quest;
+    4: Result := tab_Inv;
+    5: Result := tab_Equip;
+    6: Result := tab_Prayer;
+    7: Result := tab_Magic;
+    8: Result := tab_Clan;
+    9: Result := tab_Friends;
+    10:Result := tab_Ignore;
+    11:Result := tab_LogOut;
+    12:Result := tab_Options;
+    13:Result := tab_Emotes;
+    14:Result := tab_Music;
+    end;
+  end;
+
+  if Interfaces[BANKSCREEN].isVisible() then
+    Result := tab_Inv;
+end;
+
+(*
+tabExists
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function tabExists(tab: integer): boolean;
+
+Returns true if the gametab 'tab' exists.  Tab constants can be found in
+globals.simba.
+
+.. note::
+
+    by DannyRS
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    if (not tabExists(tab_music)) then //magic
+      writeln('We may be in a random event!');
+*)
+function tabExists(tab: integer): boolean;
+var
+  X,Y : integer;
+begin
+  if (not isLoggedIn()) then
+    exit(false);
+
+  if (not inRange(tab, TAB_COMBAT, TAB_MUSIC)) then
+  begin
+    Writeln('Tab ' + toStr(Tab) + ' is not a valid tab number.');
+    exit(false);
+  end;
+
+  if (tab = TAB_INV) then
+    if Interfaces[BANKSCREEN].isVisible() then
+      Exit(True);
+
+  case tab of
+    TAB_COMBAT : Result:=(GetColor(535,177)=65536);
+    TAB_STATS  : Result:=(GetColor(565,187)=65536);
+    TAB_QUEST  : Result:=(cs_FindColorTolerance(X, Y, 15821910, 81, intToBox(600,175,620,196), cs_CTS1));
+    TAB_INV    : Result:=(GetColor(642,173)=65536);
+    TAB_EQUIP  : Result:=(GetColor(666,177)=65536);
+    TAB_PRAYER : Result:=(GetColor(706,175)=65536);
+    TAB_MAGIC  : Result:=(GetColor(730,188)=65536);
+    TAB_CLAN   : Result:=(GetColor(538,476)=65536);
+    TAB_FRIENDS: Result:=(GetColor(565,485)=65536);
+    TAB_IGNORE : Result:=(GetColor(598,485)=65536);
+    TAB_LOGOUT : Result:=(GetColor(643,470)=65536);
+    TAB_OPTIONS: Result:=(GetColor(680,472)=65536);
+    TAB_EMOTES : Result:=(GetColor(713,475)=65536);
+    TAB_MUSIC  : Result:=(GetColor(747,471)=65536);
+  end;
+end;
+
+function gameTab(Tab: Integer): Boolean;
+var
+  TNB   : TBox;
+  T     : Timer;
+  Tries : Integer;
+begin
+  if (not isLoggedIn()) then
+    Exit(false);
+
+  if (not(InRange(Tab, Tab_Combat, Tab_LogOut))) then
+  begin
+    Writeln('GameTab ' + intToStr(Tab) + ' is not a valid tab number.');
+    Exit(False);
+  end;
+
+  if (getCurrentTab() = Tab) then
+    Exit(True);
+
+
+  if (tabExists(Tab)) then
+  begin
+    case Tab of
+      tab_Combat : TNB:=IntToBox(533,174,552,197);
+      tab_Stats  : TNB:=IntToBox(563,171,590,197);
+      tab_Quest  : TNB:=IntToBox(597,171,622,197);
+      tab_Inv    : TNB:=IntToBox(629,171,655,197);
+      tab_Equip  : TNB:=IntToBox(662,171,688,197);
+      tab_Prayer : TNB:=IntToBox(695,171,719,197);
+      tab_Magic  : TNB:=IntToBox(729,175,752,197);
+      tab_Clan   : TNB:=IntToBox(529,469,554,490);
+      tab_Friends: TNB:=IntToBox(564,469,587,495);
+      tab_Ignore : TNB:=IntToBox(597,469,620,495);
+      tab_LogOut : TNB:=IntToBox(630,469,655,495);
+      tab_Options: TNB:=IntToBox(662,469,688,495);
+      tab_Emotes : TNB:=IntToBox(697,469,720,495);
+      tab_Music  : TNB:=IntToBox(729,469,752,490);
+    end;
+
+    Tries := 0;
+    while (Tries < 3) do
+    begin
+      mouseBox(TNB, MOUSE_LEFT);
+      T.start();
+      while (T.timeElapsed < 2000) do
+      begin
+        if (getCurrentTab() = Tab) then
+          Exit(True);
+        Wait(100 + Random(100));
+      end;
+      Inc(Tries);
+    end;
+
+    if (Result) then
+      Wait(250 + Random(300));
+
+  end;
+end;
+
+(*
+
+FTab
+~~~~
+
+.. code-block:: pascal
+
+    function FTab(Tab: Integer): Boolean;
+
+Instead of clicking the Tab this uses the F keys to instantly switch to the tab.
+Works with all tabs except Logout (F1-F12, escape for inv).
+
+.. note::
+
+    by DannyRS
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function FTab(Tab: Integer): boolean;
+var
+  T : Timer;
+  F : integer;
+begin
+  if (not isLoggedIn()) then
+    Exit(false);
+  if (not(InRange(Tab, TAB_COMBAT, TAB_MAGIC))) then
+  begin
+    Writeln('FTab ' + IntToStr(Tab) + ' is not a valid tab number.');
+    Exit(false);
+  end;
+
+{ LogOut Does not have a key AFAIK }
+  if (Tab=TAB_LOGOUT) then
+  begin
+    Writeln('FTab ' + intToStr(Tab) + ' is not a valid tab number.');
+    Exit(False);
+  end;
+
+  if (getCurrentTab() = Tab) then
+    Exit(True);
+
+  case Tab of
+{ LogOut Does not have a key AFAIK }
+    TAB_COMBAT : F:=1;
+    TAB_STATS  : F:=2;
+    TAB_QUEST  : F:=3;
+    TAB_INV    : F:=-84;
+    TAB_EQUIP  : F:=4;
+    TAB_PRAYER : F:=5;
+    TAB_MAGIC  : F:=6;
+    TAB_CLAN   : F:=7;
+    TAB_FRIENDS: F:=8;
+    TAB_IGNORE : F:=9;
+    TAB_OPTIONS: F:=10;
+    TAB_EMOTES : F:=11;
+    TAB_MUSIC  : F:=12;
+  end;
+
+  T.start();
+  repeat
+    TypeByte(111+F);
+    Wait(150+random(100));
+    Result := getCurrentTab() = Tab;
+  until Result or (T.timeElapsed > 1000);
+
+  if (not Result) then
+    Result:= gameTab(Tab);
+end;

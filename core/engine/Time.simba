@@ -1,0 +1,14 @@
+// Timer type & functions by Brandon
+type Timer = record
+  Time: Int64;
+end;
+
+Procedure Timer.start();
+Begin
+  Time := GetSystemTime;
+End;
+
+Function Timer.timeElapsed(): Integer;
+Begin
+  Result := GetSystemTime - Time;
+End;

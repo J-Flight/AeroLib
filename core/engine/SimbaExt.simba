@@ -1,0 +1,512 @@
+{
+========
+SimbaExt
+========
+}
+
+function VariantIsInteger(const v: Variant): Boolean;
+begin
+  case VarType(v) of
+    varByte,
+    varShortInt,
+    varSmallInt,
+    varWord,
+    varInteger,
+    varLongWord,
+    varInt64: Result := True;
+    else Result := False;
+  end;
+end;
+
+function VariantIsFloat(const v: Variant): Boolean;
+begin
+  case VarType(v) of
+    varCurrency,
+    varSingle,
+    varDouble: Result := True;
+    else Result := False;
+  end;
+end;
+
+function VariantIsNumber(const v: Variant): Boolean;
+begin
+  Result := VariantIsInteger(v) or VariantIsFloat(v);
+end;
+
+function VariantIsString(const v: Variant): Boolean;
+begin
+  case VarType(v) of
+    varOleStr,
+    varString: Result := True;
+    else Result := False;
+  end;
+end;
+
+function VariantIsBoolean(const v: Variant): Boolean;
+begin
+  Result := VarType(v) = varBoolean;
+end;
+
+(*
+tmp_TPAFromLine
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function tmp_TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+
+Returns a TPA of the points that make up a line connecting the points (x1, y1)
+and (x2, y2) and most closely follow the slope of that line.
+
+.. note::
+
+    by euphemism
+    Last modified: Jan. 31st, 2013 by euphemism
+
+Example:
+
+.. code-block:: pascal
+
+    TPA := TPAFromLine(10, 10, 30, 20);
+*)
+function tmp_TPAFromLine(const x1, y1, x2, y2: Integer): TPointArray;
+var
+  Dx, Dy, CurrentX, CurrentY, Len, TwoDx, TwoDy, Xinc, YInc: Integer;
+  TwoDxAccumulatedError, TwoDyAccumulatedError: Integer;
+begin
+  Len := 0;
+  Dx := (X2 - X1);
+  Dy := (Y2 - Y1);
+  TwoDx := Dx + Dx;
+  TwoDy := Dy + Dy;
+  CurrentX := X1;
+  CurrentY := Y1;
+  Xinc := 1;
+  Yinc := 1;
+  if (Dx < 0) then
+  begin
+    Xinc := - 1;
+    Dx := - Dx;
+    TwoDx := - TwoDx;
+  end;
+  if (Dy < 0) then
+  begin
+    Yinc := - 1;
+    Dy := - Dy;
+    TwoDy := - TwoDy;
+  end;
+  SetLength(Result, 1);
+  Result[0] := Point(X1, Y1);
+  if ((Dx <> 0) or (Dy <> 0)) then
+  begin
+    if (Dy <= Dx) then
+    begin
+      TwoDxAccumulatedError := 0;
+      repeat
+        IncEx(CurrentX, Xinc);
+        IncEx(TwoDxAccumulatedError, TwoDy);
+        if (TwoDxAccumulatedError > Dx) then
+        begin
+          IncEx(CurrentY, Yinc);
+          DecEx(TwoDxAccumulatedError, TwoDx);
+        end;
+        Inc(Len);
+        SetLength(Result, Len + 1);
+        Result[Len] := Point(CurrentX, CurrentY);
+      until (CurrentX = X2);
+    end
+    else
+    begin
+      TwoDyAccumulatedError := 0;
+      repeat
+        IncEx(CurrentY, Yinc);
+        IncEx(TwoDyAccumulatedError, TwoDx);
+        if (TwoDyAccumulatedError > Dy) then
+        begin
+          IncEx(CurrentX, Xinc);
+          DecEx(TwoDyAccumulatedError, TwoDy);
+        end;
+        Inc(Len);
+        SetLength(Result, Len + 1);
+        Result[Len] := Point(CurrentX, CurrentY);
+      until (CurrentY = Y2);
+    end;
+  end
+end;
+
+(*
+tmp_TPAFromLineWrap
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure tmp_TPAFromLineWrap(const x1, y1, x2, y2: Integer; var Res: TPointArray);
+
+Wrapper function for TPAFromLine.
+
+.. note::
+
+    Last modified: Jan. 31st, 2013 by euphemism
+*)
+procedure tmp_TPAFromLineWrap(const x1, y1, x2, y2: Integer; var Res: TPointArray);
+begin
+  Res := tmp_TPAFromLine(x1, y1, x2, y2);
+end;
+
+type
+  TDTMPointDef = TSDTMPointDef;
+  TDTMPointDefArray = TSDTMPointDefArray;
+  TDTM = TSDTM;
+
+function InitializeHTTPClient(HandleCookies,handleredirects: Boolean): Integer; overload;
+begin
+  result := InitializeHTTPClient(HandleCookies);
+end;
+
+function IntToPoint(x,y : integer) : TPoint;
+begin
+  result := Point(x,y);
+end;
+
+procedure GetColorspeed2Modifiers(var hue,sat : extended);
+begin;
+  GetToleranceSpeed2Modifiers(hue,sat);
+end;
+
+function StartsWith(prefix, s: string): Boolean;
+var
+  i,l : integer;
+begin
+  result := false;
+  l := length(prefix);
+  if l > length(s) then
+    exit;
+  for i := 1 to l do
+    if s[i] <> prefix[i] then
+      exit;
+  result := true;
+end;
+
+procedure AddToReport(str : string);
+begin
+  writeln('Status: ' + str);
+end;
+procedure ClearReport;
+begin
+  DebugLn('Should clear report now..');
+end;
+
+function IsFKeyDown(FKey : integer) : boolean;
+begin
+  if not InRange(FKey,1,12) then
+    raiseexception(erCustomError,'FKey not in range 1..12');
+  result := IsKeyDown(VK_F1 + FKey - 1);
+end;
+
+function InCircle(x, y, mx, my, r: Integer): Boolean;
+begin
+  result := (Sqrt(sqr(x-mx) + sqr(y-my)) <= r);
+end;
+
+function CreateBitmapMaskFromText(txt,chars : string) : integer;
+begin
+  result := BitmapFromText(txt,chars);
+end;
+
+function GetNumbers(text : string) : string;
+begin;
+  result := ExtractFromStr(text,numbers);
+end;
+
+function GetLetters(Text: string): string;
+begin
+  result := ExtractFromStr(Text,letters);
+end;
+
+function GetOthers(Text: string): string;
+begin;
+  result := ExtractFromStr(text,others);
+end;
+
+function FindDTMRotated(DTM: Integer; var x, y: Integer; x1, y1, x2, y2: Integer; sAngle, eAngle, aStep: Extended; out aFound: Extended): Boolean;
+begin;
+  result := FindDTMRotatedAlternating(DTM,x,y,x1,y1,x2,y2,sangle,eangle,astep,afound);
+end;
+
+const
+  tr_AllChars = 0;
+  tr_BigLetters = 1;
+  tr_SmallLetters = 2;
+  tr_Digits = 3;
+  tr_BigSymbols = 4;
+  tr_SmallSymbols = 5;
+  tr_SecondTableChars = 6;
+  tr_Letters = 7;
+  tr_AlphaNumericChars = 8;
+  tr_Symbols = 9;
+  tr_NormalChars = 10;
+
+type
+  TCharRange = longword; //I donno
+
+function GetTextAtEx(x, y: Integer; Tolerance: Integer; Chars: String; CheckShadow, CheckOutline: Boolean; MinSpacing, MaxSpacing: Integer; TextColor: Integer; TextLength: Integer; Strict: Boolean; Range: TCharRange): string; {$IFDEF LAPE}overload;{$ENDIF}
+begin
+  // no hspacing, defaulting to 4. (with 4 ' and : will work)
+  // Defaulting MaxSpacing to 3
+  if TextColor = -1 then
+    raiseexception(ercustomerror,'GetTextAtEx with color = -1, is not supported');
+  Maxspacing := 3;
+  Result := GetTextAt(x, y, minSpacing, maxSpacing, 4, textcolor, tolerance, textlength, Chars);
+  if Range = tr_Digits then
+    result := GetNumbers(result);
+end;
+
+function IsTextInAreaEx(xs, ys, xe, ye: Integer; var x, y: Integer; S: string; Tolerance: Integer; Chars: String; CheckShadow, CheckOutline: Boolean; MinSpacing, MaxSpacing: Integer; TextColor: Integer): Boolean;
+var
+  TextTPA,SearchTPA, Matches: TPointArray;
+  Box : TBox;
+  xx,yy,i,len : integer;
+begin
+  if TextColor = -1 then
+    raiseexception(ercustomerror,'IsTextInArea with color = -1, is not supported');
+  Result := False;
+  cs_findColorsTolerance(SearchTPA, TextColor, tolerance, intToBox(xs,ys,xe,ye), cs_CTS1);
+  if Length(SearchTPA) < 1 then
+    Exit;
+  TextTPA:= TPAFromText(S,Chars,xx,yy);
+  Result := FindTextTPAinTPA(yy ,TextTPA,SearchTPA,Matches);
+  x := 0; y:=0;
+  if Result = False then
+    Exit;
+  Box := GetTPABounds(TextTPA);
+  SortTPAFrom(Matches, Point(Box.x1, Box.y1));
+  x := matches[0].x;
+  yy := 500000;
+  len := High(TextTPA);
+  for i := 0 to Len do
+    if TextTPA[i].x = Box.x1 then
+      yy := min(yy,TextTPA[i].y);
+  y := matches[0].y-yy;
+end;
+
+function GetColorToleranceSpeed : integer;
+begin;
+  result := GetToleranceSpeed;
+end;
+
+procedure ColorToleranceSpeed(cts : integer);
+begin;
+  SetColorToleranceSpeed(cts);
+end;
+
+type
+  TColorComp = (ccRed, ccGreen, ccBlue, ccHue, ccSat, ccLum);
+
+function FindColorComp(var x, y: Integer; Comp: Variant; CompType: TColorComp; xs, ys, xe, ye: Integer; Tolerance: Extended): Boolean;
+begin
+  Writeln('FindColorComp is not yet implemented! Use another color finder ;-)');
+  Result := false;
+end;
+
+procedure SetColorspeed2Modifiers(huemodifier, saturationmodifier: Extended);
+begin
+  SetToleranceSpeed2Modifiers(Huemodifier, saturationmodifier);
+end;
+
+function InStrArr(Str: string; Arr: TStringArray; CaseSensitive: Boolean): Boolean;
+var
+  i : integer;
+begin;
+  result := true;
+  if not casesensitive then
+  begin
+    str := lowercase(str);
+    for i := high(arr) downto 0 do
+      if lowercase(arr[i]) = str then
+        exit;
+  end else
+    for i := high(arr) downto 0 do
+      if arr[i] = str then
+        exit;
+  result := false;
+end;
+
+function Replace(Text, FindStr, ReplaceStr: string): string; overload;
+begin;
+  result := Replace(Text,FindStr,ReplaceStr,[rfReplaceAll]);
+end;
+
+//Sends arrow to Client's window. For a, 0 = up, 1 = right, 2 = down, 3 = left.
+procedure SendArrow(Key: Byte);
+begin
+  if not InRange(Key,0,3) then
+    Writeln('KEY IS NOT INRANGE!!')
+  else
+    case key of
+      0 : PressKey(vk_up);
+      1 : PressKey(vk_right);
+      2 : PressKey(vk_down);
+      3 : PressKey(vk_left);
+    end;
+end;
+
+procedure SendArrowWait(Key: Byte; WaitTime: Integer);
+var
+  KeyCode : integer;
+begin;
+  if not InRange(Key,0,3) then
+    Writeln('KEY IS NOT INRANGE!!')
+  else
+  begin
+    case key of
+      0 : Keycode := (vk_up);
+      1 : Keycode := (vk_right);
+      2 : Keycode := (vk_down);
+      3 : Keycode := (vk_left);
+    end;
+    KeyDown(keycode);
+    wait(waittime);
+    KeyUp(keycode);
+  end;
+end;
+
+procedure SendArrowSilentWait(Key : byte; WaitTime : integer);
+begin
+  SendArrowWait(key,waittime);
+end;
+
+procedure SendArrowSilent(Key : byte);
+begin
+  SendArrow(key);
+end;
+
+function AMax(Data: TIntegerArray): Integer;
+var
+  i : integer;
+begin;
+  if length(data) = 0 then
+  begin
+    Writeln('cannot define result of AMax, input length = 0');
+    raiseexception(erCustomError,'AMax input with length of zero');
+  end;
+  result := data[0];
+  for i := high(data) downto 1 do
+    result := max(result,data[i]);
+end;
+
+function Readln(Question : string ) : string;
+begin
+  InputQuery('Question box',Question,result);
+end;
+
+const
+  NPCChars = CharsNPC;
+
+function iAbs(i: Integer): Integer;
+begin
+  if (i < 0) then
+    Result := -i
+  else
+    Result := i;
+end;
+
+function ReplaceWrap(Text, FindStr, ReplaceStr: string; Flags: TReplaceFlags): string;
+begin
+  Result := StringReplace(Text, FindStr, ReplaceStr, Flags);
+end;
+
+function GetTextAtExWrap(const xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol: Integer; const font: string): string;
+begin
+  Result := GetTextAtEx(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol, font);
+end;
+
+function InitializeHTTPClientWrap(HandleCookies: Boolean): Integer;
+begin
+  Result := InitializeHTTPClient(HandleCookies);
+end;
+
+// Import Brandons Function.simba functions
+
+Procedure Pointer.Inc(Size: Int64);
+Begin
+  Self := Self + Size;
+End;
+
+Procedure delete(Ptr: Pointer; var Pointers: Array of Pointer); overload;
+var
+  I, J: Integer = 0;
+  Ptrs: Array of Pointer;
+begin
+  setLength(Ptrs, Length(Pointers));
+  For I := 0 To High(Pointers) do
+    if (Pointers[I] <> Ptr) then
+    begin
+      Ptrs[J] := Pointers[I];
+      Inc(J);
+    end;
+  SetLength(Ptrs, J);
+  Pointers := Ptrs;
+end;
+
+Function getDirectoryName(Directory, Path: String): String;
+var
+  I: Integer;
+  Directories: TStringArray;
+Begin
+  Directories := GetDirectories(Path);
+  For I := 0 To High(Directories) Do
+    If ExecRegExpr(Directory, Directories[I]) Then
+    Begin
+      Result := Directories[I];
+      Exit;
+    End;
+End;
+
+Function findDirectory(Directory, Path: String): Boolean;
+Begin
+  Result := Length(GetDirectoryName(Directory, Path)) > 0;
+End;
+
+Function getJavaPath(Console: Boolean): String;
+var
+  Drive: String;
+  CurrentPath: String;
+Begin
+  Drive := Copy(PluginPath, 0, 3);
+
+  If (FindDirectory('Program\sFiles\s\(x86\)', Drive)) Then
+  Begin
+    CurrentPath := Drive + 'Program Files (x86)\';
+  End Else
+    CurrentPath := Drive + 'Program Files\';
+
+  If (FindDirectory('Java|java', CurrentPath + '\')) Then
+  Begin
+    CurrentPath := CurrentPath + 'Java\';
+  End Else
+    Begin
+      Writeln('Failed To Find Path: ' + CurrentPath + 'Java\');
+      Exit;
+    End;
+
+  Drive := GetDirectoryName('jre', CurrentPath);
+  If (Length(Drive) > 0) Then
+  Begin
+    If (Console) Then
+      CurrentPath := CurrentPath + Drive + '\bin\java.exe'
+    Else
+      CurrentPath := CurrentPath + Drive + '\bin\javaw.exe';
+  End Else
+    Begin
+      Drive := GetDirectoryName('jdk', CurrentPath);
+      If (Console) Then
+      CurrentPath := CurrentPath + Drive + 'jre\bin\java.exe'
+    Else
+      CurrentPath := CurrentPath + Drive + 'jre\bin\javaw.exe';
+    End;
+
+  If (FileExists(CurrentPath)) Then
+    Result := CurrentPath
+  Else
+    writeln('Failed To Find Java.exe or Javaw.exe. Please add ...\JRE\Bin to your PATH environment variable.');
+End;

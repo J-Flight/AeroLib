@@ -1,0 +1,507 @@
+{
+============
+WorldHandler
+============
+}
+
+var
+  WorldArray: Array of Integer;
+  ArrayNumber: Integer;
+
+function logoutPlayer(): Boolean; forward;
+function loginPlayer(Safe: Boolean): Boolean; forward;
+
+(*
+ExitWorldScreen
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function exitWorldscreen(): boolean;
+
+Closes the world screen, results true if successfully closed
+
+.. note::
+
+  by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function exitWorldScreen(): Boolean;
+begin
+  if not (Me.getLoginState() = LS_WORLDSCREEN) then
+    Exit(True);
+
+  mousebox(intToBox(719,6,750,15), MOUSE_LEFT);
+  result := not (Me.getLoginState() = LS_WORLDSCREEN);
+end;
+
+(*
+getCurrentWorldLS
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getCurrentWorldLS(): integer;
+
+Returns the current world at the login screen
+
+.. note::
+
+  by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getCurrentWorldLS(): integer;
+var
+  txt :  String;
+begin
+  if not (Me.getLoginState() = LS_LOGGEDOUT) then
+    exit(-1);
+  txt := cs_GetTextAtEx(intToBox(61,465,88,480), 0, 5, 2, 16777215, 2, 'UpChars07', cs_CTS);
+  result := strToIntDef(txt, 0);
+end;
+
+(*
+OpenWorldScreen
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function: openWorldScreen(): Boolean;
+
+Opens the world screen, returns true if it is succesfully opened.
+
+.. note::
+
+    by Ashaman88
+
+Example:
+
+.. code-block::pascal
+
+*)
+function openWorldScreen(): Boolean;
+var
+  T : Timer;
+begin
+  if (Me.getLoginState() = LS_WORLDSCREEN) then
+    exit(true);
+  mousebox(intToBox(13,468,98,491), MOUSE_LEFT);
+
+  T.start();
+  repeat
+    wait(100);
+    if (Me.getLoginState() = LS_WORLDSCREEN) then
+      break;
+  until(T.timeElapsed() >= 6000);
+
+  result := (Me.getLoginState() = LS_WORLDSCREEN);
+end;
+
+(*
+WorldIndexToMSPoint
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function worldIndexToMSPoint(Index: Integer): TPoint;
+
+Converts the World Index (spot in World) to a Mainscreen TPoint of the Index. (Top Left)
+
+.. note::
+
+    Author: Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+    msPoint := WorldIndexToMSPoint(index);
+*)
+function worldIndexToMSPoint(Index: Integer): TPoint;
+begin
+  Index := Index ;
+  Result := Point(200 + (Index mod 4) * 94, 86 + Floor(Index div 4) * 24);
+end;
+
+// by Flight
+function rsWorldToMS(Index: Integer): TPoint;
+begin
+  if inRange(Index, 301, 318) then
+    Result.X := 205
+  else if inRange(Index, 319, 338) then
+    Result.X := 300
+  else if inRange(Index, 341, 360) then
+    Result.X := 392
+  else if inRange(Index, 361, 378) then
+    Result.X := 485;
+
+  if ((Index=301)or(Index=319)or(Index=341)or(Index=361)) then
+    Result.Y := 75
+  else if ((Index=302)or(Index=320)or(Index=342)or(Index=362)) then
+    Result.Y := 98
+  else if ((Index=303)or(Index=321)or(Index=343)or(Index=365)) then
+    Result.Y := 123
+  else if ((Index=304)or(Index=322)or(Index=344)or(Index=366)) then
+    Result.Y := 146
+  else if ((Index=305)or(Index=325)or(Index=345)or(Index=367)) then
+    Result.Y := 172
+  else if ((Index=306)or(Index=326)or(Index=346)or(Index=368)) then
+    Result.Y := 196
+  else if ((Index=308)or(Index=327)or(Index=349)or(Index=369)) then
+    Result.Y := 218
+  else if ((Index=309)or(Index=328)or(Index=350)or(Index=370)) then
+    Result.Y := 243
+  else if ((Index=310)or(Index=329)or(Index=351)or(Index=373)) then
+    Result.Y := 267
+  else if ((Index=311)or(Index=330)or(Index=352)or(Index=374)) then
+    Result.Y := 292
+  else if ((Index=312)or(Index=333)or(Index=353)or(Index=375)) then
+    Result.Y := 315
+  else if ((Index=313)or(Index=334)or(Index=354)or(Index=376)) then
+    Result.Y := 338
+  else if ((Index=314)or(Index=335)or(Index=357)or(Index=377)) then
+    Result.Y := 362
+  else if ((Index=316)or(Index=336)or(Index=358)or(Index=378)) then
+    Result.Y := 386
+  else if ((Index=317)or(Index=337)or(Index=359)) then
+    Result.Y := 410
+  else if ((Index=318)or(Index=338)or(Index=360)) then
+    Result.Y := 434;
+
+end;
+
+(*
+WorldIndexToMSBox
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function worldIndexToMSBox(Ind: Integer): TBox;
+
+Converts the World Index (spot in World) to a Mainscreen TBox of the Index.
+
+.. note::
+
+    Author: Ashaman88, fixed by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    msBox := worldIndexToMSBox(index);
+*)
+function worldIndexToMSBox(Index: Integer): TBox;
+var
+   P: TPoint;
+begin
+  P := rsWorldToMS(Index);
+  Result.X1 := P.X;
+  Result.Y1 := P.Y;
+  Result.X2 := Result.X1 + 77;
+  Result.Y2 := Result.Y1 + 15;
+end;
+
+(*
+WorldsOrdered
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function worldsOrdered(): boolean;
+
+Returns true if worlds are already ordered
+
+.. note::
+
+  by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function worldsOrdered(): Boolean;
+begin
+  Result := getcolor(300,8)=2851375;
+end;
+
+
+(*
+OrderWorlds
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    Procedure orderWorlds();
+
+Orders worlds by their number
+
+..note::
+
+    by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+Function orderWorlds(): boolean;
+begin
+  if not (Me.getLoginState() = LS_WORLDSCREEN)then
+    exit;
+
+  mousebox(intToBox(297,8,306,13), MOUSE_LEFT);
+  result := true;
+end;
+
+(*
+FullWorld
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function fullWorld(W: integer): Boolean;
+
+returns true if world is full
+
+..note::
+
+    by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function fullWorld(World: Integer): boolean;
+var
+  txt: string;
+  checkbox: tbox;
+begin
+  if not (Me.getLoginState() = LS_WORLDSCREEN) then
+    exit(false);
+  checkbox := worldIndexToMSBox(World);
+  txt := cs_GetTextAtEx(intToBox(checkbox.x1+44,checkbox.y1,checkbox.x2-10,checkbox.y2), 0, 4, 2, 16777215, 0, 'StatChars07', cs_CTS);
+  result:= arrinstr(['FULL','ENLL','FNLL','EULL'],txt);
+end;
+
+
+(*
+getWorldBox
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getWorldBox(W: integer): Boolean;
+
+Gets the box of the given world.
+
+..note::
+
+    by Ashaman88 & Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getWorldBox(W: integer): TBox;
+begin
+  result:=inttobox(0,0,0,0);
+  if not (Me.getLoginState() = LS_WORLDSCREEN) then
+    Exit;
+
+  if not worldsOrdered() then
+  begin
+    if not orderWorlds() then
+    begin
+      Writeln('Could not order worlds properly.');
+      exitWorldScreen();
+      Exit;
+    end;
+    wait(400+random(200));
+  end;
+
+  if fullworld(W) then
+  begin
+    Writeln('World selected is currently full');
+    exitWorldScreen();
+    exit;
+  end;
+
+  result := worldIndexToMSBox(W);
+  end;
+
+(*
+SelectWorld
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    Function selectWorld(W: Integer): Boolean;
+
+Switches to the specified world. Returns true if successful.
+
+..note::
+
+    by Narcle / ZephyrsFury & Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function selectWorld(W: integer): boolean;
+var
+  T : Timer;
+  i : integer;
+  validworld : boolean;
+  worldbox : tbox;
+begin
+  if (getCurrentWorldLS() = w) then
+    exit(true);
+
+  if Length(WorldArray) < 1 then
+    worldarray :=
+    [301,320,341,360,+
+     302,321,342,361,+
+     303,322,343,362,+
+     304,344,365,+      // 325 removed
+     305,326,345,366,+
+     306,327,346,367,+
+     309,328,349,368,+
+     310,329,350,369,+
+     311,330,351,370,+
+     312,333,352,373,+
+     313,334,353,374,+
+     314,335,354,375,+
+     317,336,357,376,+
+     318,358,377,+      // 337 removed
+     319,338,359,378];
+  for i:=0 to high(worldarray) do
+  begin
+    if worldarray[i]=W then
+    begin
+      arraynumber := i;
+      validworld := true;
+      break;
+    end
+  end;
+
+  if not validworld then
+  begin
+    Writeln('Invalid world');
+    exitWorldScreen();
+    Exit(false);
+  end;
+
+  if openWorldScreen() then
+  begin
+    worldbox:= getWorldBox(I);
+    if worldbox.x1 = 0 then
+    begin
+      exitWorldScreen();
+      exit(false);
+    end;
+    mousebox(worldbox, MOUSE_LEFT);
+    result:=true;
+  end;
+
+  T.start();
+  repeat
+    wait(randomrange(400,500));
+    if not (Me.getLoginState() = LS_WORLDSCREEN) then
+      break;
+  until(T.timeElapsed() > 6000);
+
+  if (Me.getLoginState() = LS_WORLDSCREEN) then
+    exitWorldScreen();
+
+  wait(randomrange(400,500));
+  if (not(Result)) then TypeByte(vk_Escape);
+end;
+
+
+(*
+RandomWorld
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function randomWorld(): Integer;
+
+Returns a random world
+
+..note::
+
+    by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function randomWorld(): Integer;
+var
+  H: integer;
+begin
+  if Length(WorldArray) < 1 then
+    worldarray :=
+  [301,320,341,360,+
+   302,321,342,361,+
+   303,322,343,362,+
+   304,344,365,+      // 325 removed
+   305,326,345,366,+
+   306,327,346,367,+
+   309,328,349,368,+
+   310,329,350,369,+
+   311,330,351,370,+
+   312,333,352,373,+
+   313,334,353,374,+
+   314,335,354,375,+
+   317,336,357,376,+
+   318,358,377,+      // 337 removed
+   319,338,359,378];
+  H := Random(High(WorldArray));
+
+  Result := worldarray[H];
+end;
+
+(*
+ChangeWorld
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function changeWorld(W: Integer): Boolean;
+
+Changes to world W, returns True if successful.
+
+..note::
+
+    by Ashaman88
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function changeWorld(W: Integer; Safe: Boolean): Boolean;
+begin
+  if isLoggedIn() then
+    waitFunc(@logoutPlayer, 500, 5000);
+  result := getCurrentWorldLS = w;
+  if not result then
+    Result := selectWorld(W);
+  if Length(Me.WorldList) > 0 then
+    Me.WorldList[0]:=W;
+  loginPlayer(Safe);
+end;

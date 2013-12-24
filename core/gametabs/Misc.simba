@@ -1,0 +1,560 @@
+{
+====
+Misc
+====
+}
+
+(*
+GetCurrentWorld
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getCurrentWorld(): Integer;
+
+Returns current world from Friends Tab
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getCurrentWorld(): Integer;
+var
+  Box :TBox;
+  TPA :TPointArray;
+begin
+  Result := - 1;
+  if not gameTab(TAB_FRIENDS) then
+    Exit
+  else
+    Wait(250 + Random(100));
+  if not findColors(TPA, 3381759, 695, 210, 725, 222) then
+    Exit;
+  Box := getTPABounds(TPA);
+  Result := StrToIntDef(ExtractFromStr(cs_getTextAtEx(Box, 0, 5, 1, 3381759, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
+  if (Result = - 1) then
+    Writeln('Failed to get current world');
+end;
+
+(*
+
+SetFightMode
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function setFightMode(oFightMode: Integer): Boolean;
+
+Sets fight mode.  Returns false if failed to set desired mode.
+
+.. note::
+
+    by Nielsie95 & Nava2, Quickmarch
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function setFightMode(Mode: Integer): Boolean;
+var
+  i,x,y : Integer;
+  b : TBox;
+  cmbBoxes : TBoxArray;
+begin
+  if (not isLoggedIn()) then
+    exit(false);
+  if not(gameTab(TAB_COMBAT)) then
+    exit(false);
+  Wait(100 + Random(100));
+
+  if (not(inRange(Mode, 1, 4))) then
+  begin
+    Writeln('setFightMode ' + IntToStr(Mode) + ' is not a valid fightmode number.');
+    Exit(false);
+  end;
+
+  cmbBoxes := [IntToBox(572, 255, 631, 290), IntToBox(656, 255, 715, 290),
+               IntToBox(572, 308, 631, 343), IntToBox(655, 308, 714, 343)];
+  b := cmbBoxes[Mode - 1];
+
+{ If no 4th weapon option goto 3rd option }
+  if (Mode = 4) and (not findColor(x, y, 2070783, 655, 308, 714, 343)) then
+    b := cmbBoxes[2];
+
+  i := 0;
+  while (i < 4) do
+  begin
+    if cs_findColorTolerance(x, y, 1908609, 5, b, cs_CTS1) then
+      Exit(true);
+    mouseBox(b, MOUSE_LEFT);
+    Wait(200 + Random(300));
+    Inc(i);
+  end;
+end;
+
+(*
+
+getWeaponName
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    Function getWeaponName: String;
+
+Returns the name of the weapon your currently using.
+
+.. note::
+
+    by Nielsie95 & Narcle
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+Function getWeaponName(): String;
+begin
+  if FTab(TAB_COMBAT) then
+    Result := cs_getTextAtEx(intToBox(555,210,730,230), 0, 3, 1, 2070783, 0, 'CharsNPC07', cs_CTS1);
+end;
+
+(*
+
+setRetaliate
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure setRetaliate(RetTrue: Boolean);
+
+Set's Auto Retaliate ON of OFF.
+
+.. note::
+
+    by Narcle?
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+procedure setRetaliate(Enable: Boolean);
+begin
+ if not FTab(TAB_COMBAT) then
+    exit;
+
+  if Enable then
+    if not (cs_GetTextAtEx(intToBox(644,379,667,392), 0, 5, 1, 2070783, 20, 'UpChars07', cs_CTS1) ='(On)') then
+      mouseBox(intToBox(572,362,713,397), MOUSE_LEFT);
+end;
+
+(*
+GetRunEnergy
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getRunEnergy(): Integer;
+
+    returns current run %
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getRunEnergy(): Integer;
+begin
+  if not FTab(TAB_OPTIONS) then
+    Exit(-1);
+
+  Result := strToIntDef(ExtractFromStr(cs_getTextAtEx(intToBox(625,434,658,446), 0, 5, 1, 39167, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
+end;
+
+(*
+SetRun
+~~~~~~
+
+.. code-block:: pascal
+
+    function setRun(Enable: Boolean): Boolean;
+
+Sets Run on or off.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+
+function setRun(Enable: Boolean): Boolean;
+var
+  CCount : Integer;
+begin
+  if gameTab(TAB_OPTIONS) then
+  begin
+    CCount := cs_countColorTolerance(2369440, 20, intToBox(626,412,657,413), cs_CTS1);
+    if Enable then
+    begin
+      if (CCount<1) then
+        mouseBox(intToBox(626,415,657,446), MOUSE_LEFT);
+      Result := True;
+    end else
+    begin
+      if (CCount>1) then
+        mouseBox(intToBox(626,415,657,446), MOUSE_LEFT);
+      Result := True;
+    end;
+  end;
+end;
+
+(*
+GetEquippedItemBounds
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getEquippedItemBounds(Which: Variant): TBox;
+    returns a TBox of an equipment slot
+
+Returns TBox of the specified equipment slot
+
+.. note::
+
+    by Nava2
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getEquippedItemBounds(Which: Variant): TBox;
+var
+  I : Integer;
+begin
+  Result := IntToBox(0, 0, 0, 0);
+
+  I := -1;
+
+  if VariantIsString(Which) then
+    case Which of
+      'helm', 'helmet' :
+        I := 1;
+      'cape' :
+        I := 2;
+      'amulet', 'neck', 'necklace' :
+        I := 3;
+      'arrows', 'bolts' :
+        I := 4;
+      'right hand', 'weapon' :
+        I := 5;
+      'plate', 'chest', 'platebody' :
+        I := 6;
+      'left hand', 'sheild', 'shield' :
+        I := 7;
+      'legs', 'platelegs', 'skirt', 'plateskirt' :
+        I := 8;
+      'gloves', 'gauntlets' :
+        I := 9;
+      'boots':
+        I := 10;
+      'ring' :
+        I := 11;
+    end
+  else if VariantIsInteger(Which) then
+    if (InRange(Which, 1, 11)) then
+      I := Which;
+
+  if (I = -1) then
+  begin
+    Writeln('Invalid entry (' + ToStr(Which) + ')');
+    Exit;
+  end;
+
+  case I of
+    1 : Result := IntToBox(629, 213, 656, 240);
+    2 : Result := IntToBox(588, 252, 615, 279);
+    3 : Result := IntToBox(629, 252, 656, 279);
+    4 : Result := IntToBox(670, 252, 697, 279);
+    5 : Result := IntToBox(573, 291, 600, 318);
+    6 : Result := IntToBox(629, 291, 656, 318);
+    7 : Result := IntToBox(685, 291, 712, 318);
+    8 : Result := IntToBox(629, 331, 656, 358);
+    9 : Result := IntToBox(573, 371, 600, 398);
+    10: Result := IntToBox(629, 371, 656, 398);
+    11: Result := IntToBox(685, 371, 712, 398);
+  end;
+end;
+
+(*
+EquipmentCoords
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function equipmentCoords(EquipSlot: Integer): TPoint;
+
+Returns X and Y of the coordinates of the specified equipment item
+
+.. note::
+
+    by Nava2
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+
+function equipmentCoords(EquipSlot: Integer): TPoint;
+var
+  ETB : TBox;
+  ResPoint : TPoint;
+begin
+  Result := Point(-1,-1);
+  if not InRange(EquipSlot,1,11) then
+  begin
+    Writeln('Invalid EquipSlot('+inttostr(EquipSlot)+') passed');
+    Exit;
+  end;
+  ETB := getEquippedItemBounds(EquipSlot);
+  ResPoint.X := (Round(((ETB.X2-ETB.X1)/2)+ETB.X1));
+  ResPoint.Y := (Round(((ETB.Y2-ETB.Y1)/2)+ETB.Y1));
+  Result := ResPoint;
+end;
+
+(*
+WearingItem
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function wearingItem(i: Integer): Boolean;
+
+Results True if an item is equipped at equpiment slot defined by I.
+
+.. note::
+
+    by Nava2
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function wearingItem(I: Integer): Boolean;
+var
+  X,Y : Integer;
+  STB : TBox;
+begin
+  if (not InRange(I, 1, 11)) then
+  begin
+    Writeln('Equipment slot #' + IntToStr(I) + ' is not a valid equipment slot');
+    Exit(False);
+  end;
+  if not gametab(TAB_EQUIP) then
+    exit(false);
+
+  STB := getEquippedItemBounds(I);
+  Result := findColor(X,Y,65536,STB.X1,STB.Y1,STB.X2,STB.Y2);
+end;
+
+(*
+RemoveITem
+~~~~~~~
+
+.. code-block:: pascal
+
+    function removeItem(I: Integer): Boolean;
+
+UnEquips Item specified in I, results true if successfully removed
+
+.. note::
+
+    by Flight
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function removeItem(I: Integer): Boolean;
+var
+  T  : Timer;
+  SB : TBox;
+begin
+  if not wearingItem(I) then
+    Exit(True);
+  SB := getEquippedItemBounds(I);
+
+  T.start();
+  while (T.timeElapsed < 5000) do
+  begin
+    mouseBox(SB, MOUSE_LEFT);
+    Wait(200 + Random(350));
+    if not wearingItem(I) then
+      Exit(True);
+  end;
+  Result := False;
+end;
+
+(*
+RemoveAllExcept
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure removeAllExcept(ExceptionSlots: TIntegerArray);
+
+Takes off equipped items defined by StripSlots.
+
+.. note::
+
+    by EvilChicken!
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+procedure removeAllExcept(ExceptionSlots: TIntegerArray);
+var
+  I: Integer;
+begin
+  for I:=1 to 11 do
+    if (not inIntArray(ExceptionSlots, I)) then
+      removeItem(I);
+end;
+
+(*
+RemoveAllItems
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure removeAllItems();
+
+Takes off all equipped items.
+
+.. note::
+
+    by EvilChicken!
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+procedure removeAllItems();
+begin
+  removeAllExcept([]);
+end;
+
+(*
+DoEmote
+~~~~~~~
+
+.. code-block:: pascal
+
+    procedure doEmote(EmoteNumber: Integer);
+
+Clicks on an emote specified by EmoteNumber (1 to 37)
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+procedure doEmote(EmoteNumber: Integer);
+var
+  I,Row,Col : Integer;
+  P : TPoint;
+begin
+  if (not InRange(EmoteNumber, 1, 37)) then
+  begin
+    Writeln('Invalid EmoteNumber: ' + IntToStr(EmoteNumber) + ', Valid Emotes: 1..46');
+    Exit;
+  end;
+
+  if not GameTab(TAB_EMOTES) then
+    exit;
+
+  case EmoteNumber of
+    01..20: if (getColor(721, 221) = 1777699) then
+              mouseBox(intToBox(722,222,735,240), MOUSE_LEFT);
+    21..37: if (getColor(721, 448) = 1777699) then
+              mouseBox(intToBox(723,425,735,446), MOUSE_LEFT);
+  end;
+  Wait(100 + Random(200));
+  if InRange(EmoteNumber, 1, 20) then
+    I := 1
+  else
+    if InRange(EmoteNumber, 21, 37) then I := 21;
+  DecEx(EmoteNumber, I);
+
+  Col:=(Round(EmoteNumber/4));
+  Row :=(EmoteNumber -(Col*4));
+
+  P := Point(569+(Row*44),235+(Col*49));
+
+  mouseBox(intToBox(P.X-3,P.Y-6,P.X+3,P.Y+6), MOUSE_LEFT);
+end;
+
+(*
+GetMusic
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function getMusic(): string;
+
+Gets the music that's currently playing.
+
+.. note::
+
+    by ??
+    Last Modified: 06-12-2013 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getMusic(): string;
+begin
+  if not gameTab(TAB_MUSIC) then
+    Exit('');
+  Wait(100 + Random(200));
+  Result := Trim(cs_getTextAtEx(intToBox(550,239,730,253), 0, 5, 1, 65280, 0, 'UpChars07', cs_CTS1));
+end;

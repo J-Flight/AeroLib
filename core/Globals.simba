@@ -1,0 +1,169 @@
+{ const MMX1, MMY1, MMX2, MMY2;
+  Description: MiniMap Edge Points. }
+const
+  MMX1 = 570;
+  MMY1 = 9;
+  MMX2 = 716;
+  MMY2 = 155;
+
+{ const MMCX, MMCY;
+  Description: MiniMap Centre Point. }
+const
+  MMCX = 643;
+  MMCY = 83;
+
+{ const MSX1, MSY1, MSX2, MSY2;
+  Description: Main Screen EdgePoints. }
+const
+  MSX1 = 4;
+  MSY1 = 4;
+  MSX2 = 515;
+  MSY2 = 337;
+
+{ const MSCX, MSCY;
+  Description: Main Screen Centre Points. }
+const
+  MSCX = 259;
+  MSCY = 170;
+
+{ const MIX1, MIY1, MIX2, MIY2;
+  Description: Inventory EdgePoints. }
+const
+  MIX1 = 547;
+  MIY1 = 204;
+  MIX2 = 736;
+  MIY2 = 465;
+
+{ const MICX, MICY;
+  Description: Inventory Centre Points. }
+const
+  MICX = 641;
+  MICY = 335;
+
+{ const MCX1, MCY1, MCX2, MCY2;
+  Description: Chat Screen EdgePoints. }
+const
+  MCX1 = 7;
+  MCY1 = 345;
+  MCX2 = 512;
+  MCY2 = 473;
+
+{ const MCCX, MCCY;
+  Description: Chat Screen Centre Points. }
+const
+  MCCX = 259;
+  MCCY = 409;
+
+{ const MBX1, MBY1, MBX2, MBY2;
+  Description: BankScreen EdgePoints (where you click the items, does not include tabs). }
+const
+  MBX1 = 79;
+  MBY1 = 62;
+  MBX2 = 439;
+  MBY2 = 283;
+
+{ const MBCX, MBCY;
+  Description: Bank Screen Centre Points. }
+const
+  MBCX = 259;
+  MBCY = 172;
+
+{ const DBX1, DBY1, DBX2, DBY2;
+  Description: Deposit box edgepoints (only where the item appear) }
+const
+  DBX1 = 131;
+  DBY1 = 75;
+  DBX2 = 402;
+  DBY2 = 232;
+
+{ const DBCX, DBCY;
+  Description: Deposit Box Screen Centre Points. }
+const
+  DBCX = 266;
+  DBCY = 153;
+
+const
+  MaxInt = High(Integer);
+
+{ input }
+const
+  MOUSE_MOVE = 3;
+  VK_ENTER   = 13;
+
+{ const GameTab Constants;
+  Description: Constants representing gametab numbers. }
+const
+  TAB_COMBAT  = 21;
+  TAB_STATS   = 22;
+  TAB_QUEST   = 23;
+  TAB_INV     = 24;
+  TAB_EQUIP   = 25;
+  TAB_PRAYER  = 26;
+  TAB_MAGIC   = 27;
+  TAB_CLAN    = 28;
+  TAB_FRIENDS = 29;
+  TAB_IGNORE  = 30;
+  TAB_LOGOUT  = 31;
+  TAB_OPTIONS = 32;
+  TAB_EMOTES  = 33;
+  TAB_MUSIC   = 34;
+
+var
+  Area_MS,Area_Inv,Area_CB,
+  Area_MM : TBox;
+
+
+{ const AeroLib procedures Constants; }
+const
+  al_AntiBan          = 0;  // Your AntiBan procedure to be called during various functions and procedures. (Flag, FFlag)
+  al_OnFindMod        = 1;  // After a player or Jagex mod is detected talking in the chat box.
+  al_OnFindDead       = 2;  // After the text 'Oh dear you are dead' is detected.
+  al_OnFindFight      = 3;  // After detecting a fighting random.
+  al_OnFindTrade      = 4;  // After the trade has been attempted (either success or failure).
+  al_OnSendStats      = 5;  // After STATS are sent to the server.
+  al_OnRandomCall     = 6;  // Called in FindNormalRandoms, FindInventoryRandoms, FindNonInventoryRandoms. (NOT ONLY WHEN RANDOMS ARE DETECTED).
+  al_OnFindRandom     = 7;  // After a random event is detected. (FNR, FIR, FNIR, FT)
+  al_OnLogOut         = 8;  // Just before the player is logged out.
+  al_OnExitToLobby    = 9;  // On exit to lobby
+  al_OnLogIn          = 10; // Right after player has successfully logged in.
+  al_OnRSUpdate       = 11; // Called in loginPlayer() if RuneScape updates.
+
+{ var AL_Procs: array [0..11] of procedure();
+  Description: Varibles to store user-defined procs to be called. }
+var
+  AL_Procs            : Array [0..11] of procedure();
+  AL_OnFindRandomCall : function(var Cont : boolean) : boolean;
+  AL_CombatRandoms    : Boolean;
+  AL_runDirection     : TStringArray;
+
+(*
+AL_HasProc
+
+.. code-block:: pascal
+
+    function AL_HasProc(): boolean;
+
+Checks if userproc is defined at index.
+
+.. note::
+
+    by SRL Dev Team
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function AL_HasProc(Index: Integer): Boolean;
+begin
+  if (Index >= Low(AL_Procs)) and (Index <= High(AL_Procs)) then
+    Result := @AL_Procs[Index] <> nil;
+end;
+
+procedure AL_setBoxes;
+begin
+  Area_MS  := intToBox(MSX1,MSY1,MSX2,MSY2);
+  Area_MS  := intToBox(MMX1,MMY1,MMX2,MMY2);
+  Area_Inv := intToBox(MIX1,MIY1,MIX2,MIY2);
+  Area_CB  := intToBox(MCX1,MCY1,MCX2,MCY2);
+end;

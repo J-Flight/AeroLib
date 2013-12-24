@@ -1,0 +1,422 @@
+{
+==========
+Text
+==========
+}
+
+// Plugin WarPie's OCR uptext engine
+{$loadlib rstext.dll}
+
+
+var
+  UpFont : TCharsN;
+
+(*
+InStrArrEx
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function InStrArrEx(S: string; StrArr: TStringArray; var Where: Integer): Boolean;
+
+Returns true if the string S was found in the StrArr, and if so stores the index into Where.
+
+.. note::
+
+    by n3ss3s
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function inStrArrEx(S: string; StrArr: TStringArray; var Where: Integer): Boolean;
+var
+   I,H : Integer;
+begin
+  H:=high(StrArr);
+  for I:=0 to H do
+    if LowerCase(StrArr[i]) = LowerCase(S) then
+    begin
+      Where := i;
+      Exit(True);
+    end;
+end;
+
+(*
+StrInArr
+~~~~~~~~
+
+
+
+    function StrInArr(str: string; arrS: TStringArray): Boolean;
+
+Returns True if str is found in the Array. Case sensitive.
+
+.. note::
+
+    by Narcle & Nava2
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function strInArr(str: string; arrS: TStringArray): Boolean;
+var
+  I, L, H: Integer;
+begin
+  Result := False;
+  L := Low(arrS);    H := High(arrS);
+  for I := L to H do
+    if Pos(Str, arrS[I]) > 0 then
+      Exit(True);
+end;
+
+(*
+ArrInStr
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function ArrInStr(arrS: TStringArray; str: string): Boolean;
+
+Returns True if the Array is found in the str. Case sensitive.
+
+.. note::
+
+    by Narcle & Nava2
+
+Example:
+
+.. code-block::pascal
+
+*)
+function arrInStr(arrS: TStringArray; str: string): Boolean;
+var
+  I, L, H: Integer;
+begin
+  Result := False;
+  L := Low(arrS);    H := High(arrS);
+  for I := L to H do
+    if Pos(arrS[I], Str) > 0 then
+      Exit(True);
+end;
+
+procedure freeSFonts();
+begin
+  ocr_FreeFont(UpFont);
+end;
+
+function ClientATIA(x1,y1,width,height: Integer): T2DIntegerArray;
+var
+  bmp : Integer;
+begin
+  bmp := BitmapFromClient(x1,y1,x1+width,y1+height);
+  Result := GetBitmapAreaColors(bmp, 0,0,width,height);
+  FreeBitmap(bmp);
+end;
+
+function getUpText(): String;
+begin
+  ocr_SetClient(ClientATIA(7,7,500,16));
+  Result := ocr_ReadTextEx(UpFont,0,150);
+end;
+
+function isUpText(Text:String): boolean;
+begin
+  ocr_SetClient(ClientATIA(7,7,500,16));
+  Result := ocr_IsTextEx(Text, True, UpFont);
+end;
+
+function isUptextMulti(Text: TStringArray): Boolean;
+var
+  TheText : string;
+  i,n     : integer;
+begin
+  ocr_SetClient(ClientATIA(7,7,500,16));
+  Result := ocr_IsTextMulti(Text, UpFont);
+end;
+
+function waitUpTextMulti(S: TStringArray; Time: Integer): Boolean;
+var
+  T : Timer;
+begin
+  Result := false;
+  T.start();
+  while (T.timeElapsed < Time) do
+  begin
+    if (isUpTextMulti(S)) then
+      Exit(True);
+    Wait(20 + Random(20));
+  end;
+end;
+
+function waitUptext(S: string; Time: Integer): Boolean;
+begin
+  Result := waitUpTextMulti([S], Time);
+end;
+
+(*
+FindTextEx
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTextEx(var cx, cy: Integer; txt,font: TStringArray; Area: TBox): Boolean;
+
+Searches for text or texts in specified box with specified font or fonts returns
+true on first find of one of the texts with one of the fonts in the specified
+box, returns x, y values aswell.
+
+.. note::
+
+    by Stupid3ooo, modified by LordJashin
+
+Example:
+
+.. code-block:: pascal
+
+    var
+      x, y: Integer;
+      fonts, txts: TStringArray;
+    begin
+      fonts := ['MyOwnFontSet', 'SmallCharacters'];
+      txts := ['Simba', 'HakunaMatata'];
+
+      if FindTextEx(x, y, txts, fonts, Area_MS) then
+        MoveMouse(x, y);
+    end.
+*)
+function findTextEx(var cx, cy: Integer; txt, fonts: TStringArray; Area: TBox): Boolean;
+var
+  s,j,i : Integer;
+begin
+  for j:=0 to High(txt) do
+    for i:=0 to High(fonts) do
+    begin
+      s := createBitmapMaskFromText(ToStr(txt[j]), ToStr(fonts[i]));
+
+      if (Area.X1 < 0) then Area.X1 := 0;
+      if (Area.Y1 < 0) then Area.Y1 := 0;
+
+      Result := cs_findBitmapMaskTolerance(S, Area, cx, cy, 30, 30, cs_CTS1);
+      freeBitmap(S);
+
+      if (result) then
+        exit;
+    end;
+end;
+
+(*
+FindText
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindText(var cx, cy: Integer; txt,font: string; Area: TBox;): Boolean;
+
+Searches for text in specified box with specified font.
+
+.. note::
+
+    by Coh3n
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findText(var cx, cy: integer; txt, font: string; Area: TBox): boolean;
+begin
+  result := findTextEx(cx, cy, [txt], [font], Area);
+end;
+
+(*
+ClickText
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    function ClickText(text, chars: string; Area: TBox; button: variant): boolean;
+
+Clicks text if found in the specified box.
+
+.. note::
+
+    by Coh3n
+    Last Updated: Mar. 5th, 2012 by Coh3n
+
+Example
+
+.. code-block:: pascal
+
+*)
+function clickText(text, chars: string; Area: TBox; button: variant): boolean;
+var
+  x,y: integer;
+begin
+  if (findText(x, y, text, chars, Area)) then
+  begin
+    mouse(Point(x,y), 5, 5, button);
+    result := true;
+  end;
+end;
+
+(*
+LoadTextTPA
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    Function LoadTextTPA(Text : String; Chars : Integer;var height : integer) : TPointArray;
+
+Loads a TPA of the text.. It also returns the real height of the Text. Used in FindTextTPAinTPA.
+
+.. note::
+
+    by Raymond
+
+Example
+
+.. code-block:: pascal
+
+*)
+function loadTextTPA(Text, Chars: string; var height: integer): TPointArray;
+var
+  w: integer;
+begin
+  result := TPAFromText(text,chars,w,height);
+  dec(height);
+end;
+
+(*
+FindTextTpaEx
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTextTpaEx(Color, Tol: integer; Area: TBox; var x,y : integer; Txt : string; Chars : Integer; Action  : (ClickLeft,ClickRight,Move,Nothing)) : Boolean;
+
+Uses TPA's to find text..Returns the found pos in x and y (if not found both are 0)
+Valid 'CLickTypes':
+-1          - Just return wether its found
+MOUSE_MOVE  - Just move the mouse to it
+MOUSE_LEFT  - Movemouse & Clickmouse left
+MOUSE_RIGHT - MoveMouse & Clickmouse right
+
+.. note::
+
+    by Raymond
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findTextTPAEx(Color, Tol: integer; Area: TBox; var x,y: integer; Txt,Chars: string; clickType: Integer): Boolean;
+var
+  TextTPA,SearchTPA,
+  Matches : TPointArray;
+  Box     : TBox;
+  xx,yy   : integer;
+begin
+  cs_findColorsTolerance(SearchTPA, Color, tol, Area, cs_CTS1);
+  if Length(SearchTPA) < 1 then
+    Exit(False);
+  TextTPA := loadTextTPA(Txt,Chars,yy);
+  Result := findTextTPAinTPA(yy, TextTPA, SearchTPA, Matches);
+  x := 0; y:=0;
+  if not Result then
+    Exit;
+  Box := getTPABounds(TextTPA);
+  sortTPAFrom(Matches, Point(Box.x1, Box.y1));
+  x := matches[0].x;
+  y := matches[0].y;
+  if clickType = -1 then
+    Exit;
+  getMousePos(xx,yy);
+  if not intInBox(xx,yy,intToBox(matches[0].x,matches[0].y,matches[0].x + Box.x2,Matches[0].y + (Box.y2 shr 1))) then
+    brakeMMouse(Point(matches[0].x+Random(box.x2),Matches[0].y+Random(Box.y2 shr 1)),0,0,False);
+  fastClick(clickType);
+end;
+
+(*
+FindTextTPA
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTextTpa(Color, Tol: integer; Area: Box; Txt, Chars: String; clickType: Integer) : Boolean;
+
+Just like FindTextTpaEx, but without the x and y pos returning.
+
+.. note::
+
+    by Raymond
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findTextTPA(Color, Tol: integer; Area: TBox; Txt, Chars: string; clickType: Integer): Boolean;
+var
+  x,y : integer;
+begin
+  Result := findTextTPAEx(Color, Tol, Area, x, y, Txt, chars, clickType);
+end;
+
+(*
+FindTextTPAMulti
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function FindTextTPAMulti(Color, tol: integer; Area: TBox; Texts: TStringArray; Chars: string;/integer; Action: fnct_ActionOptions): Boolean;
+
+Just like FindTextTPA, only that it takes an array of strings as text to search for.
+
+.. note::
+
+    by Cigue and EvilChicken!
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findTextTPAMulti(Color, tol: integer; Area: TBox; Texts: TStringArray; Chars: string; clickType: Integer): Boolean;
+var
+  I: Integer;
+begin
+  for i := 0 to High(Texts) do
+    if findTextTPA(Color, Tol, Area, Texts[i], Chars, clickType) then
+      Exit(True);
+end;
+
+function findNPCChatTextMulti(txt: TStringArray; clickType: Integer): boolean;
+var
+  x,y   : integer;
+  chars : TStringArray;
+begin
+  chars := [UpChars07, CharsNPC07];
+
+  if (findTextEx(x, y, txt, chars, Area_CB)) then
+  begin
+    if clickType = -1 then
+      Exit(False);
+    case RandomRange(1,3) of
+      1: brakeMMouse(Point(x,y), 6, 3, True);
+      2: humanMMouse(Point(x,y), 6, 3);
+      3: missMouse(Point(x,y), 6, 3);
+    end;
+
+    fastClick(clickType);
+  end;
+end;
+
+function findNPCChatText(txt: string; clickType: Integer): boolean;
+begin
+  result := findNPCChatTextMulti([txt], clickType);
+end;
