@@ -7,6 +7,15 @@ InputHandler
 var
   MouseSpeed: Integer;
 
+procedure getRealMousePos(var X,Y: Integer); forward;
+function getRealMousePnt: TPoint;
+var
+  x,y : integer;
+begin
+  getRealMousePos(X, Y);
+  Result := Point(X, Y);
+end;
+
 {*******************************************************************************
 procedure Procedure brakeWindMouse(xs, ys, xe, ye, gravity, wind, minWait,
   maxWait, targetArea: extended; reverse: boolean);

@@ -1,0 +1,83 @@
+{
+=====
+Items
+=====
+}
+
+
+(*
+GetItemAmount
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getItemAmount(Pnt: TPoint): Integer;
+
+Returns the amount of an item at point Pnt.  Works for
+both bank items & inventory items.
+
+.. note::
+
+    Author: Flight / Zeph, N1ke & Narcle
+    Last Modified: 24-12-2013
+
+Example:
+
+.. code-block:: pascal
+
+    var
+      i: Integer;
+    begin
+      i := getItemAmount(point(90,90));
+      Writeln('We have '+toStr(i)+' items in bank slot #1');
+    end;
+*)
+
+function getItemAmount(Pnt: TPoint): Integer;
+var
+  Box  : TBox;
+  S    : String;
+  i    : Integer;
+  TPA  : TPointArray;
+  ATPA : T2DPointArray;
+  Col  : TIntegerArray;
+begin
+  Result := 0;
+
+  Box := intToBox(0,0,755,500);
+  if not PointInBox(Pnt, Box) then
+    Exit;
+  Box := intToBox(Pnt.X-32,Pnt.Y-32,Pnt.X+32,Pnt.Y+32);
+  if Box.X1 < 0 then Box.X1 := 0;
+  if Box.Y1 < 0 then Box.Y1 := 0;
+  if Box.X2 > 764 then Box.X2 := 764;
+  if Box.Y2 > 502 then Box.Y2 := 502;
+
+  if not cs_FindColorsTolerance(TPA, 65536, 0, Box, cs_CTS) then
+    Exit;
+
+  Inc(Result);
+  ATPA := clusterTPA(TPA, 5);
+  if length(ATPA) < 1 then
+    Exit;
+  SortATPAFromMidPoint(ATPA, Pnt);
+
+  Box  := getTPABounds(ATPA[0]);
+  Col  := [65535, 65278, 16777215, 8453888];
+  Pnt  := Point(round((Box.X1+Box.X2)/2), Box.Y1);
+  Box  := intToBox(Pnt.x-20, Pnt.y-15, Pnt.x+20, Pnt.y+15);
+  TPA  := [];
+  ATPA := [];
+
+  for i:=0 to High(Col) do
+    if cs_FindColors(TPA, Col[i], Box, cs_CTS) then
+    begin
+      S := getTextAtExWrap(Box.x1, Box.y1, Box.x2, Box.y2, 0, 1, 1, Col[i], 0, StatChars07);
+      Result := strToIntDef(GetNumbers(S), 1);
+      Case I of
+        2: Result := Result * 1000;
+        3: Result := Result * 1000000;
+      end;
+      Exit;
+   end;
+end;

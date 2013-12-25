@@ -1,3 +1,30 @@
+//By Janilabo
+function TPADelete(var TPA: TPointArray; x: Integer): Boolean;
+var
+  i, h: Integer;
+begin
+  h := High(TPA);
+  Result := ((x <= h) and (x > -1));
+  if not Result then
+    Exit;
+  for i := x to (h - 1) do
+    TPA[i] := TPA[(i + 1)];
+  SetLength(TPA, h);
+end;
+
+function safePnts(TPA: TPointArray): TPointArray;
+var
+  i,l  : integer;
+  ctpa : TPointArray;
+begin
+  if length(TPA) < 1 then
+    exit;
+
+  for i:=0 to high(TPA) do
+    if not PointInBox(TPA[i], intToBox(0,0,764,502)) then
+      TPADelete(TPA, i);
+end;
+
 {==============================================================================]
   Explanation: Constants for Simba's default CTS-related settings. Used in cs_CTS(Ex) functions.
 [==============================================================================}
