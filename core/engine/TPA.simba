@@ -1,0 +1,32 @@
+{
+===
+TPA
+===
+}
+
+function TPointArray.midPnt(): TPoint;
+var
+  mPnt: TPoint;
+begin
+  if Length(Self) < 1 then
+    Exit;
+
+  mPnt := middleTPA(Self);
+  sortTPAFrom(Self, mPnt);
+
+  Result:= Self[0];
+end;
+
+function TPointArray.getBounds(): TBox;
+var
+  mPnt: TPoint;
+begin
+  if Length(Self) < 1 then
+    Exit;
+  Result:= getTPABounds(Self);
+end;
+
+function pointsMatch(Pnt1, Pnt2: TPoint): Boolean;
+begin
+  result := ((Pnt1.X = Pnt2.X) and (Pnt1.Y = Pnt2.Y));
+end;

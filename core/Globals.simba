@@ -1,3 +1,11 @@
+type
+  TPointerSet = record
+    isProc : Boolean;
+    proc   : procedure;
+    func   : function: Boolean;
+    name   : string;
+  end;
+
 { const MMX1, MMY1, MMX2, MMY2;
   Description: MiniMap Edge Points. }
 const
@@ -110,7 +118,7 @@ const
 
 var
   Area_MS,Area_Inv,Area_CB,
-  Area_MM : TBox;
+  Area_MM,Area_BS,Area_DS : TBox;
 
 
 { const AeroLib procedures Constants; }
@@ -162,8 +170,10 @@ end;
 
 procedure AL_setBoxes;
 begin
-  Area_MS  := intToBox(MSX1,MSY1,MSX2,MSY2);
-  Area_MS  := intToBox(MMX1,MMY1,MMX2,MMY2);
-  Area_Inv := intToBox(MIX1,MIY1,MIX2,MIY2);
-  Area_CB  := intToBox(MCX1,MCY1,MCX2,MCY2);
+  AREA_MS  := intToBox(MSX1,MSY1,MSX2,MSY2);
+  AREA_MM  := intToBox(MMX1,MMY1,MMX2,MMY2);
+  AREA_INV := intToBox(MIX1,MIY1,MIX2,MIY2);
+  AREA_CB  := intToBox(MCX1,MCY1,MCX2,MCY2);
+  AREA_BS  := intToBox(MBX1,MBY1,MBX2,MBY2);
+  AREA_DS  := intToBox(DBX1,DBY1,DBX2,DBY2);
 end;

@@ -1,0 +1,105 @@
+{$include AeroLib/core/Globals.simba}
+{$include AeroLib/core/engine/Color.simba}
+{$include AeroLib/core/engine/Boxes.simba}
+{$include AeroLib/core/engine/TPA.simba}
+{$include AeroLib/core/engine/DTM.simba}
+{$include AeroLib/core/engine/Time.simba}
+{$include AeroLib/core/engine/Math.simba}
+{$include AeroLib/core/engine/InputHandler.simba}
+{$include AeroLib/core/engine/SimbaExt.simba}
+
+{$include AeroLib/misc/Graphics.simba}
+{$include AeroLib/misc/Debugging.simba}
+
+{$IFDEF SMART}
+  {$include AeroLib/misc/connection/Smart.simba}
+{$ENDIF}
+
+{$include AeroLib/core/Timing.simba}
+{$include AeroLib/core/Text.simba}
+{$include AeroLib/core/Menu.simba}
+{$include AeroLib/core/Interfaces.simba}
+{$include AeroLib/core/Animation.simba}
+{$include AeroLib/core/Chat.simba}
+
+{$include AeroLib/misc/Combat.simba}
+{$include AeroLib/entities/EntityHandler.simba}
+{$include AeroLib/entities/player/Player.simba}
+{$include AeroLib/entities/player/Login.simba}
+{$include AeroLib/entities/player/WorldHandler.simba}
+{$include AeroLib/core/Bank.simba}
+
+{$include AeroLib/entities/items/Items.simba}
+
+{$include AeroLib/core/minimap/Minimap.simba}
+{$include AeroLib/core/Breaking.simba}
+{$include AeroLib/core/gametabs/GameTab.simba}
+{$include AeroLib/core/Antiban.simba}
+
+{$include AeroLib/misc/randomsolvers/Master.simba}
+{$include AeroLib/misc/Reports.simba}
+
+{$IFDEF SPS}
+  {$i AeroLib/core/minimap/SPS.simba}
+{$ENDIF}
+
+Var
+  _subVar : Extended;
+  {$IFDEF SMART}
+    OS_SMART : TSmart;
+  {$ENDIF}
+
+Const
+  AL_VERSION_MAIN = '1.0';
+  AL_VERSION_SUB  = '0.0';
+
+procedure AL_checkVersion();
+var
+  Page,vM,vS : String;
+begin
+  warn('Checking version...', WT_CORE);
+  try
+    Page := GetPage('http://pastebin.com/raw.php?i=RHP62Pi7');
+  except
+    warn('Error while checking version', WT_CORE);
+    Exit;
+  end;
+
+  vM := Between('<_MAIN>', '</_MAIN>', Page);
+  vS := Between('<_SUB>', '</_SUB>', Page);
+  if (not (AL_VERSION_MAIN = vM)) then
+    showMessage('There'#39's a major update available for AeroLib!');
+  if (not (AL_VERSION_SUB = vS)) then
+    warn('There'#39's a minor update available for AeroLib.', WT_CORE);
+
+  if ((AL_VERSION_MAIN = vM) and (AL_VERSION_SUB = vS)) then
+    warn('Currently up to date.', WT_CORE);
+end;
+
+procedure initAL();
+begin
+  AL_InitMessage(AL_VERSION_MAIN, AL_VERSION_SUB);
+  warn('Initiating AeroLib...', WT_CORE);
+  AL_checkVersion();
+  setupGauss();
+  AL_setBoxes();
+
+  MouseSpeed := 20;
+  ocr_LoadFont(AppPath + 'Fonts\UpChars07_s\', UpFont);
+  addOnTerminate('freeSFonts');
+  setupInterfaces();
+  setupRandoms();
+
+  {$IFDEF SMART}
+    OS_SMART.Create;
+    OS_SMART.Pair;
+
+    if not RSReady() then
+    begin
+      warn('Failed to initiate SMART, terminating script', WT_CORE);
+      terminateScript();
+    end;
+  {$ENDIF}
+  Me.ModelSet := False;
+  warn('Startup complete!', WT_CORE);
+end;

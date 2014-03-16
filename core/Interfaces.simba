@@ -108,12 +108,7 @@ begin
     end;
   end;
 
-  for i:=0 to high(Interfaces) do
-    if i=high(Interfaces) then
-      if not Interfaces[i].isVisible() then
-        Exit(True);
-
-  // handles the advanced skill guide window
+// handles the advanced skill guide window
   if (cs_findColorTolerance(x, y, 2994428, 20, intToBox(728,8,753,30), cs_CTS)) then
   begin
     BrakeMMouse(Point(X,Y), 3, 3, False);
@@ -131,6 +126,16 @@ begin
     end;
     if not Interfaces[PINSCREEN].isVisible() then
       Exit(True);
+  end;
+
+  if (Interfaces[BANKSCREEN].isVisible() or Interfaces[SHOPSCREEN].isVisible()) then
+  begin
+    mouseBox(intToBox(479,33,495,50), MOUSE_MOVE);
+    if (waitUptextMulti(['lose','ack','Cl','se'], 200)) then
+    begin
+      fastClick(MOUSE_LEFT);
+      Exit(True);
+    end;
   end;
 
   Col := [1118997,  1449250,  {Main typ 1}
@@ -156,7 +161,7 @@ begin
 
       for ii:=0 to high(a) do
       begin
-        Pa := getTPABounds(a[ii]);
+        Pa := a[ii].getBounds();
         if ((Pa.x2 - Pa.x1) > 50) or ((Pa.y2 - Pa.y1) > 50) then
           Continue;
 

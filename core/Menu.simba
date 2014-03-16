@@ -1,7 +1,7 @@
 {
-==========
+====
 Menu
-==========
+====
 }
 
 Type TOptions = Record
@@ -37,15 +37,15 @@ begin
   if (length(TPA) < 100) then
     Exit;
 
-  B := getTPABounds(TPA);
+  B := TPA.getBounds();
   BigBox := B;
   Yoff := IntToBox(B.X1, B.Y1 + 18, B.X2, B.Y2);
   cs_findColorsTolerance(TPA1, 0, 0, Yoff, cs_CTS3);
 
-  splitTPAExWrap(TPA1, 1, 1, ATPA);
+  ATPA := clusterTPA(TPA1, 1);
   sortATPASize(ATPA, true);
   if Length(ATPA) > 0 then
-    TextSearchBox := getTPABounds(ATPA[0]);
+    TextSearchBox := ATPA[0].getBounds();
 
   combineTPAWrap(TPA, TPA1, TPA);
   if (length(TPA) < 10) then
@@ -63,7 +63,7 @@ begin
 
   SetLength(ATPA, h div 15);
   for i:=0 to High(ATPA) do
-    cs_findColorsTolerance(ATPA[i], clRed, 0, intToBox(0,2+(i*15),w-1,16+(i*15)), cs_CTS1);
+    cs_findColorsTolerance(ATPA[i], clRed, 0, intToBox(0,2+(i*15),w-1,15+(i*15)), cs_CTS1); //16+(i*15)
 
   sortATPAFromFirstPointY(ATPA, Point(w div 2, 0));
   setArrayLength(Result, Length(ATPA));
@@ -72,10 +72,10 @@ begin
   for i:=0 to high(ATPA) do
   begin
     TPA := ATPA[i];
-    tempatpa := SplitTPAEx(TPA, 1, 10);
+    tempatpa := clusterTPAEx(TPA, 1, 10);
     sortATPAFromFirstPointX(tempatpa, Point(0, 0));
     Result[i].Str := getTextATPA(tempatpa, 5, 'UpChars07');
-    BB := GetTPABounds(ATPA[i]);
+    BB := ATPA[i].getBounds();
     Result[i].Bounds := IntToBox(BB.X1 + Yoff.X1, BB.Y1 + Yoff.Y1,
                 Result[0].BigBox.X2, BB.Y2 + Yoff.Y1);
     setlength(tempatpa,0);
@@ -86,21 +86,53 @@ begin
   freeBitmap(bmp);
 end;
 
+function exitMenu(): Boolean;
+var
+  T   : Timer;
+  x,y : Integer;
+begin
+  result := false;
+  T.start();
+  while (T.timeElapsed() < 3000) do
+  begin
+    getMousePos(X, Y);
+    humanMMouse(Point(x,y-10), 0, 0);
+    if not menuOpen() then
+      break;
+  end;
+  result := not menuOpen();
+end;
+
+function optionExistsMulti(Texts: TStringArray): Boolean;
+var
+  i : Integer;
+  Options : array of TOptions;
+begin
+  result  := False;
+  Options := getOptions();
+  if (Length(Options) < 1) then
+    Exit(False);
+
+  for i:=0 to high(Options) do
+    if arrInStr(Texts, Options[i].Str) then
+      exit(true);
+end;
+
 function chooseOptionMulti(Texts: TStringArray): Boolean;
 var
-   B          : TBox;
-   T          : Timer;
-   i,X,Y,ms,
-   H,R,x2,y2  : Integer;
-   Options    : array of TOptions;
+  B          : TBox;
+  T          : Timer;
+  i,X,Y,ms,
+  R,x2,y2  : Integer;
+  Options    : array of TOptions;
 begin
   Options := getOptions();
   if (Length(Options) < 1) then
     Exit(False);
   ms := MouseSpeed;
-  MouseSpeed := RandomRange(8,12);
-  H := High(Options);
-  for i:=0 To H do
+  MouseSpeed := RandomRange(13,17);
+
+  for i:=0 to high(Options) do
   begin
     if ArrInStr(Texts, Options[i].Str) then
     begin
@@ -117,21 +149,27 @@ begin
     end;
   end;
 
-  T.start();
-  while (T.timeElapsed() < 3000) do
-  begin
-    getMousePos(X, Y);
-    missMouse(Point(x,y-10), 0, 0);
-    if not menuOpen() then
-      break;
-  end;
-
+  exitMenu;
   MouseSpeed := ms;
 end;
 
 function chooseOption(Txt: String): Boolean;
 begin
   Result := chooseOptionMulti([Txt]);
+end;
+
+function waitOptionExistsMulti(S: TStringArray; Time: Integer): Boolean;
+var
+  T : Timer;
+begin
+  Result := False;
+  T.start();
+  while (T.timeElapsed() < Time) do
+  begin
+    if optionExistsMulti(S) then
+      Exit(True);
+    Wait(20 + Random(10));
+  end;
 end;
 
 function waitOptionMulti(S: TStringArray; Time: Integer): Boolean;

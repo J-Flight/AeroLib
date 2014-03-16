@@ -1,0 +1,300 @@
+(*
+Pillory
+=======
+
+Stores all the routines to solve the Pillory random.  None of these routines
+should be used throughout scripts.  They only need to be called in SRL's random
+detection methods.
+
+This solver uses color counting to determine the shape
+of the lock and which key to use.
+
+*)
+function PL_LockScreen(): Boolean;
+begin
+  if not isLoggedIn() then Exit(false);
+  Result := (getColor(497, 34) = 65536);
+end;
+
+function PL_Detect(): boolean;
+var
+  tpa : TPointArray;
+begin
+  if (not tabExists(TAB_OPTIONS)) and (tabExists(TAB_FRIENDS)) then
+  begin
+    // red doors of the cages
+    cs_findColorsTolerance(tpa, 235, 20, intToBox(MMCX-15, MMCY-15, MMCX+15, MMCY+15), cs_CTS);
+    Result := (inRange(length(tpa), 3, 18));
+  end;
+end;
+
+(**
+ * Author: DannyRS
+ * Last modified 15/03/2013 By DannyRS
+ * Description: Opens Cage Interface
+ *)
+function PL_ClickCage(): Boolean;
+var
+  T : Timer;
+  x,y : Integer;
+begin
+  Result := False;
+
+  T.start();
+  if (not isLoggedIn()) then Exit(false);
+
+  Result := PL_LockScreen();
+
+  if (not Result) then
+  begin
+    repeat
+      x:= MSCX;
+      y:= MSCY;
+      if (not(isUpTextMulti(['Unlock','lock','Cage','age']))) then
+        if cs_findColorSpiralTolerance(x, y, 9738912, 19, AREA_MS, cs_CTS) or cs_findColorSpiralTolerance(x, y, 1118484, 19, AREA_MS, cs_CTS) then
+        begin
+          missMouse(point(x,y), 4, 4);
+        end else
+          missMouse(point(243,143), 80, 65);
+
+      if waitUpTextMulti(['Unlock','lock','Cage','age'], 300) then
+      begin
+        fastClick(MOUSE_LEFT);
+        if (waitFunc(@PL_LockScreen, 50, 5000)) then
+        begin
+          warn('Opened Lock Screen', WT_RANDOM);
+          Wait(RandomRange(190, 270));
+          Result := True;
+        end else
+          warn('Failed to open Lock Screen', WT_RANDOM);
+      end else
+        missMouse(point(243,143), 80, 65);
+    until (Result) or (T.timeElapsed > 38000);
+  end;
+end;
+
+(**
+ * Author: DannyRS
+ * Last modified 15/03/2013 By DannyRS
+ * Description: Clicks a key 0-2
+ *)
+function PL_ClickKey(Slot: Integer): Boolean;
+var
+  p : TPoint;
+begin
+  Result := False;
+
+  if (not PL_LockScreen()) then Exit(false);
+
+  p := Point(209 + (Slot*93), 251);
+  humanMMouse(p, 2, 4);
+  fastClick(MOUSE_LEFT);
+
+  Result := True;
+end;
+
+(**
+ * Author: DannyRS
+ * Last modified 9/04/2013 By DannyRS
+ * Description: Scans for lock type
+ *)
+function PL_GetLock(): String;
+var
+  T : Timer;
+  CNum,Count : Integer;
+  cs : cs_TColorSettings;
+begin
+  Result := '';
+  cs     := cs_ToColorSettings(2, 0.21, 2.01);
+  Count  := 100;
+  T.start();
+  repeat
+    CNum := cs_countColorTolerance(1057067, 10, intToBox(60,65,150,150), cs);
+    if (CNum > Count) then
+      Count := CNum;
+      wait(50 + random(50));
+  until (T.timeElapsed() > RandomRange(9000,10000));
+  if (Count > 800) and (Count < 1000) then Result := 'square';
+  if (Count > 570) and (Count < 799) then Result := 'triangle';
+  if (Count > 400) and (Count < 569) then Result := 'diamond';
+  if (Count > 1001) and (Count < 1600) then Result := 'circle';
+  warn('Lock Found: ' + Result + ' [' + ToStr(Count) + ']', WT_RANDOM);
+end;
+
+(**
+ * Author: DannyRS
+ * Last modified 9/04/2013 By DannyRS
+ * Description: Scans for key types
+ *)
+function PL_GetKeys(): TStringArray;
+var
+  T : Timer;
+  C1,C2,C3,CNum,Count: Integer;
+  cs : cs_TColorSettings;
+begin
+  SetLength(Result, 3);
+
+  cs := cs_ToColorSettings(2, 0.43, 2.81);
+  Result[0] := '';
+  Count := 100; CNum := 0;
+  T.start();
+  repeat
+    CNum := cs_countColorTolerance(1516846, 7, intToBox(180,170,235,260), cs);
+
+    case CNum of
+      286: Result[0] := 'triangle';
+      493: Result[0] := 'diamond';
+      506: Result[0] := 'circle';
+      729: Result[0] := 'square';
+    end;
+
+    if (CNum > Count) then
+      Count := CNum;
+    wait(50 + random(50));
+  until(not (Result[0] = '')) or (T.timeElapsed() > 10000);
+
+  if (Result[0] = '') then
+  begin
+    if InRange(Count, 250, 350) then Result[0] := 'triangle';
+    if InRange(Count, 400, 500) then Result[0] := 'diamond';
+    if InRange(Count, 501, 600) then Result[0] := 'circle';
+    if InRange(Count, 670, 1300) then Result[0] := 'square';
+  end;
+
+  C1 := Count;
+
+  Result[1] := '';
+  Count := 100; CNum := 0;
+  T.start();
+  repeat
+    CNum := cs_countColorTolerance(1516846, 7, intToBox(265,170,345,260), cs);
+
+    case CNum of
+      286: Result[1] := 'triangle';
+      493: Result[1] := 'diamond';
+      506: Result[1] := 'circle';
+      729: Result[1] := 'square';
+    end;
+
+    if (CNum > Count) then
+      Count := CNum;
+    wait(50 + random(50));
+
+  until(not (Result[1] = '')) or (T.timeElapsed() > 10000);
+
+  if (Result[1] = '') then
+  begin
+    if InRange(Count, 250, 350) then Result[1] := 'triangle';
+    if InRange(Count, 400, 500) then Result[1] := 'diamond';
+    if InRange(Count, 501, 600) then Result[1] := 'circle';
+    if InRange(Count, 670, 1300) then Result[1] := 'square';
+  end;
+
+  C2 := Count;
+
+  Result[2] := '';
+  Count := 100; CNum := 0;
+  T.start();
+  repeat
+    CNum := cs_countColorTolerance(1516846, 7, intToBox(365,170,430,260), cs);
+
+    case CNum of
+      286: Result[2] := 'triangle';
+      493: Result[2] := 'diamond';
+      506: Result[2] := 'circle';
+      729: Result[2] := 'square';
+    end;
+
+    if (CNum > Count) then
+      Count := CNum;
+    wait(50 + random(50));
+
+  until(not (Result[2] = '')) or (T.timeElapsed() > 10000);
+
+  if (Result[2] = '') then
+  begin
+    if InRange(Count, 250, 350) then Result[2] := 'triangle';
+    if InRange(Count, 400, 500) then Result[2] := 'diamond';
+    if InRange(Count, 501, 600) then Result[2] := 'circle';
+    if InRange(Count, 670, 1300) then Result[2] := 'square';
+  end;
+
+  C3 := Count;
+
+  warn('Keys Found: '+
+      Result[0]+' ['+IntToStr(C1)+']'+' '+
+      Result[1]+' ['+IntToStr(C2)+']'+' '+
+      Result[2]+' ['+IntToStr(C3)+']', WT_RANDOM);
+end;
+
+(**
+ * Author: DannyRS
+ * Last modified 15/03/2013 By DannyRS
+ * Description: Solves the Pillory Random Event
+ *)
+function PL_Solve: Boolean;
+var
+  T         : Timer;
+  lock      : String;
+  keysolves,
+  i         : Integer;
+  Deg       : Extended;
+  keys      : TStringArray;
+begin
+  Result := False;
+  if (not isLoggedIn) then Exit;
+  keysolves := 0;
+  Deg := getCompassAngle();
+  Wait(100 + random(50));
+  setCompass('N');
+
+  T.start();
+  repeat
+    Result := (tabExists(TAB_OPTIONS));
+    if Result then Break;
+
+    // open the lock screen if it's not already open
+    if (not PL_LockScreen()) then PL_ClickCage();
+
+    lock := PL_GetLock();
+    keys := PL_GetKeys();
+
+    for i := 0 to 2 do
+      if (keys[i] = '') then
+      begin
+         warn('Failed to get all keys', WT_RANDOM);
+         Break;
+      end;
+
+      if (lock = '') then
+      begin
+         warn('Failed to get lock type', WT_RANDOM);
+         Continue;
+      end;
+
+      for i := 0 to 2 do
+      if (keys[i] = lock) then
+      begin
+        warn('Clicking key : ' + keys[i], WT_RANDOM);
+        if PL_ClickKey(i) then
+        begin
+          keysolves := keysolves + 1;
+          Wait(RandomRange(1500, 2000));
+        end;
+      end;
+
+    Result := ((keysolves > 2) and (not PL_LockScreen())) or
+        (tabExists(TAB_OPTIONS));
+
+  until(Result or (T.timeElapsed()> 120000));
+
+  if Result then
+    setCompass(Deg);
+
+  if (not Result) then
+  begin
+    if (T.timeElapsed > 120000) then
+      warn('Pillory solver timed out', WT_RANDOM);
+  end else
+    Wait(RandomRange(800, 1200));
+end;

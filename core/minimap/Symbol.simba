@@ -1,0 +1,847 @@
+{
+======
+Symbol
+======
+}
+
+var
+  SymbolBitmap   : Integer;
+  SymbolAccuracy : Extended;
+
+// Comment fix by drizzt:
+// Updated list - 20/05/2012 - [J]ustin
+{*******************************************************************************
+Valid Arguments are:
+- agility                   - gem stall                         - rest, resting spot
+- altar                     - guide                             - sandpit
+- anvil                     - hair dresser                      - saw mill
+- apothecary                - herbalist                         - scimitar shop
+- archery shop              - house                             - shield
+- arrow                     - hunter store                      - shop, store
+- axe shop                  - hunter training                   - short cut
+- bar                       - jewelery                          - silk stall
+- bank                      - kebab shop                        - silver stall
+- candle shop               - lodestone                         - slayer master
+- churn                     - mace shop                         - spice stall
+- clothes shop              - magic shop                        - spinning wheel, spin
+- cookery shop              - makeover mage                     - staff shop
+- cookery, cook             - mill                              - summoning store
+- crafing shop              - minigame                          - summoning obelisk
+- dungeon                   - mining shop, mining site, mine    - sword shop
+- farming shop              - pet shop                          - tanner
+- farming spot              - platebody shop                    - training dummy
+- fishing shop, fish store  - plateskirt shop                   - underground
+- fishing spot, fish        - portal (to player owned houses)   - water source, water
+- food shop                 - pottery, pot                      - weave
+- fur trader                - quest                             - windmill
+- furnace                   - range
+                            - rare trees, tree
+
+*******************************************************************************}
+
+Const     //Symbol Constants, may be changed to integers in SRL6
+  SYMBOL_Agility = 'agility';
+  SYMBOL_Furnace = 'furnace';
+  SYMBOL_Altar = 'altar';
+  SYMBOL_Anvil = 'anvil';
+  SYMBOL_Apothecary = 'apothecary';
+  SYMBOL_ArcheryShop = 'archery shop';
+  SYMBOL_Arrow = 'arrow';
+  SYMBOL_AxeShop = 'axe shop';
+  SYMBOL_Bar = 'bar';
+  SYMBOL_Bank = 'bank';
+  SYMBOL_CandleShop = 'candle shop';
+  SYMBOL_Churn = 'churn';
+  SYMBOL_ClothesShop = 'clothes shop';
+  SYMBOL_CookeryShop = 'cookery shop';
+  SYMBOL_Cookery = 'cookery';
+  SYMBOL_Cook = SYMBOL_Cookery;
+  SYMBOL_CraftingShop = 'crafting shop';
+  SYMBOL_Dungeon = 'dungeon';
+  SYMBOL_FarmingShop = 'farming shop';
+  SYMBOL_FarmingSpot = 'farming spot';
+  SYMBOL_FishingShop = 'fishing shop';
+  SYMBOL_FishingStore = SYMBOL_FishingShop;
+  SYMBOL_FishingSpot = 'fishing spot';
+  SYMBOL_Fish = SYMBOL_FishingSpot;
+  SYMBOL_FoodShop = 'food shop';
+  SYMBOL_FoodStore = SYMBOL_FoodShop;
+  SYMBOL_FurTrader = 'fur trader';
+  SYMBOL_RareTrees = 'rare trees';
+  SYMBOL_Tree = SYMBOL_RareTrees;
+  SYMBOL_RestingSpot = 'resting spot';
+  SYMBOL_Rest = SYMBOL_RestingSpot;
+  SYMBOL_Runecrafting = 'runecrafting';
+  SYMBOL_Rcing = SYMBOL_Runecrafting;
+  SYMBOL_Rc = SYMBOL_Runecrafting;
+  SYMBOL_GemStall = 'gem stall';
+  SYMBOL_Guide = 'guide';
+  SYMBOL_HairDresser = 'hair dresser';
+  SYMBOL_Herbalist = 'herbalist';
+  SYMBOL_House = 'house';
+  SYMBOL_HunterStore = 'hunter store';
+  SYMBOL_HunterTraining = 'hunter training';
+  SYMBOL_Jewelery = 'jewelery';
+  SYMBOL_KebabShop = 'kebab shop';
+  SYMBOL_MaceShop = 'mace shop';
+  SYMBOL_MagicShop = 'magic shop';
+  SYMBOL_MakeoverMage = 'makeover mage';
+  SYMBOL_Mill = 'mill';
+  SYMBOL_Minigame = 'minigame';
+  SYMBOL_MiningShop = 'mining shop';
+  SYMBOL_MiningSpot = 'mining spot';
+  SYMBOL_MiningSite = SYMBOL_MiningSpot;
+  SYMBOL_Mine = SYMBOL_MiningSpot;
+  SYMBOL_PetShop = 'pet shop';
+  SYMBOL_PlatebodyShop = 'platebody shop';
+  SYMBOL_PlateskirtShop = 'plateskirt shop';
+  SYMBOL_Portal = 'portal';
+  SYMBOL_Pottery = 'pottery';
+  SYMBOL_Pot = SYMBOL_Pottery;
+  SYMBOL_Quest = 'quest';
+  SYMBOL_Range = 'range';
+  SYMBOL_Windmill = 'windmill';
+  SYMBOL_Sandpit = 'sandpit';
+  SYMBOL_SawMill = 'saw mill';
+  SYMBOL_ScimitarShop = 'scimitar shop';
+  SYMBOL_Shield = 'shield';
+  SYMBOL_Shop = 'shop';
+  SYMBOL_Store = SYMBOL_Shop;
+  SYMBOL_ShortCut = 'short cut';
+  SYMBOL_SilkStall = 'silk stall';
+  SYMBOL_SilverStall = 'silver stall';
+  SYMBOL_SlayerMaster = 'slayer master';
+  SYMBOL_SpiceStall = 'spice stall';
+  SYMBOL_SpinningWheel = 'spinning wheel';
+  SYMBOL_Spin = SYMBOL_SpinningWheel;
+  SYMBOL_StaffShop = 'staff shop';
+  SYMBOL_SwordShop = 'sword shop';
+  SYMBOL_Tanner = 'tanner';
+  SYMBOL_TrainingDummy = 'training dummy';
+  SYMBOL_Transportation = 'transportation';
+  SYMBOL_Underground = 'underground';
+  SYMBOL_WaterSource = 'water source';
+  SYMBOL_Water = SYMBOL_WaterSource;
+  SYMBOL_Weave = 'weave';
+
+(*
+LoadSymbolBitmapColor
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+
+    function LoadSymbolBitmapColor(Name: String): Integer;
+
+Loads Bitmap and Color of a Specific Symbol.
+
+.. note::
+
+  by Stupid3ooo, WT-Fakawi, Bebemycat2, Ron, and StarBlaster100
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function loadSymbolBitmapColor(Name: string): Integer;
+begin
+  case LowerCase(Name) of
+    SYMBOL_Bank:             //done
+      begin
+      {
+       SymbolBitmap := BitmapFromString(7, 7, 'meJzzu/GZNbveD0wuXLYSgvyQBIHo' +
+        '4LGTQOSyfC9QBIIg4kCVQEGIOLIhcMXIglhVwg1ENhMArCpSCw==');
+      }
+        SymbolBitmap := BitmapFromString(4, 4, 'meJzjTisKufyMO62IG8yAICDba9EG' +
+          'CANIIrMBQuIY8w==');
+        result := 5559270;
+        //result := 2216175;
+      end;
+    SYMBOL_MiningSpot, 'mining site', 'mine':                //done
+      begin
+        SymbolBitmap := BitmapFromString(6, 9, 'meJwrr60vR0IHj51cuGxlUnoWXATI' +
+        'BQra5S4wT5+YW1QKFAmNjgNytWObpf3LHFw9gYp9g0KBXDH7QqBii' +
+        'HagCJ9lEoQL1A4UgbAhXGQRCBeC0LgQBAAGFlo9');
+        Result := 5077645;
+      end;
+    SYMBOL_Transportation:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33303534347074353' +
+          '4B73032219E34763173348592A62E666E66A6C8B20660330D904C' +
+          '86A841D6858BC454896C3EA6C9C498899FC465B291A3B193910B3' +
+          '124A69910715C269317CEC866229B0C00B3496273');
+        Result := 2650848;
+      end;
+    SYMBOL_MagicShop:       //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 7, 'meJxT1/9/8NhJdf3/qkv/L1y2UqHi' +
+        'vzpYBMIAkkBxOBuoAMKAiMOlIBrhgnApuHpkQVbt60BxIAk3CiLIz' +
+        'nMSKC6X+xTIAHIhIhBBIAIA+c9XNA==');
+        Result := 1714669;
+      end;
+    SYMBOL_WaterSource, 'water':   //done
+      begin
+        SymbolBitmap := BitmapFromString(5, 8, 'meJx72Vf1JtcXgg4eOwkk3587DyQf' +
+        'ugstXLYSyIZzgQhZFsKFs9EQUC/QNCAJR0AuMgIAkXBHJg==');
+        Result := 16279593;
+      end;
+    SYMBOL_Furnace:  //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 7, 'meJzTdUpTqPiPjHSd0hxcPXXB4qpL' +
+        '//P8B5FEimM1BxMBxXGhhctWYkUArMdH7A==');
+        Result := 3508223;
+      end;
+    SYMBOL_Anvil:    //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA95CF510AC0300803D02B' +
+          'A59DE0F2D9F6FE771A2CFB10CAC4FE04117C443434D8E4C2EA4A8' +
+          '7DFCE8B06FB369AF38C025E139B5C7194EA106F73B9D2991C187D' +
+          '3773F92F2BE6A91CBFD05CE9FC00C9DB6164');
+        Result := 4012591;
+      end;
+    SYMBOL_RareTrees, 'tree':  //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 9, 'meJxjDuRnzhdg7xFGRsxYBfMF0AR5' +
+        '5stiCmLVDlIJFkQTBwkG8i9ctlJQxwlIQgQPHjsJZIMEDYKBJIQLJ' +
+        'CEIohLCBgDteDqV');
+        Result := 494860;
+      end;
+    SYMBOL_FishingSpot, 'fish':  //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 7, 'meJw7eOzkQRzo/3kDECqTRBcsk4Qj' +
+        'hHiZJIeAAprUjmU8D92FgAguCOGioTPyXEC0cNlKIAnUBeFCRCAIK' +
+        'AgA+VZgSw==');
+        Result := 16743189;
+      end;
+    SYMBOL_Cookery, 'cook':
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAA590410AC0200C04BFB41' +
+          'B4D5B8F2ACDFF9FD4D25008885EBC0C21EC0E211010EC6CD66EE7' +
+          'C1A4F869A9524AD74BB2CF3139233E2782D9BB713F52CE37A1D98' +
+          '4A823D7E678A15FAE4CC4EDDDB5B9B258D932BB61C67DF3FACF0F' +
+          '3E40632F');
+        Result := 1194607;
+      end;
+    SYMBOL_Quest:      //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 6, 'meJx7NbPv/aaNL/uqgOjVzL6DwfZA' +
+        'cuGylUASKAKRgghCEEQlBL3J9YUjiCxQPZANVA8XgQgCSYgyuPkQQ' +
+        'Yg4hAGUAooDAEDRW5o=');
+        Result := 14908517;
+      end;
+    SYMBOL_mill:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAB58F3B0AC0300C43AF24A' +
+          '75D3CD621BEFF9102D52228822C5D1EC69F878C8140CCA8AEE5D8' +
+          'DD0BA97C223BED3E5E27C48CBAE7B878ABF54987B5337FB3E995D' +
+          '26DF2973F323B33C9A9D26573A47303B52569D1');
+        Result := 655103;
+      end;
+    SYMBOL_Dungeon:     //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 8, 'meJw7eOykuv7/kMj/QBKIOHhXLVy2' +
+        '8iBYEI7wCy5ZhxDJzPsPEYSIo4nAEVAEWRBiApBEVoNmCwDcXWPX');
+        Result := 2698232;
+      end;
+    SYMBOL_weave:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33303230343074367472' +
+          '73724526CD0C4C0C8CDC1C0D2DDD2C5D8DDD8C4C0CA0E2103644D' +
+          'CDCD1CCD4C40CC246D66B0036D300AFC9986622B3293119979B21' +
+          'ECC1E966649793EA6600F03E685F');
+        Result := 926783;
+      end;
+    SYMBOL_Pottery, 'pot':              //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA8DCE5B0AC0200C44D1' +
+          '2D6592691B3F2DD5FD2FA98F08554A410217C9C73102B966673E7' +
+          '64617AA094DA16349D4B15E96621EED05C13B5F19F9DEFF178E14' +
+          '3F869CE8479A9267FCFEE619992A55100D7F8519CC37562DBDD6F' +
+          'AECE76FEEFD55D5A50983FFBCB76A807CE5139EC460AC');
+        Result := 270148;
+      end;
+    SYMBOL_SpinningWheel, 'spin':   //done
+      begin
+        SymbolBitmap := BitmapFromString(6, 7, 'meJxbuGzlwmUrtWObgeTBYyfN0ycC' +
+        '2UAGRATChnDhJFCczzIJWRCiWNq/DMiFkECumH0hkAEhIYJwvRC7g' +
+        'LoAPw5FPA==');
+        Result := 2710649;
+      end;
+    SYMBOL_guide:             //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33303400424717470B27' +
+          '33086961E168E4EC64E866E264EE0C614349170B0B4B336411143' +
+          '56059880906860848C06488995432193F89CB47F84D869A8FE14E' +
+          '8869F8CD24C664E2431E533DC44C00EBA66771');
+        Result := 13345416;
+      end;
+    SYMBOL_shop, 'store':      //done
+      begin
+        SymbolBitmap := BitmapFromString(5, 8, 'meJzjUNHkACPb5CqLwCwOAQUIEjQI' +
+        'BnJZeGLhXCACcoFIzL6Q2aUPSCol7ldOngNkQxDxXKBeAPQ9Hfk=');
+        Result := 3176384;
+      end;
+    SYMBOL_Shield:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DACDCC3112C0200844D12' +
+          'B611484920DE4FE47CA8CA63085BDCD9F6DF6511614BE233CEADA' +
+          '16ECFC9553204DD36055D92EF56E2AFD99DB038EDF97864927C8C' +
+          '339595EFD9D3CCD9DFC02CAE26976');
+        Result := 9542286;
+      end;
+    SYMBOL_altar:        //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33703574323475767171' +
+          '7431B670B574B2A4888498630036D300C96464F3DD880610F58E2' +
+          'E4E8E4E501297C9C49B8F69267E37936732B25EFC26131F1AB84C' +
+          '06006E357035');
+        Result := 9542286;
+      end;
+    SYMBOL_arrow:             //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 8, 'meJw7eOzkQRiSy33qm+CUXuULZCAj' +
+        'oCAmAirDKg5EGgbGyAgiiNXMhctWwhFQEKL+IKqTgCJAEgCFbEfB');
+        Result := 2782945;
+      end;
+    SYMBOL_bar:      //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJxT3/HZcMUTIDIuP2KXu8A8feLB' +
+        'YyfVYYIuy/cCBRcuWwkUJ0YQKIJVEKgYUzsQYSoD2g4A+OlQNw==');
+        Result := 4433385;
+      end;
+    SYMBOL_underground:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33303400422743' +
+          '272727134CD2D5C2C8D4D01993B47033303630B434B474B2C4A2C' +
+          'BC01001E96FB28B9BA3A10516335D5DCC8C4D9D293119D97C62CC' +
+          '24D5646412622631260300830265FA');
+        Result := 1844712;
+      end;
+    SYMBOL_tanner:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA8D904B0EC0200805AF0' +
+          '4F85F4ABDFF991AFB162521D26E26462703919898BAAACEAB82B5' +
+          'E5C4ABB52289FED316E8699229DBE63ECB8AA7F8D75319843374C' +
+          'C594B4FC2C5177003C7FAE0A90CC2C92ACA392E5B3FDED9F22DCB' +
+          '47D9FFF30DFAEB6308');
+        Result := 3363443;
+      end;
+    SYMBOL_churn:                  //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJwTNAjms0yS9i+Do4PHTgrqOAki' +
+        'i8e1AQUhDCBSTp4DJMtr64GCSelZuUWlEAQU8Q0KBQoCSWQENdMgG' +
+        'ILgxi5cthLKBhsLZABNAAoCAEWXNlQ=');
+        Result := 1720403;
+      end;
+    SYMBOL_house:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA9D90410AC0300804BF6' +
+          '41B2DF66863F3FF2715BA978560A0BD0C32E2B228F766123D53BB' +
+          '33E5F5A08DC3ECD434550779BBBE9D3D1290C9846FDEC63EC02A8' +
+          '13D9B7F5C77AE9AF337B86DE4A5E1E0D7649EABE4F9F601C37765' +
+          'F5');
+        Result := 4740173
+      end;
+    SYMBOL_AxeShop:     //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 8, 'meJw7eOzkwWMny2vrfYNCHVw9Fy5b' +
+        'eRAsAhFMSs8KjY4DSiGLA7lAQaAUUL15+kS4OAQF1S+0y10AlMotK' +
+        'gWagCwIVAzUCzEWKBjbvgEiCDQcYiCQhAhK+5cBBYEIaA7EVUBlYv' +
+        'aFEEGImRA2AG3gZpU=');
+        Result := 6841956;
+      end;
+    SYMBOL_CookeryShop:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA8DCE410AC0300804C0' +
+          '2F194CDCE42896FCFF49856E0F421072D983BA83D2C56485C608E' +
+          '4C484236CA341999CBBFA7020A6CEFEDF74339B9CF3463E530A99' +
+          '4993ADDCA55C6D6F647E955B959CB757F22754F2F9ED8DBCCCD01' +
+          'B137B3CDAB290E76797E60B5A736560');
+        Result := 7565679
+      end;
+    SYMBOL_windmill: //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJw7eOzkwWMnef7/h6CFy1YCuap+' +
+        'whAuVgYE4VEANASIkM2EGAs3GaIGIoJpOwDQsFT/');
+        Result := 1245183;
+      end;
+    SYMBOL_minigame: //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJyLTboWC0ZOrtchDHaek3ARiCCy' +
+        'CIREUwNBmsZnISgWZiaQDVSJLAIRhIijCcJtBwDL+UPh');
+        Result := 4670928;
+      end;
+    SYMBOL_furtrader:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA3330313033B0743' +
+          '67636753647262D2C4C8C0D2C31497357A07A0B64D2D1D8D1D4D1' +
+          '1C4242F41A80CD34C06132A6F9C49849BCC9B8CCC76526792623B' +
+          'B16BF7A52438378F321660200DE126419');
+        Result := 607112;
+      end;
+    SYMBOL_archeryshop:        //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAA5CE490AC0201' +
+          '044D12BB5560F71E910EF7FA4403A0B8318846CFEAA78143129A5' +
+          '8A2AD5769A9A29172F8385CD9B91253F1BBA4DDA964733A91A07D' +
+          '7FEC8A366A702C59D51DB9215140BF77804BCCC2E0D6136E7AE64' +
+          '37477FF5F35BBE0049C36545');
+        Result := 4945565;
+      end;
+    SYMBOL_StaffShop:   //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 6, 'meJw7eOzkQRiyy12gnDxn4bKVB/EK' +
+        'wkXggkCulOc0ZBFMNViNAgADY1A9');
+
+        Result := 4286358;
+      end;
+    SYMBOL_ClothesShop:       //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJwLm2wTNtlG1U84DMwAooPHTnq1' +
+        'GwARXATCdspWhgtCFAARXBDCXrhsJVZBoJlo2uGCyIohggAIxDpn');
+        Result := 5935156;
+      end;
+    SYMBOL_FarmingSpot:                //done
+      begin
+        SymbolBitmap := BitmapFromString(6, 7, 'meJw7eOzkQRjis0xauGzlQVQRQYNg' +
+        'NC5cDZwLROW19blFpRATIAqS0rOAIkASrh7IBqLQ6Di4CABdG0gf');
+        Result := 12632256;
+      end;
+    SYMBOL_Apothecary:   //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 6, 'meJw7eOzkwWMn/6TPAKKHTuULl608' +
+        'iCQCEQQiuMj7c+fhgpsl/dFE4ILIeoEiQAQ0AVkNEAHtAgAaT0wM');
+        Result := 16737938;
+      end;
+    SYMBOL_SwordShop:  //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 7, 'meJw7eOzkQRiaNHfRrSc/V23clpSe' +
+        'hSa4cNlKIAMonuPkgCkIZADFgQhNEIiAiuFakAWb2rvKa+shuoBci' +
+        'CAQAQVzi0ohuiBSEAQAl6Zn8Q==');
+        Result := 10067100;
+      end;
+    SYMBOL_PlatebodyShop:       //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA8DD0410AC02' +
+          '00C44D12BA56832761902BDFF910A9DCD8055DCFC850C4FD1BA85' +
+          'DDD5CA0B6CF48818F1E042633190A87D55B0CF349167534FD459D' +
+          'DBB92596EB2A527DC3DFC4FFE6EE446F7EC4A66CF65DDEFDFAC3D' +
+          '97E77F7E014609646B');
+        Result := 8157816;
+      end;
+    SYMBOL_ScimitarShop:      //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA9DD04D0AC340' +
+          '0805E02B8D7FCF71399349EF7FA4A6B8A825109A203C5CE887D8A' +
+          '81D356962CA3FD9475FDD96AE581012880405E267A6D1B7CE0277' +
+          '61DBAB56CDEC6963A2F14CAE5AA69B0FF76ADE95315CBDA59FBB2' +
+          'AEAAAF50367F35A0630711C0AB697B1B9E9678223F3DAACF21B5C' +
+          '65625E');
+        Result := 8752522;
+      end;
+    SYMBOL_GemStall:       //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAA58E4B0AC0300844' +
+          'AFA4F96719F3B9FF919A640A154A3729836F21FA18629A1196201' +
+          '6ECCD772FE0E03AAA057B32F350338DF50B6A03F1932FF34DEDDC' +
+          '1BED0433E7900FCD835C76011B89BFCDAFB6AEAEFB504FCC6013F' +
+          '6C4DA8C9E306B1653E29C4D6DBE0027B7630B');
+        Result := 1777896;
+      end;
+    SYMBOL_SilkStall:            //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA333034004227432' +
+          '733276364D2C2C4C0D0D488181253AF81210262CA42484B67030B' +
+          '33476248DA996C696869664994C9C48706B299F84D36733630347' +
+          '62486849889CB6400B4306127');
+        Result := 5374340;
+      end;
+    SYMBOL_PlateskirtShop:     //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA3330340042' +
+          '2743273327634CD2D9D8CCC2D9009974323235763282909686966' +
+          '696587419182220F126239B4F9EC9B8DC8929423B93315D4E2034' +
+          '709843BCC900457662CC');
+        Result := 12609731;
+      end;
+    SYMBOL_Agility:      //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'beNpjYGRgYDwABkAGEM2fPx' +
+     '+NAWHDFRyAAbgssgIIA1Mxsnq4GjyK0czHFMcUmQ8G6I4EAIrAWyc=');
+        Result := 65536;
+      end;
+    SYMBOL_TrainingDummy:        //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAA5CC5B0AC43' +
+          '00805D02D69468DF9BC6DEAFE97D401032384F92845B8888F434C' +
+          'DF0210386A6A6B9D3833270E0F5F5B7371D2FD2B93F857FFE4D4A' +
+          'AE962D402E738ED1A0768E08D5CE743FA14A49CB9DF3C95CDA4B3' +
+          'A6EC1FB73E6BBE974D6572403C74F9AB2F9769DEA32D69B5');
+        Result := 1586538;
+      end;
+    SYMBOL_FoodShop, 'food store':          //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJwLql+YPX8PBMW2bwiqX2ibXAUX' +
+        'gSCsgkCRSXMXYQouXLYSWQRoJkQQyEAW1I5tBgra5S4AGg5EEKu9i' +
+        '7uk/csAJFlOiA==');
+        Result := 7837098;
+      end;
+    SYMBOL_FishingShop, 'fish store':  //done
+      begin
+        SymbolBitmap := BitmapFromString(9, 8, 'meJw7eOzkQTBiStgJRAuXrQQiIBdC' +
+        'YorDpTDFdyzjAbKxikMQUFw5ec5BmI3IUkBxCILrghsIZEDEMQ1Ed' +
+        'g8cQVQCANLAhRw=');
+        Result := 9734280;
+      end;
+    SYMBOL_Jewelery:        //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 8, 'meJw7eOzkwWMnnVyvaxqfBaKDYC4Q' +
+        'Ff//x/v0EwQB2RAR0SuvXZbvXbhsJZAEsiFqICJABFQDZEO0wEUgC' +
+        'KiYac2h/Isf4SJANlBQOXkOxBxk8yHmANkQBDEfAKWIbvk=');
+        Result := 4829105;
+      end;
+    SYMBOL_CraftingShop:     //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA95CEC10AC020' +
+          '0C03D05F8AD3D979AC71FFFF4BC27A29C8A45E420EE111240C748' +
+          '2648B24BEFDD5B36414149626F793E45D3708CBDEACA98EAA662A' +
+          '94DA2C4FE5D5F49A374FE53F73FF642F9B693D627A79020EC868E' +
+          'C');
+        Result := 3159851;
+      end;
+    SYMBOL_Portal:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAA5D04B0AC0300805' +
+          'C02B69D2D6B8D47CEE7FA4045CD442ED22457848D0410208AB549' +
+          '4942D2F4858DAA9B05A6A4895251DB93FD2DE6DC6E6BD0078D7B7' +
+          'A98374A0CFC86761E2173977C052F764DB8DE43F375B46F2DE3F7' +
+          'BD3CB13F26764CE');
+        Result := 15287202;
+      end;
+    SYMBOL_MakeoverMage:     //done
+      begin
+        SymbolBitmap := BitmapFromString(8, 6, 'meJybdezDrGMfsufvsctdAETM7FwH' +
+        'j50Eolmo4nApIAlEQHEIAyK+cNlKrOrh4hCVmOLI9gIFgQgAfKRDlQ==');
+        Result := 10340324;
+      end;
+    SYMBOL_MaceShop:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA9DD14B0A80300C04' +
+          'D02B4D4CF3E93226DEFF4A82155404296EB21A1E330484C29AC8C' +
+          'CFE7DAD7BB89A38D9A6696EA2A4A511888C4712878909D9521BB3' +
+          'A6086368B248C969FE932F7381546BE477ED6DCEC80F135C64DFD' +
+          'A8C7CDFFEEE39F39161EE1ADD6893');
+        Result := 8817273;
+      end;
+    SYMBOL_HairDresser:     //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 7, 'meJw7eOzkQTBiZucCIjgbTi5cthKZ' +
+        'AUdALkQETiKrhHPhUgdhFsEVIIsgIwCqTkzJ');
+        Result := 13225152;
+      end;
+    SYMBOL_MiningShop:              //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33B03430313074' +
+          'B670367672C5241D2D1C8D2DA1A40158258474737473333285909' +
+          '8BA9055E232199944360DBFF9C49B8C6926B22F20E21011FC263B' +
+          '5998BAC0447099499EC9C498896C022E9301172B6823');
+        Result := 10396584;
+      end;
+    SYMBOL_SilverStall:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA958E410AC0400' +
+          '803BF14D1823D6E6DF3FF2715EA4510A17B09C198211008347031' +
+          'A4AB4169E2E6EA071F06EFF4F5DE5BF89818C8D9ADB4AE13FF0FB' +
+          '976FBF2F4F9B370726D90FBB64977C913BFA6D3E61755066363');
+        Result := 8749956;
+      end;
+    SYMBOL_SpiceStall:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA9DD0C10E80200C' +
+          '03D05FEA06883B22D2FFFF2413F140B240D44BD3C3FA0E8340102' +
+          'A0E5619D3984CAC714B50B224D1A72B9BEEBDF71BBFC56DC2C96F' +
+          'CCB5EFE5A9F9D1F77244609C66B67CE6B6CE0263997EE39FDFCD5' +
+          '1BE002BE06493');
+        Result := 157167;
+      end;
+    SYMBOL_FarmingShop:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA95CE410E80200' +
+          'C44D12B4D5B405C160CF73F92C461D1C498E0E6D374F1280402EB' +
+          '68A30B6B559340150D25F5F95ED55392D556735365BBA96B661DE' +
+          '7F025E031F192A9D1E75CAA1D52A2CFD2E42FFB7234BFE478FF8E' +
+          '9CE7128332E72FEDAF1C2FDF91A319E51BD93562F0');
+        Result := 1918090;
+      end;
+    SYMBOL_SlayerMaster:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAA5D04B0AC030' +
+          '0804D02B8D89A5CD320D9DFB1FA9BF8D622D8582B810E6210381A' +
+          '00EAC1CA2A85461E3F34C1CB366FBCE7634F6533C4C04D9FAEE62' +
+          '84ECF22EDB3F9D53B89525CADF7F4E1BB864B77FB411B359C351D' +
+          'E019F8C655C');
+        Result := 7666933;
+      end;
+    SYMBOL_Herbalist:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA7D8E5D0AC0300883' +
+          'AFA4FDD33E5AC6EE7FA415C258C0D10A22267E8DA8EC5A253C9CB' +
+          'B5EF5166D7D4C89DE6DE9C45C6DF8BB1733FBBB15FD0A1B10B001' +
+          '99F9CCC42C5AB77B16DFEF4C86BF370B355C653272428513EA990' +
+          'C3FF3393954EEFC2327CFE4CCCFC933136A263F5CC35F29');
+        Result := 682309
+      end;
+    SYMBOL_CandleShop:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33303400422723' +
+          '470B470B4CD2CDD0C2D5C01042BA9ABB9A9A3A218BE0D26560888' +
+          '0B8D4209B8F6CB2A591051040488A4C367035753571317136B134' +
+          '8390B8CC1CEA26030022F6653F');
+        Result := 6022631;
+      end;
+    SYMBOL_SawMill:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DAB58EB10DC03008045' +
+          '70A600C2EFDF1FE33450A299088A53469AEB08FD3D3498D7861C9' +
+          '3A2A4D3ABA0FF1E99619EFBB2BBA9B54CA0A157D69C66FED87FFA' +
+          '55CD7663FF7C30120F87173EEEFCA266DF2431F0AB6E11D3C770C' +
+          'A76EBE00CD48658B');
+        Result := 8882835;
+      end;
+    SYMBOL_KebabShop:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'beNpj4OBg4Dh37BgQZTtJRDFwZM8' +
+          'xhKD/mpo9DAwgEScJiAKgSohioIjEFJBKIAlEQJUQxcjqkRUDVULE' +
+          'gSQQzUl2ArKB5N7qKCBj6dKlyIoh4lhJNMWY6iEIZCNYJUgxALQIU' +
+          '2Q=');
+        Result := 7316427;
+      end;
+    SYMBOL_ShortCut: //done
+      begin
+        SymbolBitmap := BitmapFromString(7, 8, 'meJwzXcBtCkapa30OHjsJQaYwQWTx' +
+        'hjs9aOJAEiIFYcMR3BxkcayGY4ogq0RGADCjVB8=');
+        Result := 5286667
+      end;
+    SYMBOL_HunterStore:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA95D0510AC3300' +
+          '806E02BC558CDEFA309F6FE47DAC08E3942A143F041934FB1517B' +
+          '87C78447CD76BA591CCA445015EE5DD641C459F9D4F554C997F56' +
+          'FA36FEC3204819E663A77F25CAE633C972F01BC48AAB9FBB9C373' +
+          '79DFB6E69C98DDE1E0813FAE1106FCF897564C992A6277F20B925' +
+          '96443');
+        Result := 1261916;
+      end;
+    SYMBOL_HunterTraining:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA8DCF410A00' +
+          '210C03C02FC52D76E9B18AFFFF92B0EB2150025E728876AC78916' +
+          '8D3678C55D360F6F89FE919211B9EC267A2C87CB32F6FFD08EC70' +
+          'CF6FDDC8D554597F712FF3AC3AE546C96A1FE573B2BC0197F063A' +
+          'B');
+        Result := 10398118
+      end;
+    SYMBOL_Sandpit:
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'z78DA8DCF4B0AC0300' +
+          '804D02B8DA9F9B84CA4BDFF91526A16820D64330CA20F0481208A' +
+          '51B4FA1C4998CBD07EE5D5EFA654B34F9BC75B7C2682BC336D72E' +
+          '247B921239137577766ECB629E9BD959D5CC14CCF8F1FBE88A665' +
+          '8794BE952DFDFE49DA95972794856206');
+        Result := 7717352;
+      end;
+    SYMBOL_PetShop:
+      begin
+       SymbolBitmap := BitmapFromString(15, 5, 'beNpj42Nm4zt87GxnbWFhUkh' +
+         'skCsQ7dm7CYIgXKB4dUkYUA1QJVwxULyypllFSQMoBUEQLlAcyF68' +
+         'bA1ccV1hBlAQKAXkQoxdOL0LyMalGCgLUQYRhOsCOgOI0BQfWt0JQ' +
+         'TomBhAEVAnkAo0FGg5SDADYtlua');
+        result:= 11713980;
+      end;
+    SYMBOL_Range:     //done
+      begin
+       SymbolBitmap := BitmapFromString(6, 7, 'meJwTsy8UAyPl5DlA8uCxk8zsXMhI' +
+        'UMcJIgVEfJZJggbB5IksXLYSaDiQhCMgFwCsFSbn');
+        result:= 1458033;
+      end;
+    SYMBOL_RestingSpot, 'rest':
+      begin
+       SymbolBitmap := BitmapFromString(15, 5, 'beNptjUENwDAMAw2lU' +
+         'AylUAyljwEZtFryukVd7xHpYisBzF2wjnEdFfjKWCTdtJY9exfJpJ' +
+         'u6kKVhAxeNyj76f/ReM5IceVZ9yhPESE1p');
+        Result := 65536;
+      end;
+    SYMBOL_Runecrafting, 'rc', 'rcing':            //done
+      begin
+        SymbolBitmap := BitmapFromString(15, 5, 'meJxjZGA4cOBAREpJY3M7U+tPxu3' +
+          'fgAjICAmJBCKIOJABVMPIwMAIVgwR5/T8C1QGIZkFvsPVY1UMJOGG' +
+          'A7VA1GMq1rawgQgCFQCVwdUD9QLFgbLIilV0teCGABFcPcRwoCxEM' +
+          'QBG91kH');
+        result := 542972;
+      end;
+  end;
+end;
+
+(*
+GetSymbolColorIn
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getSymbolColorIn(var rx, ry: Integer; Name: string; xs, ys, xe, ye: Integer): Integer;
+
+Returns the Color of the Chosen Symbol, Searching in a selected area
+of the Minimap
+
+.. note::
+
+  by Starblaster100 based off of the ideas of Stupid3000
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getSymbolColor(var rx, ry: Integer; Name: string): Integer;
+var
+  TheColor, c, x, y: Integer;
+  acc: Extended;
+begin
+  TheColor := loadSymbolBitmapColor(LowerCase(Name));
+  if (TheColor <> 0) then
+  begin
+    findDeformedBitmapToleranceIn(SymbolBitmap, x, y, MMX1, MMY1, MMX2, MMY2, 50, 0, True, acc);
+    if (acc > SymbolAccuracy) then
+      repeat
+        c := c + 5;
+        if findColorTolerance(x, y, TheColor, x, y, x + 15, y + 5, c) then
+        begin
+          Result := GetColor(x, y);
+          rx := x;
+          ry := y;
+        end;
+      until (Result > 0) or (c > 70);
+  end else
+    warn(Name + ' is not a valid name.', WT_CORE);
+  try
+    freeBitmap(SymbolBitmap);
+  except
+    Result := 0;
+  finally
+    Exit;
+  end;
+end;
+
+(*
+FindSymbol
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function findSymbol(var rx, ry: Integer; Name: String): Boolean;
+
+Finds a minimap Symbol and returns a Boolean if True.
+
+.. note::
+
+  by Stupid3ooo
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findSymbol(var rx, ry: Integer; Name: string): Boolean;
+begin
+  Result := (getSymbolColor(rx, ry, LowerCase(Name)) > 0);
+end;
+
+(*
+FindSymbolsIn
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function findSymbolsIn(var AnsTPA: TPointArray; SymbolName: string; x1, y1, x2, y2: integer): Boolean;
+
+Finds a symbol in multiple places within the search coords. Results
+true if at least 1 symbol is found.
+
+.. note::
+
+  by lordsaturn Fixed by Bad Boy JH
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findSymbols(var AnsTPA: TPointArray; SymbolName: string): Boolean;
+var
+  CTS, Col, Hi, i, x, y, fx, fy, L: integer;
+  aP: T2DPointArray;
+  P: TPointArray;
+  Pt: TPoint;
+  acc: Extended;
+begin
+  Col := getSymbolColor(fx, fy, SymbolName);
+  if Col = 0 then
+    Exit;
+
+  cs_findColorsTolerance(P, Col, 0, AREA_MM, cs_CTS);
+  aP := clusterTPA(P, 10);
+  Hi := High(aP);
+  loadSymbolBitmapColor(LowerCase(SymbolName));
+
+  SetLength(AnsTPA, Hi+1);
+  for i := 0 to Hi do
+  begin
+    Pt := aP[i].midPnt();
+    if pointInTPA(Point(fx, fy), aP[i]) then
+      acc := 1
+    else
+      findDeformedBitmapToleranceIn(SymbolBitmap, x, y, Pt.x-15, Pt.y-5, Pt.x+15, Pt.y+5, 70, 0, True, acc);
+    if (acc > SymbolAccuracy) then
+    begin
+      AnsTPA[L] := Pt;
+      Inc(L);
+    end;
+  end;
+  Result := L > 0;
+  SetLength(AnsTPA, L);
+  freeBitmap(SymbolBitmap);
+end;
+
+(*
+FindSymbolsMultiIn
+~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function findSymbolsMultiIn(var aTPA: TPointArray; Symbols: TStringArray): Boolean;
+
+Finds multiple symbols the specified area. Results true if at least
+1 symbol is found.
+
+.. note::
+
+  by Nava2 & NCDS
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function findSymbolsMulti(var aTPA: TPointArray; Symbols: TStringArray): Boolean;
+var
+  gTPA: TPointArray;
+  I: Integer;
+begin
+  for I:=0 to high(Symbols) do
+  begin
+    if findSymbols(gTPA, Symbols[i]) then
+      Result := True;
+    aTPA := combineTPA(gTPA, aTPA);
+  end;
+end;

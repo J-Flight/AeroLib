@@ -14,8 +14,10 @@ type TPlayer = record
     WorldList : TIntegerArray;           // * List of preferred worlds
     Level     : array[0..24] of Integer; // * Levels of all skills.
     Active    : Boolean;                 // * Set to True if Ok, False if Lost.
-//  Model     : TEntity;                 // -FUTURE UPDATE-
+    Model     : TEntity;                 // * Player's specific entity
+    ModelSet  : Boolean;                 // * Has the player's model been set
     Status    : string;                  // * User Status
+    Random    : string;                  // * Current random event
     LampSkill : Integer;                 // * Preferred skill to be increased upon upon XP reward
     Worked    : Integer;                 // * Time User has worked
     Booleans  : array of Boolean;        // * For reports, etc.
@@ -61,20 +63,81 @@ const
   SKILL_COMBAT        = 23;
   SKILL_TOTAL         = 24;
 
-  LS_LOGGEDOUT        = 0;
-  LS_LOGGEDIN         = 1;
-  LS_SPLASHSCREEN     = 2;
-  LS_WORLDSCREEN      = 3;
-
-function TPlayer.getLoginState(): Integer;
+function TPlayer.inCombat(): Boolean;
+var
+  B   : TBox;
+  Pnt : TPoint;
 begin
-  if (getColor(427,489) = 16777215) then
-    Exit(LS_LOGGEDIN);
-  if (getColor(400,335) = 16777215) then
-    Exit(LS_SPLASHSCREEN);
-  if (getcolor(115,14) = 1800605) then
-    Exit(LS_WORLDSCREEN);
-  Result := LS_LOGGEDOUT;
+  if Self.ModelSet then
+  begin
+    B      := Self.Model.FullTPA.getBounds();
+    Pnt    := Point(B.CX, B.Y1);
+    B.X1   := Pnt.X-25;
+    B.Y1   := Pnt.Y-25;
+    B.X2   := Pnt.X+25;
+    B.Y2   := Pnt.Y;
+    Result := foundHPBarIn(B);
+  end else
+    Result := foundHPBarIn(intToBox(220, 120, 295, 168));
+end;
+
+Procedure definePlayerModel(maxW, maxH: Integer);
+var
+  b     : TBox;
+  T     : Timer;
+  P,P2  : TPoint;
+  X,Y   : Integer;
+  tTPA  : TPointArray;
+  pCols : TIntegerArray;
+label
+  Start;
+begin
+  Start:
+  showMessage('Hover the mouse over your players chest for 1 second');
+  wait(500);
+  T.start();
+  repeat
+    if isMouseInClient() then
+    begin
+      P := getRealMousePnt();
+      brakeMMouse(P, 0, 0, False);
+      if not pointsMatch(getRealMousePnt(), P) then
+        T.start();
+    end;
+  until((T.timeElapsed > 1000));
+
+  if isMouseInClient() then
+    P := getRealMousePnt();
+
+  showMessage('Hover the mouse over your players legs for 1 second');
+  wait(500);
+  T.start();
+  repeat
+    if isMouseInClient() then
+    begin
+      P2 := getRealMousePnt();
+      brakeMMouse(P2, 0, 0, False);
+      if not pointsMatch(getRealMousePnt(), P2) then
+        T.start();
+    end;
+  until((T.timeElapsed > 1000));
+
+  if isMouseInClient() then
+    P2 := getRealMousePnt();
+
+  Me.Model.define(P, P2);
+  Me.Model.Update();
+  b := Me.Model.Bounds;
+
+  if ((b.Width > maxW) and (b.Height > maxH)) then
+  begin
+    showMessage('Inaccurate selection, please try again');
+    wait(1500);
+    GoTo Start;
+  end;
+
+  Me.ModelSet := True;
+  warn('Player entity defined', WT_CORE);
 end;
 
 (*

@@ -1,0 +1,709 @@
+{
+=======
+AntiBan
+=======
+}
+
+(*
+randomRClick
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure randomRClick
+
+Performs random right click to stay active.
+
+.. note::
+
+    Author: phantombmx/EvilChicken!, idea by Naum
+    Last Modified: Unknown
+
+Example:
+
+.. code-block:: pascal
+
+    randomRClick;
+*)
+procedure randomRClick();
+var
+  II,M,R : Byte;
+  Inv    : Boolean;
+  I      : TBooleanArray;
+begin
+  if not isLoggedIn() then exit;
+  M := MouseSpeed;
+  MouseSpeed := 7 + Random(25);
+  Inv := (getCurrentTab() = TAB_INV);
+  if (Inv) then Inv := ((not (getInvCount() < 1)) and (Random(3) > 0));
+  if (not Inv) then
+    mouseBox(AREA_MS, MOUSE_RIGHT)
+  else
+  begin
+    SetLength(I, 28);
+    for II := 0 to 27 do
+      I[II] := itemInSlot(II + 1);
+
+    R := RandomRange(1, 28);
+    while (not I[R - 1]) do
+      R := RandomRange(1, 28);
+    mouseBox(invBox(R), MOUSE_RIGHT);
+  end;
+  Inv := False;
+  if (Random(3) > 0) then
+    Inv := chooseOption('xamine');
+  if (not Inv) then chooseOption('ancel');
+  MouseSpeed := M;
+end;
+
+procedure hoverSkill(Skill: Variant; Click: Boolean);
+var
+  TP       : TPoint;
+  TheSkill : String;
+  tempTab  : Integer;
+  Skills   : TStringArray;
+begin
+  if not isLoggedIn() then Exit;
+  tempTab := getCurrentTab();
+  gameTab(TAB_STATS);
+  if VariantIsInteger(Skill) then
+  begin
+    if Skill >= 0 then
+      TP := skillToCoords(Skill)
+    else
+      repeat
+        Skill := RandomRange(SKILL_ATTACK, SKILL_CONSTRUCTION);
+        TP := skillToCoords(Skill);
+      until(getSkillMaxLevel(TheSkill) > 1)
+
+  end else begin
+    if(Lowercase(Skill) <> 'random')then
+      TP := skillToCoords(Skill)
+    else
+    repeat
+      Skills := ['attack','defence','strength','hitpoints','mining','smithing','woodcutting','firemaking','magic',
+                 'fletching','hunter','fishing','construction','herblore','agility','thieving','crafting',
+                 'ranged','slayer','farming','prayer','runecrafting','cooking'];
+      TheSkill := Skills[Random(Length(Skills))];
+      TP := SkillToCoords(TheSkill);
+    until (TP.x > 0) and (getSkillMaxLevel(TheSkill) > 1);
+
+  end;
+
+  case RandomRange(1,3) of
+    1: brakeMMouse(TP, 5, 5, True);
+    2: humanMMouse(TP, 5, 5);
+    3: missMouse(TP, 5, 5);
+  end;
+
+  if Click then
+  begin
+    fastClick(MOUSE_LEFT);
+    Wait(3000+Random(3000));
+    closeInterface();
+  end else begin
+    brakeMMouse(TP, 5, 5, True);
+    Wait(1000+Random(800));
+  end;
+  gameTab(tempTab);
+end;
+
+(*
+pickUpMouse
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure pickUpMouse();
+
+Acts just like you picked your mouse off the pad...
+then sets it back down.
+
+.. note::
+
+    Author: dark_sniper
+    Last Modified: Unknown
+
+Example:
+
+.. code-block:: pascal
+
+    pickUpMouse();
+*)
+procedure pickUpMouse();
+var
+  cx,cy,XX,YY : Integer;
+begin
+  if not isLoggedIn()then
+    exit;
+  getMousePos(cx, cy);
+  XX := cx;
+  YY := cy;
+  if(Random(2) = 0)then
+    humanMMouse(point(cx-3-Random(5), cy-8-Random(17)), 0, 0)
+  else
+    humanMMouse(point(cx+3, cy-8-Random(17)), 5, 0);
+  Wait(1131 + Random(358));
+  if(Random(2) = 0)then
+    missMouse(Point(XX+3,YY+8), 5, 9)
+  else
+    missMouse(Point(XX-3-Random(5),YY+8), 0, 9);
+end;
+
+(*
+SleepAndMoveMouse
+~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure SleepAndMoveMouse(Time: Integer);
+
+Waits for specified time and moves mouse around like bored human would.
+
+.. note::
+
+    by RsN
+
+Example:
+
+.. code-block:: pascal
+
+*)
+procedure SleepAndMoveMouse(Time: Integer);
+var
+  Moving: Boolean;
+  mx, my: Integer;
+  x, y, xv, yv: Extended;
+  gx, gy: Extended;
+  T: Integer;
+begin
+  GetMousePos(mx, my);
+  x := mx;
+  y := my;
+  if (Random(2) = 0) then
+    Moving := False
+  else
+    Moving := True;
+  gx := 130 + Random(500);
+  gy := 130 + Random(300);
+  T := GetTickCount;
+  repeat
+    Sleep(10);
+    if (Moving) then
+    begin
+      if (gx > x) then
+        xv := xv + 0.1
+      else
+        xv := xv - 0.1;
+      if (gy > y) then
+        yv := yv + 0.1
+      else
+        yv := yv - 0.1;
+      x := x + xv;
+      y := y + yv;
+      MoveMouse(Round(x), Round(y));
+    end;
+    if (Random(100) = 0) then
+      Moving := not Moving;
+    if (Random(30) = 0) then
+    begin
+      gx := 130 + Random(500);
+      gy := 130 + Random(300);
+    end;
+  until (Abs(GetTickCount - T) >= Time);
+end;
+
+(*
+randomMovement
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure randomMovement();
+
+Presses random arrow keys and moves the mouse. Able to press 2 keys simultaneously.
+
+.. note::
+
+    Author: Krazy_Meerkat
+    Last Modified: Unknown
+
+Example:
+
+.. code-block:: pascal
+
+    randomMovement();
+*)
+procedure randomMovement();
+var
+  I    : Integer;
+  Deg  : Extended;
+  Keys : TIntegerArray;
+begin
+ if not isLoggedIn() then
+  exit;
+
+ Keys := [VK_RIGHT, VK_LEFT];
+ I := Random(2);
+
+ if (Random(2) = I) then
+ begin
+   activateClient();
+   Deg := getCompassAngle();
+   Wait(100 + random(50));
+   KeyDown(Keys[I]);
+   Wait(500 + random(1000));
+   KeyUp(Keys[I]);
+   Wait(500 + random(1000));
+   setCompass(Deg);
+  end else
+   if (Random(3) = 0) then
+    sleepAndMoveMouse(1000 + random(200));
+end;
+
+(*
+compassMovement
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function compassMovement(MinMovement, MaxMovement: Integer; Return: Boolean): Boolean;
+
+Rotates the compass somewhere between MinMovement and MaxMovement.  Will return
+to original angle if Return is set to true.
+
+.. note::
+
+    Author: Nebula
+    Last Modified: Mar. 6th, 2011 by Nebula
+
+Example:
+
+.. code-block:: pascal
+
+    compassMovement(10, 30, true);
+*)
+function compassMovement(MinMovement, MaxMovement: Integer; Return: Boolean): Boolean;
+var
+  StartAngle,Movement : Extended;
+begin
+  Result := False;
+  StartAngle := round(getCompassAngle());
+  case Random(2) of
+    0: Movement := RandomRange(-MinMovement, -MaxMovement);
+    1: Movement := RandomRange(MinMovement, MaxMovement);
+  end;
+  setCompass(StartAngle + Movement);
+  if Return then
+  begin
+    wait(RandomRange(100,350));
+    setCompass(StartAngle);
+  end;
+  Result := true;
+end;
+
+(*
+boredHuman
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure boredHuman;
+
+Performs 5-15 times:
+    * Rotates the cam,
+    * Moves the mouse around MainScreen,
+    * If it finds IsUpText('option'), it will Chooseoption('Examine');
+
+.. note::
+
+    Author: WT-Fakawi, small edit by Harry
+    Last Modified: Unknown
+
+Example:
+
+.. code-block:: pascal
+
+    boredHuman;
+*)
+procedure boredHuman();
+var
+  i,x,y : Integer;
+  Deg   : Variant;
+begin
+  if not isLoggedIn() then
+    exit;
+  Deg := getCompassAngle();
+  for i:=1 to (3 + Random(11)) do
+  begin
+    humanMMouse(Point(Random(MSX2),Random(MSY2)), 0, 0);
+    if isUpText('opti') then
+    begin
+      fastClick(MOUSE_RIGHT);
+      chooseOption('Examine');
+    end;
+    case Random(6) of
+      0: SendArrowWait(((Random(2) * 2) + 1), 1000 + Random(200));
+      1: SendArrowWait(((Random(2) * 2)), 1000 + Random(200));
+      2: SendArrowWait(((Random(2) * 2) + 1), 200 + Random(200));
+      3: SendArrowWait(((Random(2) * 2)), 200 + Random(200));
+      4: SendArrowWait(((Random(2) * 2) + 1), 20 + Random(20));
+      5: SendArrowWait(((Random(2) * 2)), 20 + Random(20));
+    end;
+  end;
+  if (Deg <> 0) then
+    setCompass(Round(Deg))
+  else
+    setCompass('N');
+  SendArrowWait(0, 750 + Random(500));
+end;
+
+(*
+examineInv
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure examineInv();
+
+Chooses a random item in the inventory to examine.
+
+.. note::
+
+    Author: R1ch
+    Last Modified: Unknown
+
+Example:
+
+.. code-block:: pascal
+
+    examineInv();
+*)
+procedure examineInv();
+var
+  I,L      : Byte;
+  InvSpots : Array of Byte;
+begin
+  if (getInvCount() < 1) then
+    exit;
+
+  for I:=1 to 28 do
+    if itemInSlot(I) then
+    begin
+      setLength(InvSpots, Length(InvSpots) + 1);
+      InvSpots[L] := I;
+      inc(L);
+    end;
+  mouseBox(invBox(Random(Length(InvSpots))), MOUSE_RIGHT);
+  if (not waitOption('xamine', 375)) then
+    if (Random(2) = 0) then
+      waitOption('ancel', 375);
+end;
+
+(*
+randomFKeys
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure randomFKeys(Return: Boolean)
+
+Randomly changes tabs using fkeys to simulate a human pressing fkeys quickly.
+Will return to the original tab if Return is set to true.
+
+.. note::
+
+    Author: Ollybest
+
+Example:
+
+.. code-block:: pascal
+
+ randomFKeys(True);
+
+*)
+procedure randomFKeys(Return: Boolean);
+var
+  t,r,i : Integer;
+  Tabs  : TIntegerArray;
+begin
+ if not isLoggedIn() then
+   exit;
+
+ t := getCurrentTab();
+ r := RandomRange(1, 6);
+ Tabs := [TAB_COMBAT, TAB_INV, TAB_EQUIP, TAB_PRAYER, TAB_MAGIC];
+ for i:=0 to r do
+   FTab(Tabs[Random(Length(Tabs))]);
+
+ // not all tabs can be f keyed
+ if (Return) then
+   if InIntArray(Tabs, t) then
+     FTab(t)
+   else
+     gameTab(t);
+end;
+
+(*
+randomTab
+~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure randomTab;
+
+Switches to a random gametab, more of a 50% chance of switching to a more
+used tab. Will return to the original tab if Return is set to true.
+
+.. note::
+
+    Author: Ollybest
+
+Example:
+
+.. code-block:: pascal
+
+  randomTab(True);
+
+*)
+procedure randomTab(Return: Boolean);
+var
+  AllTabs,T : Integer;
+  TIA       : TIntegerArray;
+begin
+  if not isLoggedIn() then
+    exit;
+
+  T := getCurrentTab();
+  // every tab
+  AllTabs := RandomRange(21, 37);
+  // more commanly used tabs
+  TIA := [23, 25, 26, 30, 28];
+
+  if (RBool) then
+    gameTab(AllTabs)
+  else
+    gameTab(TIA[Random(Length(TIA))]);
+
+  if Return then
+    gameTab(T);
+end;
+
+//by Home
+function areaToBoxArray(const AreaX1, AreaY1, AreaX2, AreaY2, Width, Height: Integer): TBoxArray;
+var
+  AreaW,AreaH,
+  BoxX,BoxY,
+  x,y,i : Integer;
+begin
+  // Calculate the area dimensions
+  AreaW := AreaX2 - AreaX1 + 1;
+  AreaH := AreaY2 - AreaY1 + 1;
+
+  // Calculate the number of boxes in each dimension
+  BoxX := AreaW div Width;
+  if AreaW mod Width <> 0 then Inc(BoxX);
+  BoxY := AreaH div Height;
+  if AreaH mod Height <> 0 then Inc(BoxY);
+
+  // Set the number of boxes
+  SetLength(Result, BoxX * BoxY);
+
+  // Calculate the boxes
+  i := 0;
+  for y := 0 to BoxY - 1 do
+    for x := 0 to BoxX - 1 do
+    begin
+      Result[i] := IntToBox(AreaX1 + x * Width,
+        AreaY1 + y * Height,
+        Min(AreaX2, AreaX1 + (x + 1) * Width - 1),
+        Min(AreaY2, AreaY1 + (y + 1) * Height - 1));
+      Inc(i);
+    end;
+end;
+
+Procedure checkMovingObjs(RClick: Boolean);
+var
+  T : Timer;
+  TBA: TBoxArray;
+  MidBox: TPoint;
+  TIA: TIntegerArray;
+  H,I,J,X,Y: Integer;
+  TPA,PBox: TPointArray;
+  RCOpts: Array of TOptions;
+begin
+  if not isLoggedIn() then
+    Exit;
+
+  PBox := TPAFromBox(IntToBox(240, 130, 275, 185));
+  TBA  := areaToBoxArray(MSX1, MSY1, MSX2, MSY2, 35, 35);
+  TIA  := pixelShiftMulti(TBA, 300);
+
+  for H:=0 to High(TBA) do
+  begin
+    if (TIA[H] > 100) then
+    begin
+      MidBox := middleBox(TBA[H]);
+      SetArrayLength(TPA, Length(TPA)+1);
+      TPA[High(TPA)] := MidBox;
+    end;
+  end;
+
+  clearTPAFromTPAWrap(TPA, PBox, TPA);
+  if (Length(TPA) < 1) then
+    Exit;
+
+  I := Random(Length(TPA));
+  missMouse(TPA[I], 5, 5);
+  if RClick then
+  begin
+    fastClick(MOUSE_RIGHT);
+    RCOpts := getOptions();
+    J := Length(RCOpts);
+    Wait(RandomRange(J*75, J*120));
+
+    T.start();
+    repeat
+      getMousePos(X, Y);
+      brakeMMouse(Point(X-10,Y-10),15,5,False);
+      if (T.timeElapsed() > 5000) then
+        break;
+    until(not findTextEx(X,Y,['Choose','Option'],['UpCharsEx'],Area_MS))
+
+    if findTextEx(X,Y,['Choose','Option'],['UpCharsEx'],Area_MS) then
+      humanMMouse(Point(RandomRange(MIX1,MIX2),RandomRange(MIY1,MIY2)), 0, 0);
+  end;
+
+end;
+
+(*
+MMouseOffClient
+~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure MMouseOffClient(Direction: String);
+
+Moves the mouse off the client in the set direction.
+   - Vaild Directions: 'top', 'bottom', 'left', 'right' or accepts 'random'
+     and 'rand' for a random direction.
+
+.. note::
+
+    Author: Ollybest
+
+Example:
+
+.. code-block:: pascal
+
+  MMouseOffClient('top');
+
+*)
+procedure MMouseOffClient(Direction: String);
+var
+  B: TBoxArray;
+  P: TPoint;
+  i, W, H: Integer;
+begin
+  GetClientDimensions(W, H);
+  SetArrayLength(B, 4);
+  B[0] := IntToBox(-300, -300, W, 0); //top
+  B[1] := IntToBox(0, H, W, H +300); //bottom
+  B[2] := IntToBox(0-300, 0, 0, H); //left
+  B[3] := IntToBox(W, 0, W +300, H); //right
+
+  case Lowercase(Direction) of
+    'top': i := 0;
+    'bottom':  i := 1;
+    'left': i := 2;
+    'right': i := 3;
+    'rand', 'random': i := Random(4);
+    else
+      Writeln('Wrong direction');
+  end;
+
+  P := Point(RandomRange(B[i].X1, B[i].X2), RandomRange(B[i].Y1, B[i].Y2));
+  humanMMouse(P, 0, 0);
+end;
+
+// Here
+
+(*
+levelUpEx
+
+.. code-block:: pascal
+
+    function levelUpEx(ClickSkill: Boolean): Boolean;
+
+Returns true if the player has gained a level. If ClickSkill is set to true,
+it will click the skill and exit the window.
+
+.. note::
+
+    Author: Flight
+
+Example:
+
+.. code-block:: pascal
+
+  if (levelUpEx(true)) then
+    inc(Me.Integers[10]);
+*)
+function levelUpEx(ClickSkill: Boolean): Boolean;
+var
+  i: Integer;
+  Skills: TStringArray;
+begin
+  if findBlackChatMessage('just adva') then
+  begin
+    clickContinue(True);
+    Wait(RandomRange(125, 250));
+    clickContinue(True);
+
+    if ClickSkill then
+    begin
+      Wait(RandomRange(50, 110));
+
+      Skills := [
+        'Attack', 'Defence', 'Strength', 'Hitpoints', 'Mining', 'Smithing',
+        'Woodcutting', 'Firemaking', 'Magic', 'Fletching', 'Hunting', 'Fishing',
+        'Construction', 'Herblore', 'Agility', 'Thieving', 'Crafting', 'Ranged',
+        'Slayer', 'Farming', 'Prayer', 'Runecrafting', 'Cooking'
+      ];
+
+      for i:=0 to High(Skills) do
+        if isChatBoxTextBetween(Skills[i], clBlack, 1, 8) then
+          hoverSkill(Skills[i], True);
+    end;
+
+    Result := True;
+    WriteLn(Me.Name + ' leveled up!');
+  end;
+end;
+
+(*
+levelUp
+~~~~~~~
+
+.. code-block:: pascal
+
+    function levelUp(): Boolean;
+
+Returns true if the player has gained a level.  Will click the "click to
+continue" button in the chat box.
+
+.. note::
+
+    Author: Flight
+
+Example:
+
+.. code-block:: pascal
+
+  if levelUp() then
+    inc(Me.Integers[10]);
+*)
+function levelUp(): Boolean;
+begin
+  Result := levelUpEx(False);
+end;

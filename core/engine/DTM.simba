@@ -1,0 +1,29 @@
+{
+===
+DTM
+===
+}
+
+function DTM_findBestPointEx(DTMs: TIntegerArray; Area: TBox; var Pnt: TPoint): Boolean;
+var
+  i    : Integer;
+  pnts : TPointArray;
+  atpa : T2DPointArray;
+  angs : T2Dextendedarray;
+begin
+  if length(DTMs) < 1 then
+    Exit(false);
+
+  for i:=0 to high(DTMs) do
+  begin
+    if not findDTMs(DTMs[i], pnts, Area.x1, Area.y1, Area.x2, Area.y2) then
+      findDTMsRotatedAlternating(DTMs[i], pnts, Area.x1, Area.y1, Area.x2, Area.y2, -Pi, Pi, Pi/60, angs);
+    if length(pnts) > 0 then
+    begin
+      atpa := clusterTPA(pnts, 5);
+      sortATPASize(atpa, True);
+      Pnt := atpa[0].midPnt;
+      Exit(true);
+    end;
+  end;
+end;

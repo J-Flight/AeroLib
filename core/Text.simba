@@ -1,10 +1,10 @@
 {
-==========
+====
 Text
-==========
+====
 }
 
-// Plugin WarPie's OCR uptext engine
+// Plugin Warpie's OCR uptext engine
 {$loadlib rstext.dll}
 
 
@@ -112,9 +112,13 @@ function ClientATIA(x1,y1,width,height: Integer): T2DIntegerArray;
 var
   bmp : Integer;
 begin
-  bmp := BitmapFromClient(x1,y1,x1+width,y1+height);
-  Result := GetBitmapAreaColors(bmp, 0,0,width,height);
-  FreeBitmap(bmp);
+  try
+    bmp := BitmapFromClient(x1,y1,x1+width,y1+height);
+    Result := GetBitmapAreaColors(bmp, 0,0,width,height);
+    FreeBitmap(bmp);
+  except
+    Writeln('Error grabbing UpText');
+  end;
 end;
 
 function getUpText(): String;
@@ -155,6 +159,34 @@ end;
 function waitUptext(S: string; Time: Integer): Boolean;
 begin
   Result := waitUpTextMulti([S], Time);
+end;
+
+function extractNPCNameUptext(): String;
+var
+  h,i     : Integer;
+  UpText  : String;
+  Strings : TStringArray;
+begin
+  Result := '';
+  for i:=0 to 5 do
+  begin
+    UpText := getUpText();
+    if length(UpText) < 2 then
+      Exit;
+
+    setLength(Strings, 4);
+    Strings := ['-to ','tack ','rade ','from '];
+    for i:=0 to high(Strings) do
+    begin
+      if isArrInStr(['(lev'], UpText) then
+        result := between(Strings[i], ' (le', UpText)
+      else
+        result := between(Strings[i], ' /', UpText);
+
+      if length(result) > 1 then
+        Exit(result);
+    end;
+  end;
 end;
 
 (*
@@ -200,7 +232,7 @@ begin
       if (Area.X1 < 0) then Area.X1 := 0;
       if (Area.Y1 < 0) then Area.Y1 := 0;
 
-      Result := cs_findBitmapMaskTolerance(S, Area, cx, cy, 30, 30, cs_CTS1);
+      Result := cs_findBitmapMaskTolerance(S, 30, 30, Area, cx, cy, cs_CTS1);
       freeBitmap(S);
 
       if (result) then
@@ -329,7 +361,7 @@ begin
   x := 0; y:=0;
   if not Result then
     Exit;
-  Box := getTPABounds(TextTPA);
+  Box := TextTPA.getBounds();
   sortTPAFrom(Matches, Point(Box.x1, Box.y1));
   x := matches[0].x;
   y := matches[0].y;
@@ -393,30 +425,4 @@ begin
   for i := 0 to High(Texts) do
     if findTextTPA(Color, Tol, Area, Texts[i], Chars, clickType) then
       Exit(True);
-end;
-
-function findNPCChatTextMulti(txt: TStringArray; clickType: Integer): boolean;
-var
-  x,y   : integer;
-  chars : TStringArray;
-begin
-  chars := [UpChars07, CharsNPC07];
-
-  if (findTextEx(x, y, txt, chars, Area_CB)) then
-  begin
-    if clickType = -1 then
-      Exit(False);
-    case RandomRange(1,3) of
-      1: brakeMMouse(Point(x,y), 6, 3, True);
-      2: humanMMouse(Point(x,y), 6, 3);
-      3: missMouse(Point(x,y), 6, 3);
-    end;
-
-    fastClick(clickType);
-  end;
-end;
-
-function findNPCChatText(txt: string; clickType: Integer): boolean;
-begin
-  result := findNPCChatTextMulti([txt], clickType);
 end;

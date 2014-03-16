@@ -100,6 +100,7 @@ begin
   end;
 end;
 
+function FTab(Tab: Integer): boolean; forward;
 (*
 
 getWeaponName
@@ -150,82 +151,13 @@ Example:
 *)
 procedure setRetaliate(Enable: Boolean);
 begin
- if not FTab(TAB_COMBAT) then
+  if not FTab(TAB_COMBAT) then
     exit;
 
   if Enable then
     if not (cs_GetTextAtEx(intToBox(644,379,667,392), 0, 5, 1, 2070783, 20, 'UpChars07', cs_CTS1) ='(On)') then
       mouseBox(intToBox(572,362,713,397), MOUSE_LEFT);
-end;
-
-(*
-GetRunEnergy
-~~~~~~~~~~~~
-
-.. code-block:: pascal
-
-    function getRunEnergy(): Integer;
-
-    returns current run %
-
-.. note::
-
-    by ??
-    Last Modified: 06-12-2013 by Flight
-
-Example:
-
-.. code-block:: pascal
-
-*)
-function getRunEnergy(): Integer;
-begin
-  if not FTab(TAB_OPTIONS) then
-    Exit(-1);
-
-  Result := strToIntDef(ExtractFromStr(cs_getTextAtEx(intToBox(625,434,658,446), 0, 5, 1, 39167, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
-end;
-
-(*
-SetRun
-~~~~~~
-
-.. code-block:: pascal
-
-    function setRun(Enable: Boolean): Boolean;
-
-Sets Run on or off.
-
-.. note::
-
-    by ??
-    Last Modified: 06-12-2013 by Flight
-
-Example:
-
-.. code-block:: pascal
-
-*)
-
-function setRun(Enable: Boolean): Boolean;
-var
-  CCount : Integer;
-begin
-  if gameTab(TAB_OPTIONS) then
-  begin
-    CCount := cs_countColorTolerance(2369440, 20, intToBox(626,412,657,413), cs_CTS1);
-    if Enable then
-    begin
-      if (CCount<1) then
-        mouseBox(intToBox(626,415,657,446), MOUSE_LEFT);
-      Result := True;
-    end else
-    begin
-      if (CCount>1) then
-        mouseBox(intToBox(626,415,657,446), MOUSE_LEFT);
-      Result := True;
-    end;
-  end;
+  FTab(TAB_INV);
 end;
 
 (*

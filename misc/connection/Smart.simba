@@ -11,37 +11,6 @@ type TSmart = record
   __Graphics: TGraphics;
 end;
 
-function FindAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean;
-var
-  T : TSysProcArr;
-  I : Integer;
-begin
-  T := GetProcesses;
-  for I := High(T) downto 0 do
-    if Pos(TitlePrefix, T[I].Title) <> 0 then
-    begin
-      Result := True;
-      if SetAsTarget then SetTarget(T[I]);
-      Exit;
-    end;
-end;
-
-procedure getRealMousePos(var X, Y : Integer);
-var
-  KMTarget, ITarget: Integer;
-begin
-  KMTarget := GetKeyMouseTarget;
-  ITarget := GetImageTarget;
-  FindAndSetTarget('SMART', True);
-  GetMousePos(X, Y);
-  FreeTarget(GetImageTarget);
-  SetKeyMouseTarget(KMTarget);
-  SetImageTarget(ITarget);
-
-  X := X - 3;
-  Y := Y - 25;
-end;
-
 Procedure TSmart.Create;
 Begin
   Self.Create(765, 503, ['']);

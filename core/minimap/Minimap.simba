@@ -1,0 +1,678 @@
+{
+=======
+Minimap
+=======
+}
+
+{$include_once Mapwalk.simba}
+{$include_once Orbs.simba}
+{$include_once Symbol.simba}
+
+(*
+variantDirection
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function variantToDirection(dir: Variant): Extended;
+
+Converts a variant to a direction, catching errors and attempts to fix. This
+function expects "compass relative" angles. For example: ('n', 's', 'e', 'w') or
+degree (23.3, 25, 205.2) or 'random' (returns 0..360).
+
+.. note::
+
+    by Nava2
+
+Example:
+
+.. code-block:: pascal
+
+    dir := variantToDirection('n');     // -> 0.0
+    dir := variantToDirection('rand');  // -> in range 0..360
+    dir := variantToDirection(50);      // -> 50
+
+*)
+function variantToDirection(dir: Variant): Extended;
+var
+  e: Extended;
+begin
+  if VariantIsNumber(dir) then
+    Result := FixD(dir + 0.0)
+  else if VariantIsString(dir) then
+    case LowerCase(dir) of
+      'n': Result := 0;
+      'e': Result := 90;
+      's': Result := 180;
+      'w': Result := 270;
+      'random', 'rand': Result := RandomRange(0, 360);
+      else
+      begin
+        e := StrToFloatDef(dir, -1337);
+        if (e <> -1337) then
+          Result := FixD(e)
+        else
+        begin
+          writeln('dir [' + toStr(dir) +'] invalid. Returned 0.0 for safety');
+          Result := 0.0;
+        end;
+      end;
+    end;
+end;
+
+function getCompassRadians(): Extended;
+var
+  Angles: Array [0..2] of Extended;
+  Vectors: Array [0..2] of TVector;
+  I: Integer;
+  SouthPoint: TPoint;
+  TPA: TPointArray;
+begin
+  Result := -1;
+  findColors(TPA, 920735, 545, 4, 576, 36); //Searches for red of South, East, and West points on compass.
+  RAaSTPA(TPA, 7); // the point are small clusters of pixels, so by doing this, we are left with four points: the three cardinal points, and the center of the red arrow on the compass.
+  SortTPAFrom(TPA, Point(561, 20)); //Sort from center of the compass, so the first point in the array is the point that is the center of the red arrow.
+  InvertTPA(TPA); //Invert the array so that the arrow's center point is now at the end of the array and out of the way.
+  if (Length(TPA) <> 4) then //If we don't have four points, something has gone wrong.
+    Exit;
+  for I := 0 to 2 do //Creates normalized vectors from center of compass to three cardinal points.
+    Vectors[i] := CreateVector(Point(561, 20), TPA[i], True); //Creates normalized vectors from center of compass out to the cardinal points.
+  Angles[0] := AngleBetween(Vectors[0], Vectors[1]); //Stores the angle between vectors 0 and 1 in Angles[0].
+  Angles[1] := AngleBetween(Vectors[0], Vectors[2]); //Stores the angle between vectors 0 and 2 in Angles[1].
+  Angles[2] := AngleBetween(Vectors[1], Vectors[2]); //Stores the angle between vectors 1 and 2 in Angles[2].
+  for I := 0 to 2 do //This loop determines which point is the southern point of the compass.
+  begin
+    if (Angles[i] > pi) then //If the angle is greater than pi radians (180 degrees),
+      Angles[i] := MATH_2PI - Angles[i]; //We subtract it from 2pi radians (360 degrees) to get something like a reference angle.
+    if (Angles[i] >= 2) then //If the angle is greater than 2 radians, then we know that the two vectors this angle is between
+    begin //are the East and West point vectors.
+      case I of //The vector that is not those two is the South point vector.
+        0: SouthPoint := TPA[2];
+        1: SouthPoint := TPA[1];
+        2: SouthPoint := TPA[0];
+      end;
+    end;
+  end;
+  Result := FixRad((ArcTan2(-(SouthPoint.y - 20), SouthPoint.x - 561) + MATH_PIOVER2));
+end;
+
+(*
+GetCompassAngle
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getCompassAngle(): Extended;
+
+Returns the compass angle in radians.
+
+.. note::
+
+    by ReadySteadyGo, changes by euphemism & Flight
+
+Example:
+
+.. code-block:: pascal
+
+*)
+function getCompassAngle(): Extended;
+var
+  Angles: Array [0..2] of Extended;
+  Vectors: Array [0..2] of TVector;
+  I: Integer;
+  SouthPoint: TPoint;
+  TPA: TPointArray;
+begin
+  Result := -1;
+  FindColors(TPA, 920735, 545, 4, 576, 36); //Searches for red of South, East, and West points on compass.
+  RAaSTPA(TPA, 7); // the point are small clusters of pixels, so by doing this, we are left with four points: the three cardinal points, and the center of the red arrow on the compass.
+  SortTPAFrom(TPA, Point(561, 20)); //Sort from center of the compass, so the first point in the array is the point that is the center of the red arrow.
+  InvertTPA(TPA); //Invert the array so that the arrow's center point is now at the end of the array and out of the way.
+  if (Length(TPA) <> 4) then //If we don't have four points, something has gone wrong.
+    Exit;
+  for I := 0 to 2 do //Creates normalized vectors from center of compass to three cardinal points.
+    Vectors[i] := CreateVector(Point(561, 20), TPA[i], True); //Creates normalized vectors from center of compass out to the cardinal points.
+  Angles[0] := AngleBetween(Vectors[0], Vectors[1]); //Stores the angle between vectors 0 and 1 in Angles[0].
+  Angles[1] := AngleBetween(Vectors[0], Vectors[2]); //Stores the angle between vectors 0 and 2 in Angles[1].
+  Angles[2] := AngleBetween(Vectors[1], Vectors[2]); //Stores the angle between vectors 1 and 2 in Angles[2].
+  for I := 0 to 2 do //This loop determines which point is the southern point of the compass.
+  begin
+    if (Angles[i] > pi) then //If the angle is greater than pi radians (180 degrees),
+      Angles[i] := MATH_2PI - Angles[i]; //We subtract it from 2pi radians (360 degrees) to get something like a reference angle.
+    if (Angles[i] >= 2) then //If the angle is greater than 2 radians, then we know that the two vectors this angle is between
+    begin //are the East and West point vectors.
+      case I of //The vector that is not those two is the South point vector.
+        0: SouthPoint := TPA[2];
+        1: SouthPoint := TPA[1];
+        2: SouthPoint := TPA[0];
+      end;
+    end;
+  end;
+  Result := FixRad((ArcTan2(-(SouthPoint.y - 20), SouthPoint.x - 561) + MATH_PIOVER2));
+  Result := Degrees(FixD(Result));
+end;
+
+(*
+MakeCompass
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function setCompass(Direction: Variant): Boolean;
+
+Aligns RS to specified direction
+   - Enter a compass angle ('n', 's', 'e', 'w') or degree (23.3, 25, 205.2)
+      and it will move the compass to that angle. Also accepts 'random',
+      and 'rand' to make the compass a random direction.
+
+.. note::
+
+    by Nielsie95 & Nava2
+
+Example:
+
+.. code-block:: pascal
+
+    // using a string!
+    setCompass('N');
+
+    // using an integer!
+    setCompass(0);
+
+*)
+
+// Helper function for setCompass to clean up code
+// Compares Angle and DirectionDeg to see how far away it is
+function __setCompass_MinCheck(Angle, DirectionDeg: Extended): Extended;
+begin
+  // TODO: Check if FixD could be used to remove some cases..
+  Result := MinE(Abs(Angle - (DirectionDeg + 360)), Abs((Angle + 360) - DirectionDeg));
+  Result := MinE(Abs(Angle - DirectionDeg), Result);
+end;
+
+function setCompass(Direction: Variant): Boolean;
+var
+  T : Timer;
+  StartAngle, Angle, DirectionDeg, i: Extended;
+  Left: Boolean;
+begin
+  Result := False;
+  if not isLoggedIn() then
+    Exit;
+  StartAngle := getCompassAngle();
+  if (StartAngle < 0) then
+    Exit;
+
+  // convert from variant to direction:
+  DirectionDeg := variantToDirection(Direction);
+
+  if (__setCompass_MinCheck(StartAngle, DirectionDeg) <= 8.0) then
+  begin
+    Result := True;
+    Exit;
+  end;
+  Left := (Round((360 - StartAngle) + DirectionDeg) mod 360 <= Round((StartAngle + 360) - DirectionDeg) mod 360);
+  KeyDown((Ord(not Left) * 2) + 37);
+  Wait(10);
+  T.Start();
+  i := 0.0;
+  repeat
+    Wait(16);
+    Angle:= getCompassAngle();
+    if (((T.timeElapsed() > 6000)  and (i < 1.0)) or
+        ((T.timeElapsed() > 10000) and (i < 2.0)) or
+        ((T.timeElapsed() > 14000) and (i < 3.0))) then
+    begin
+      i := i + 1.0;
+    end;
+  until ((Angle < 0) or (T.timeElapsed() > 14000) or
+    (__setCompass_MinCheck(Angle, DirectionDeg) <= (7.0 + i)));
+  if Left then
+    KeyUp(VK_Left)
+  else
+    KeyUp(VK_Right);
+  Wait(10);
+  Result := (__setCompass_MinCheck(Angle, DirectionDeg) <= (7.0 + i));
+end;
+
+(*
+SetAngle
+~~~~~~~~
+
+.. code-block:: pascal
+
+    procedure setAngle(Angle: Integer);
+
+Sets the mainscreen at highest\lowest angle, dependant on constant passed.
+
+.. note::
+
+    by Raymond, edit by NaumanAkhlaQ
+
+Example:
+
+.. code-block:: pascal
+
+    // make the camera the highest!
+    setAngle(True);
+
+*)
+
+// TODO: fix doc for this.
+// Allows one to use ClickNorth without waiting 1s every time.
+const
+  ANGLE_HIGH  = 0;
+  ANGLE_LOW   = 1;
+
+// TODO: Check if 1000ms wait is necessary
+procedure setAngle(Angle: Integer);
+begin
+  if not isLoggedIn() then
+    Exit;
+
+  KeyDown((Angle * 2) + 38);
+  Sleep(1000 + Random(300));
+  KeyUp((Angle * 2) + 38);
+  Wait(500 + Random(100));
+end;
+
+(*
+FindFlag
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function findFlag(var P: TPoint): Boolean;
+
+Returns true if the flag is found on the minimap.
+
+.. note::
+
+    by euphemism
+
+Example:
+
+.. code-block:: pascal
+
+  if (findFlag(P)) then
+  begin
+    writeln('Flag found');
+    mouse(P, 3, 3, MOUSE_LEFT);
+  end;
+*)
+function findFlag(var P: TPoint): Boolean;
+var
+  I: Integer;
+  ColorsArray: TIntegerArray;
+  StaffColors: TPointArray;
+begin
+  Result := False;
+  ColorsArray := [1127261, 284358, 255]; //Brown of the flag staff, Orange of the flag staff, Red of the flag.
+  for I := 0 to 2 do
+  begin
+    if (not cs_FindColors(StaffColors, ColorsArray[i], Area_MM, cs_CTS)) then
+    begin
+      if (I < 2) then
+        Continue
+      else
+        Exit;
+    end else
+      Break;
+  end;
+  Result := True;
+  if (I <> 3) then //Keeps track of whether we ended up having to search for the red of the flag or not.
+  begin //The first two colors checks are for the staff of the flag, which means we sort by Y to get the bottom of the staff.
+    SortTPAByY(StaffColors, False);
+    P := StaffColors[0];
+    Exit;
+  end else //The last color check is for the red of the flag, so if the first two colors were not found:
+  begin
+    SortTPAByX(StaffColors, True);
+    P := Point(StaffColors[0].x + 7, StaffColors[0].y + 8); //Somewhat rough approximation of where the base of the staff is in relation to the tip of the flag.
+    Exit;
+  end;
+end;
+
+(*
+FlagPresent
+~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function flagPresent(): Boolean;
+
+T/F depending on flag exist.
+
+
+.. note::
+
+    by weequ, edited by euphemism.
+
+Example:
+
+.. code-block:: pascal
+
+
+*)
+function flagPresent(): Boolean;
+var
+  P : TPoint;
+begin
+  Result := findFlag(P);
+end;
+
+(*
+FlagDistance
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function flagDistance(): Integer;
+
+Returns distance in pixels your char dot is from flag on mini-map
+
+
+.. note::
+
+    by weequ, edited by euphemism.
+
+Example:
+
+.. code-block:: pascal
+
+
+*)
+function flagDistance(): Integer;
+var
+  P: TPoint;
+begin
+  Result := -1;
+  if (findFlag(P)) then
+    Result := Distance(MMCX, MMCY, P.x, P.y);
+end;
+
+(*
+WalkingToFlag
+~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function walkingToFlag(WaitTime: Integer): Boolean;
+
+Checks if your charachter is moving; stores current FlagDistance to a variable,
+waits "WaitTime" ms and then checks the FlagDistance again.
+If it differs from the Distance stored in the variable, function returns true.
+
+.. note::
+
+    by EvilChicken!
+
+Example:
+
+.. code-block:: pascal
+
+
+*)
+function walkingToFlag(WaitTime: Integer): Boolean;
+var
+  FirstDistance: Integer;
+begin
+  Result := False;
+  if not flagPresent() then
+    exit;
+  FirstDistance := flagDistance();
+  Wait(WaitTime);
+  Result := (FirstDistance > flagDistance());
+end;
+
+(*
+FlagEx
+~~~~~~
+
+.. code-block:: pascal
+
+    function FFlag(Dist: Integer): Boolean;
+
+Waits until Flag is within "Distance" distance.
+
+.. note::
+
+    by Wizzup? / WT-Fakawi / ZephyrsFury / N1ke! / weequ, edited by euphemism / Flight.
+
+Example:
+
+.. code-block:: pascal
+
+
+*)
+function FFlag(Dist: Integer): Boolean;
+var
+  T     : Timer;
+  D1,D2 : Integer;
+  P     : TPoint;
+begin
+  Wait(randomRange(400, 600));
+  Result := False;
+  T.start();
+  repeat
+    if (not findFlag(P)) then
+      exit(true);
+    D1 := Distance(P.x, P.y, MMCX, MMCY);
+    if (D1 <= Dist) then
+      exit(true);
+    if (D1 > Dist+12) then
+      wait(450+random(70))
+    else
+      wait(50+random(50));
+    if (getColor(6, 6) <> 13092807) then // border of the loading message
+      if (T.timeElapsed > 5000) then
+      begin
+        if (D1 = D2) then Exit;
+        D2 := D1;
+        T.start();
+      end;
+  until(not isLoggedIn());
+end;
+
+{*******************************************************************************
+function getMiniMapDotsIn(WhatDot: String; x1, y1, x2, y2: Integer): TPointArray;
+By: euphemism, mormonman
+Description: Results the dots specified by WhatDot in the box x1, y1, x2, y2.
+Usage : 'npc', 'yellow', 'n', 'y' : Yellow Dot;
+        'cape', 'blue', 'team', 't', 'b' : Blue Dot;
+        'item', 'red', 'i', 'r' : Red Dot;
+        'player', 'white', 'p', 'w' : White Dot;
+        'friend', 'green', 'f', 'g' : Green Dot;
+*******************************************************************************}
+function getMiniMapDotsIn(WhatDot: String; Area: TBox): TPointArray;
+var
+  I, Dif, Radius, Hi, C: Integer;
+  TPA: TPointArray;
+begin
+  case LowerCase(WhatDot) of
+    'npc', 'n', 'yellow', 'y': Dif := 4369;
+    'item', 'i', 'red', 'r': Dif := 50;
+    'player', 'p', 'white', 'w': Dif := 1907997;
+    'friend', 'f', 'green', 'g': Dif := 5376;
+    'team', 't', 'blue', 'b', 'cape': Dif := 2171941;
+    {'clan', 'c', 'orange', 'o': Dif := -1;}
+  else
+    writeln('"' + WhatDot + '" is not a valid dot type');
+  end;
+  Freeze;
+  Radius := Max((Area.x2-Area.x1)div 2, (Area.y2-Area.y1)div 2);
+  cs_findColorsPie(TPA, 65536, 0, 0, 360, 0, radius, (Area.x1+Area.x2)div 2, (Area.y1+Area.y2)div 2, Area, cs_CTS);
+  Hi := High(TPA);
+  SetLength(Result, Hi + 1);
+  if (Hi < 0) then
+  begin
+    UnFreeze;
+    Exit;
+  end;
+  C := 0;
+  for I := 0 to Hi do
+  begin
+    if (getColor(TPA[I].X-1, TPA[I].Y-1) - getColor(TPA[I].X, TPA[I].Y-1) = Dif) then
+    begin
+      Result[C] := Point(TPA[I].x, TPA[i].y - 2);
+      Inc(C);
+    end;
+  end;
+  Unfreeze;
+  SetLength(Result, C);
+end;
+
+(*
+GetMiniMapDots
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getMiniMapDots(WhatDot: String): TPointArray;
+
+Results the dots specified by WhatDot on the Minimap. See `getMiniMapDotsIn`
+for more information.
+
+
+.. note::
+
+    by Nava2
+
+Example:
+
+.. code-block:: pascal
+
+    // print the minimap positions on the debug canvas
+    DebugTPA(getMiniMapDots('white'));
+
+*)
+function getMiniMapDots(WhatDot: String): TPointArray;
+begin
+  Result := getMinimapDotsIn(WhatDot, Area_MM);
+end;
+
+function countMMDots(WhatDot: String): Integer;
+var
+  TPA : TPointArray;
+begin
+  Result := length(getMinimapDotsIn(WhatDot, Area_MM));
+end;
+
+function getClosestDot(WhatDot: String): TPoint;
+var
+  dots : tpointarray;
+begin
+  dots := getMiniMapDots(WhatDot);
+  if (length(dots) < 1) then Exit(point(0,0));
+  result := dots[0];
+end;
+
+(*
+PercentColorMM
+~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function percentColorMM(Color, Tol: Integer): Integer;
+
+Returns the percentage of colour on the minimap.
+
+
+.. note::
+
+    by Richard, and Nava2
+      -Modified by Flight
+
+Example:
+
+.. code-block:: pascal
+
+
+*)
+function percentColorMM(Color, Tol: Integer): Integer;
+var
+  TPA: TPointArray;
+begin
+  cs_findColorsTolerance(TPA, Color, Tol, Area_MM, cs_CTS);
+  filterPointsPie(TPA, 0, 360, 0, 73, MMCX, MMCY);
+  Result := ceil((Length(TPA) * 100) / ((Pi * (73 * 73)) * ((360 - 0) / 360.0)-((Pi * 0) * 1)));
+end;
+
+(*
+GetBlackBackground
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function getBlackBackground(): integer;
+
+Autocolours the black background colour. Returns -1 if not found.
+
+.. note::
+
+    Author: ZephyrsFury
+    Last Modified: January 8, 2014 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    blackColour := getBlackBackground();
+*)
+function getBlackBackground(): Integer;
+var
+  i,C,Count,MaxC : Integer;
+  TPA  : TPointArray;
+  Cols : TIntegerArray;
+  cs   : cs_TColorSettings;
+begin
+  Result := -1;
+  if not isLoggedIn() then
+    Exit;
+  cs := cs_ToColorSettings(2, 100, 100);
+
+  cs_findColorsTolerance(TPA, clBlack, 3, Area_MM, cs);
+  if (Length(TPA) < 1) then Exit;
+
+  Cols := getColors(TPA);
+  clearSameIntegers(Cols);
+
+  for i:=0 to High(Cols) do
+  begin
+    C := Cols[i];
+    Count := countColor(C, MMX1, MMY1, MMX2, MMY2);
+    if (countColor(C, MMX1, MMY1, MMX2, MMY2) > MaxC) then
+    begin
+      Result := C;
+      MaxC := Count;
+    end;
+  end;
+
+end;
+
+(*
+PercentBlackMM
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function percentBlackMM(): integer;
+
+Returns the percentage of the minimap which is black.
+
+.. note::
+
+    Author: NaumanAkhlaQ
+    Last Modified: January 8, 2014 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+     while (percentBlackMM() > 50) then
+       playerUnderground := True;
+*)
+function percentBlackMM(): Integer;
+begin
+  Result := percentColorMM(getBlackBackground(), 0);
+end;

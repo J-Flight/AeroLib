@@ -1,0 +1,19 @@
+function BK_Detect(): boolean;
+var
+  i : integer;
+begin
+  if not isLoggedIn() then Exit(false);
+  for i := TAB_COMBAT to TAB_MAGIC do
+    if (tabExists(i)) then
+      exit(false);
+
+  if (tabExists(TAB_OPTIONS)) or (tabExists(TAB_EMOTES)) then
+    exit(false);
+
+  result := (percentBlackMM() > 93);
+end;
+
+function BK_Solve(): boolean;
+begin
+  Result := false;
+end;

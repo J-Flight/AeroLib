@@ -1,0 +1,65 @@
+{
+========
+Breaking
+========
+}
+
+Var
+  timer_Break : Timer;
+  break_In,break_For,break_In_Ran,
+  break_For_Ran,break_RealTime,
+  break_Count : Integer;
+  A,B,C,D : Integer;
+
+procedure setupBreak(BreakIn, BreakFor, RanBreakIn, RanBreakFor: Integer);
+begin
+  A             := BreakIn;
+  B             := BreakFor;
+  C             := RanBreakIn;
+  D             := RanBreakFor;
+  break_In      := (BreakIn * 60000);
+  break_For     := (BreakFor * 60000);
+  break_In_Ran  := RandomRange(-RanBreakIn * 60000, RanBreakIn * 60000);
+  break_For_Ran := RandomRange(-RanBreakFor * 60000, RanBreakFor * 60000);
+  timer_Break.Start();
+end;
+
+Function breakHandler(): Boolean;
+Var
+  T      : Timer;
+  h,m,s  : integer;
+  tmpAng : Extended;
+begin
+  if not isLoggedIn() then Exit;
+  if (timer_Break.timeElapsed() < (break_In + break_In_Ran)) then Exit;
+
+  Result         := true;
+  break_RealTime := Round((break_For+break_For_Ran)/60000);
+  tmpAng         := getCompassAngle();
+  warn('Taking a break for about ' + intToStr(break_RealTime) + ' minutes.', WT_CORE);
+  logoutPlayer();
+  T.Start();
+
+  repeat
+    Wait(21000);
+    convertTime((break_For+break_For_Ran)-T.timeElapsed, h, m, s);
+    clearDebug();
+    warn('Breaktime left: '+IntToStr(h)+':'+IntToStr(m)+':'+IntToStr(s), WT_CORE);
+  until(T.timeElapsed > (break_For+break_For_Ran));
+
+  warn('Logging in...', WT_CORE);
+  loginPlayer(true);
+  wait(4000);
+  Result := isLoggedIn();
+  setAngle(ANGLE_HIGH);
+  setCompass(tmpAng);
+
+  timer_Break.Start();
+  inc(break_Count);
+
+  break_In     := (A * 60000);
+  break_For    := (B * 60000);
+  break_In_Ran := RandomRange(-C * 60000, C * 60000);
+  break_In_Ran := RandomRange(-D * 60000, D * 60000);
+  warn('The next break will occur in '+msToTime((break_In+break_In_Ran),Time_Short), WT_CORE);
+end;

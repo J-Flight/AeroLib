@@ -98,14 +98,36 @@ begin
     mouse(Point(742,481), 10, 10, MOUSE_LEFT);
 end;
 
+Var
+  LS_LOGGEDOUT    = 0;
+  LS_LOGGEDIN     = 1;
+  LS_SPLASHSCREEN = 2;
+  LS_WORLDSCREEN  = 3;
+
+function getLoginState(): Integer;
+begin
+  if (getColor(427,489) = 16777215) then
+    Exit(LS_LOGGEDIN);
+  if (getColor(400,335) = 16777215) then
+    Exit(LS_SPLASHSCREEN);
+  if (getcolor(115,14) = 1800605) then
+    Exit(LS_WORLDSCREEN);
+  Result := LS_LOGGEDOUT;
+end;
+
 function isLoggedIn(): Boolean;
 begin
-  result := Me.getLoginState() = LS_LOGGEDIN;
+  result := getLoginState() = LS_LOGGEDIN;
 end;
 
 function isSplashScreen(): Boolean;
 begin
-  result := Me.getLoginState() = LS_SPLASHSCREEN;
+  result := getLoginState() = LS_SPLASHSCREEN;
+end;
+
+function isWorldScreen(): Boolean;
+begin
+  result := getLoginState() = LS_WORLDSCREEN;
 end;
 
 (*
@@ -151,33 +173,11 @@ begin
     wait(20+random(10));
   end;
 
-  Writeln('Could not start up Old School RuneScape or RSReady was not detected!');
+  warn('Could not start up OSRS or RSReady was not detected!', WT_CORE);
   terminateScript();
 end;
 
 function gameTab(Tab: Integer): Boolean; forward;
-(*
-LogoutPlayer
-~~~~~~
-
-.. code-block:: pascal
-
-    function logoutPlayer: Boolean;
-
-Logs you all the way out from ingame.
-
-.. note::
-
-    by Ashaman88/Justin/Le Jingle - modified by Flight
-
-Example:
-
-.. code-block:: pascal
-
-    if (not findTree()) then
-      logoutPlayer();
-
-*)
 function logoutPlayer(): Boolean;
 var
   T : Timer;
@@ -188,15 +188,21 @@ begin
   if not gametab(TAB_LOGOUT) then
     exit(false);
 
-  mousebox(intToBox(LOx1,LOy1,LOx2,LOy2), MOUSE_LEFT);
+  T.start();
+  while (Me.inCombat() and (T.timeElapsed() < 5000)) do
+    wait(1);
+
   T.start();
   repeat
+    mousebox(intToBox(LOx1,LOy1,LOx2,LOy2), MOUSE_LEFT);
     wait(randomRange(400,500));
     if (not isLoggedIn()) then
       exit(true);
   until(T.timeElapsed > 11000);
 end;
 
+function selectWorld(W: integer): boolean; forward;
+function randomWorld(): Integer; forward;
 function loginPlayer(Safe: Boolean): Boolean;
 var
   T              : Timer;
@@ -207,36 +213,52 @@ var
   pLen,i,j,
   Attempts       : integer;
   foundLogin,
-  retryLogin     : boolean;
+  retryLogin,
+  doSwitch       : boolean;
   TPA            : TPointArray;
   Actions        : TVariantArray;
 label
-  ProcStart;
+  EnterName,EnterGame,SplashScreen;
 begin
   //ActivateClient;
-  if (isSplashScreen() or isLoggedIn()) then
+  if isLoggedIn() then
     exit(true);
+  if ((length(Me.Name) < 1) or (length(Me.Pass) < 1)) then
+  begin
+    warn('No username / password, deactivating player...', WT_CORE);
+    Me.Active := false;
+    Exit(false);
+  end;
+
+  if isSplashScreen() then
+    goto SplashScreen;
 
   if not Me.Active then
   begin
-    WriteLn('Player inactive...');
-    Exit;
+    warn('Player inactive...', WT_CORE);
+    Exit(false);
   end;
+
+  if (length(Me.Name) < 1) then
+    Exit(false);
 
   T.start();
   repeat
     if (T.timeElapsed > 180000) then
     begin
-      WriteLn('It has been 3 minutes and Runescape is not yet ready... Terminating.');
+      warn('It has been 3 minutes and OSRS is not yet ready, terminating script.', WT_CORE);
       terminateScript();
     end;
     Wait(RandomRange(1000,2000));
   until (RSReady);
 
-  WriteLn('Logging player in...');
+  warn('Logging player in...', WT_CORE);
 
-  if (isSplashScreen() or isLoggedIn()) then
+  if isLoggedIn() then
     exit(true);
+
+  if isSplashScreen() then
+    goto SplashScreen;
 
   if Length(Me.WorldList) > 0 then
     selectWorld(Me.WorldList[0]);
@@ -257,13 +279,12 @@ begin
     end;
     if not FoundLogin then
     begin
-      writeln('Unable to detect login interface...');
-      exit;
+      warn('Unable to detect login interface...', WT_CORE);
+      exit(false);
     end;
   end;
 
-  ProcStart:
-
+  EnterName:
   for W:=0 to 1 do
   begin
     if W = 0 then
@@ -366,6 +387,7 @@ begin
     until((uH = uLen) and (pH = pLen));
   end;
 
+  EnterGame:
   mouseBox(intToBox(GBx1,GBy1,GBx2,GBy2), MOUSE_LEFT);
 
   T.start();
@@ -376,27 +398,26 @@ begin
     SetLength(Actions, 0);
 
     if (T.timeElapsed > 60000) then
-      Actions :=       ['One minute has passed... Debug: ' + ToStr(CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)),              0,    5,    'PlayerFalse',   'Login Failed']
+      Actions :=       ['One minute has passed... Debug: ' + ToStr(CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)),              0,    5,    'Terminate']
     else
     case (CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)) of
                         // WriteLn Error                  Wait for   Retrys     Action
       738:  Actions := ['Invalid Username / Password',           0,    0,    'Terminate'];
       1539: Actions := ['Your account has been disabled',        0,    0,    'Terminate'];
       1073: Actions := ['Your account is already logged in',  5000,    5,    'Retry'];
-       492: Actions := ['Error Connecting.',                 20000,    9,    'Terminate'];
+       492: Actions := ['Error Connecting.',                 20000,    10,   'Retry'];
       1721: Actions := ['Too many incorrect logins.',    5 * 60000,    2,    'Retry'];
-       906: Actions := ['This world is full.',                5000,   10,    'Switch'];
+       906: Actions := ['This world is full.',                5000,    2,    'Switch'];
       1136: Actions := ['Runescape has been updated.',           0,    0,    'RSUpdate'];
-       777: Actions := ['Login limit exceeded.',             20000,   10,    ''];
-      1700: Actions := ['You will need a members account to login to this world. Please subscribe, or use a different world.',        0,    0,    'PlayerFalse',   'Acc Disabled'];
+       777: Actions := ['Login limit exceeded.',                 0,    0,    ''];
+      1700: Actions := ['Members world',                         0,    0,    'Terminate'];
     end;
                              {Respond}
 
     if (Length(Actions) > 0) then
     begin
-      WriteLn(Actions[0]);
+      warn(Actions[0], WT_CORE);
       Wait(1000 + Random(500));
-      TypeByte(vk_Escape);
       Wait(Actions[1] + Random(100));
 
       if (Actions[2] > 0) then
@@ -413,6 +434,18 @@ begin
       case Actions[3] of
         'Terminate': terminateScript();
 
+        'Retry':
+          begin
+            RetryLogin := True;
+            break;
+          end;
+
+        'Switch':
+          begin
+            doSwitch := True;
+            break;
+          end;
+
         'RSUpdate':
           begin
             if AL_HasProc(al_OnRSUpdate) then
@@ -420,23 +453,23 @@ begin
               case actions[0] of
                 'Runescape has been updated.':
                   begin
-                    Writeln('Runescape has been updated! Waiting 5 minutes to restart SMART!');
+                    warn('OSRS has updated, waiting 5 minutes to restart SMART.', WT_CORE);
                     Wait(300000);
                   end;
               end;
               AL_Procs[al_OnRSUpdate]();
               Exit;
             end;
-            Writeln('Runescape has been updated! Please restart Simba.');
+            warn('OSRS has been updated, please restart Simba.', WT_CORE);
             terminateScript();
           end;
       end;
     end;
   until(Result);
 
+  SplashScreen:
   if isSplashScreen() then
   begin
-    //takeScreen('LOGIN', includePath+'AeroLib/screenshots/login/');  // IP address removed, why?
     mouseBox(intToBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
     i := 0;
     repeat
@@ -445,13 +478,22 @@ begin
     until (isLoggedIn() or (i > 30));
   end;
 
+{Back to main screen if needed}
+  if doSwitch then
+  begin
+    RetryLogin := False;
+    Inc(Attempts);
+    TypeByte(vk_Escape);
+    selectWorld(randomWorld());
+    goto EnterName;
+  end;
+
   Wait(100 + Random(100));
 
-{Back to main screen if needed}
   if RetryLogin then
   begin
     RetryLogin := False;
     Inc(Attempts);
-    goto ProcStart;
+    goto EnterGame;
   end;
 end;

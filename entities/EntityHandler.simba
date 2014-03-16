@@ -1,0 +1,77 @@
+{
+=============
+EntityHandler
+=============
+}
+
+Type TEntity = record
+  Bounds      : TBox;
+  BasePnt     : TPoint;
+  tCol,tTol,
+  bCol,bTol   : Integer;
+  FullTPA     : TPointArray;
+  tHMod,tSMod,
+  bHMod,bSMod : Extended;
+end;
+
+Procedure TEntity.define(PntT, PntB: TPoint);
+var
+  tTPA       : TPointArray;
+  pCols      : TIntegerArray;
+begin
+  cs_findColorsTolerance(tTPA, getColor(PntT.X,PntT.Y), 20, intToBox(PntT.X-15,PntT.Y-20,PntT.X+15,PntT.Y+25), cs_CTS);
+  getColorsWrap(tTPA, pCols);
+  clearSameIntegers(pCols);
+  returnValues(pCols, self.tHMod, self.tSMod, self.tCol, self.tTol);
+
+  tTPA  := [];
+  pCols := [];
+
+  cs_findColorsTolerance(tTPA, GetColor(PntB.X,PntB.Y), 20, intToBox(PntB.X-15,PntB.Y-20,PntB.X+15,PntB.Y+25), cs_CTS);
+  getColorsWrap(tTPA, pCols);
+  clearSameIntegers(pCols);
+  returnValues(pCols, self.bHMod, self.bSMod, self.bCol, self.bTol);
+  self.BasePnt := Point(round((PntT.X+PntB.X)/2), round((PntT.Y+PntB.Y)/2));
+end;
+
+function isPlayerWalking(): Boolean; forward;
+Procedure TEntity.update();
+var
+  pPnt      : TPoint;
+  tTPA,bTPA,
+  fTPA      : TPointArray;
+  atpa      : T2DPointArray;
+  cs        : cs_TColorSettings;
+begin
+  while isPlayerWalking() do
+    Wait(1);
+
+  self.FullTPA := [];
+  pPnt := self.BasePnt;
+
+  cs := cs_ToColorSettings(2, self.tHMod, self.tSMod);
+  cs_findColorsTolerance(tTPA, self.tCol, self.tTol, intToBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), cs);
+  cs := cs_ToColorSettings(2, self.bHMod, self.bSMod);
+  cs_findColorsTolerance(bTPA, self.bCol, self.bTol, intToBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), cs);
+  combineTPAWrap(tTPA, bTPA, fTPA);
+
+  if (length(fTPA) < 1) then
+  begin
+    Writeln('[TEntity]: Colors not found...');
+    Exit;
+  end;
+
+  atpa := clusterTPA(fTPA, 15);
+  sortATPAFromMidPoint(atpa, fTPA.midPnt());
+  self.FullTPA := atpa[0];
+  self.BasePnt := self.FullTPA.midPnt();
+
+  if (distance(self.BasePnt.X, self.BasePnt.Y, MSCX, MSCY) > 75) then
+  begin
+    sortATPAFromMidPoint(atpa, Point(MSCX,MSCY));
+    self.FullTPA := atpa[0];
+    self.BasePnt := self.FullTPA.midPnt();
+  end;
+
+  self.Bounds := self.FullTPA.getBounds();
+end;

@@ -1,0 +1,20 @@
+(**
+ * Author: Coh3n
+ * Description: Detects if a player is in the Abyss random.
+ *)
+function Abyss_Detect(): boolean;
+var
+  x, y: integer;
+begin
+  if (tabExists(TAB_MAGIC)) then
+    exit;
+
+  // redish color on the minimap; only searches top half because the Mime audience color is similar and only appears in the bottom of the minimap
+  if (findColorTolerance(x, y, 3619450, MMCX-10, MMCY-10, MMCX+10, MMCY, 15)) then
+    result := (countColorTolerance(clBlack, MMX1, MMY1, MMX2, MMY2, 15) > 1000);
+end;
+
+function Abyss_Solve(): boolean;
+begin
+  Result := false;
+end;

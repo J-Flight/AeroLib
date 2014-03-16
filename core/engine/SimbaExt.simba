@@ -4,6 +4,11 @@ SimbaExt
 ========
 }
 
+type
+  TExtPoint = record x, y: double; end;
+  TPerspective = record m00, m01, m02,m10, m11, m12,m20, m21, m22: double; end;
+  TRectRemapper = record width, height: Integer; source: array of TExtPoint; end;
+
 function VariantIsInteger(const v: Variant): Boolean;
 begin
   case VarType(v) of
@@ -154,6 +159,7 @@ begin
 end;
 
 type
+  TBooleanArray = Array of Boolean;
   TDTMPointDef = TSDTMPointDef;
   TDTMPointDefArray = TSDTMPointDefArray;
   TDTM = TSDTM;
@@ -201,6 +207,19 @@ begin
   if not InRange(FKey,1,12) then
     raiseexception(erCustomError,'FKey not in range 1..12');
   result := IsKeyDown(VK_F1 + FKey - 1);
+end;
+
+function midPntinTPA(TPA: TPointArray): TPoint;
+var
+  mPnt: TPoint;
+begin
+  if length(TPA) < 1 then
+    Exit;
+
+  mPnt := middleTPA(TPA);
+  sortTPAFrom(TPA, mPnt);
+
+  Result:= TPA[0];
 end;
 
 function InCircle(x, y, mx, my, r: Integer): Boolean;
@@ -420,6 +439,27 @@ begin
   Result := GetTextAtEx(xs, ys, xe, ye, minvspacing, maxvspacing, hspacing, color, tol, font);
 end;
 
+Function intToStrEx(Int: Integer): String;
+begin
+  Result := GroupDigits(Int, ',');
+end;
+
+function centerStringEx(str: string; size: Integer; fill: Char): string;
+var
+  l, p: Integer;
+begin
+  l := Length(str);
+  if (l >= size) then
+    Result := str
+  else
+    if (l > 0) then
+    begin
+      p := (((size - l) div 2) + 1);
+      Result := (StringOfChar(fill, (p - 1)) + str + StringOfChar(fill, ((size - (p + l)) + 1)));
+    end else
+      Result := StringOfChar(fill, size);
+end;
+
 function InitializeHTTPClientWrap(HandleCookies: Boolean): Integer;
 begin
   Result := InitializeHTTPClient(HandleCookies);
@@ -510,3 +550,63 @@ Begin
   Else
     writeln('Failed To Find Java.exe or Javaw.exe. Please add ...\JRE\Bin to your PATH environment variable.');
 End;
+
+function downloadToFile(const URL, Filename: string): boolean;
+var
+  FileI: LongInt;
+  FileC, FileH: string;
+begin
+  Result := False;
+
+  FileI := InitializeHTTPClient(False,False);
+  try
+    FileC := GetHTTPPage(FileI, URL);
+    FileH := GetRawHeaders(FileI);
+
+    if ((FileC = '') or (FileH = '')) then
+    begin
+      WriteLn('Error downloading "' + URL + '".');
+      Exit;
+    end;
+
+    FileH := Copy(GetRawHeaders(FileI), 10, Pos(#13, FileH) - 10);
+
+    if (FileH <> '200 OK') then
+    begin
+      WriteLn('Couldn'#39't download "' + URL + '", Error Code: ' + FileH + '.');
+      Exit;
+    end;
+
+  finally
+    FreeHTTPClient(FileI);
+  end;
+
+  try
+    if not FileExists(Filename) then
+      FileI := CreateFile(Filename)
+    else
+      FileI := OpenFile(Filename, False);
+
+    CloseFile(FileI);
+
+    FileI := RewriteFile(Filename, False);
+    Result := WriteFileString(FileI, FileC);
+  finally
+    CloseFile(FileI);
+  end;
+end;
+
+function FindAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean;
+var
+  T : TSysProcArr;
+  I : Integer;
+begin
+  T := GetProcesses;
+  for I := High(T) downto 0 do
+    if Pos(TitlePrefix, T[I].Title) <> 0 then
+    begin
+      Result := True;
+      if SetAsTarget then SetTarget(T[I]);
+      Exit;
+    end;
+end;

@@ -1,0 +1,325 @@
+{
+=======
+MapWalk
+=======
+}
+
+function variantToDirection(dir: Variant): Extended; forward;
+function FFlag(Dist: Integer): Boolean; forward;
+function flagPresent(): Boolean; forward;
+
+function isPlayerWalkingEx(Area: TBox; MinShift: integer): Boolean;
+begin
+  Result := pixelShift(Area, 200) > MinShift;
+end;
+
+function isPlayerWalking(): Boolean;
+begin
+  Result := isPlayerWalkingEx(intToBox(MMCX-30, MMCY-30, MMCX+30, MMCY+30), 100);
+end;
+
+(*
+LinearWalkEx
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function linearWalkEx(var TPA: TPointArray; cx, cy, TheColor, tol: Integer; Direction: Variant; Radius: Integer): Boolean;
+
+Finds TheColor from Radial (scanning outwards) for Radius Distance.
+Valid Arguments:
+
+    - tpa.  Result points.
+    - Direction. See `variantToDirection` for information
+    - Radius.  Distance from the centre of minimap, i.e. how far away the mouse clicks. Use numbers 20-72
+
+
+.. note::
+
+    by Nielsie95
+
+Example:
+
+.. code-block:: pascal
+
+    // check if the colour is present
+    while (findColor(x,y, RoadColor)) do
+    begin
+      // build a tpa to walk on
+      if (linearWalkEx(tpa, MMCX, MMCY, RoadColor, 5, -25.0, (MMX1-MMCX))) then
+        walkTPA(tpa);          // this depends how you want to work with the tpa
+    end;
+
+*)
+function linearWalkEx(var TPA: TPointArray; cx, cy, TheColor, tol: Integer; Direction: Variant; Radius: Integer): Boolean;
+var
+  T     : Timer;
+  SD,ED : Integer;
+begin
+  Result := False;
+  if not isLoggedIn() then Exit;
+  Direction := variantToDirection(Direction);
+
+  T.start();
+  if (Direction < 50) then
+    SD := ((Direction + 360) - 50)
+  else
+    SD := (Direction - 50);
+  ED := (Direction + 50);
+  SD := Trunc(FixD(SD + 0.0));
+  ED := Trunc(FixD(ED + 0.0));
+
+  try
+    cs_findColorsTolerance(tpa, TheColor, tol, AREA_MM, cs_CTS);
+    filterPointsPie(tpa, SD, ED, 10, Radius, cx, cy);
+    linearSort(tpa, cx, cy, Direction, False);
+    Result := (Length(tpa) > 0);
+  except
+    Writeln('LWex error!');
+    Exit;
+  end;
+end;
+
+(*
+RadialWalkEx
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function radialWalkEx(var TPA: TPointArray; cx, cy, TheColor, tol: Integer; StartRadial, EndRadial: Variant; Radius: Integer): Boolean;
+
+Finds TheColor from StartRadial to EndRadial for Radius Distance.
+Valid Arguments:
+
+    - tpa. Result points.
+    - StartRadial/EndRadial. See `variantToDirection` for information
+    - Radius. Distance from the centre of minimap, i.e. how far
+      away the mouse clicks. Use numbers 20-72
+
+.. note::
+
+    by Nielsie95
+
+Example:
+
+.. code-block:: pascal
+
+    // check if the colour is present
+    while (findColor(x,y, RoadColor)) do
+    begin
+      // build a tpa to walk on
+      if (radialWalkEx(tpa, MMCX, MMCY, RoadColor, 5, -25.0, (MMX1-MMCX))) then
+        WalkTPA(tpa);          // this depends how you want to work with the tpa
+    end;
+
+*)
+// TODO: Reorder params to clean up type changes?
+function radialWalkEx(var TPA: TPointArray; cx, cy, TheColor, tol: Integer; StartRadial, EndRadial: Variant; Radius: Integer): Boolean;
+var
+  T : Timer;
+  SD,ED : extended;
+begin
+  Result := False;
+  if not isLoggedIn() then Exit;
+
+  if not (variantIsNumber(StartRadial) and variantIsNumber(EndRadial)) then
+  begin
+    SD := variantToDirection(StartRadial);
+    StartRadial := SD;
+    ED := variantToDirection(EndRadial);
+    EndRadial := ED;
+  end else
+  begin
+    SD := StartRadial;
+    ED := EndRadial;
+  end;
+
+  if SD > ED then SwapE(SD, ED);
+
+  if (SD = ED) then
+  begin
+    Writeln('StartRadial = EndRadial, using LinearWalkEx.');
+    Result := linearWalkEx(tpa, cx, cy, TheColor, tol, StartRadial, Radius);
+  end;
+
+  T.start();
+  try
+    cs_findColorsTolerance(tpa, TheColor, tol, AREA_MM, cs_CTS);
+    filterPointsPie(tpa, SD, ED, 10, Radius, cx, cy);
+    sortCircleWise(tpa, cx, cy, StartRadial, False, StartRadial > EndRadial);
+    Result := (Length(tpa) > 0);
+  except
+    Writeln('An exception has occured'); Exit;
+  end;
+end;
+
+(*
+RadialWalk
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function radialWalk(TheColor: Integer; StartRadial, EndRadial: Variant; Radius, Xmod, Ymod: Integer): Boolean;
+
+Walks TheColor from StartRadial to EndRadial for Radius Distance
+Valid Arguments:
+
+    - TheColor. Any Color, but Road- or WaterColor will do fine :)
+    - StartRadial/EndRadial. See `variantToDirection` for information
+    - Radius. Distance from the centre of minimap, i.e. how far away the mouse clicks. Use numbers 20-72
+    - XMod, YMod: deviation from MouseFindFlag. -2 to 2.
+
+
+.. note::
+
+    by Nielsie95 from an original idea by WT-Fakawi
+
+Example:
+
+.. code-block:: pascal
+
+    while (radialWalk(GetRoadColor, 'w', 'n', 50, -1, 2)) do
+      WriteLn('Walking in a ''pie'' shape!');
+
+*)
+function radialWalk(TheColor: Integer; StartRadial, EndRadial: Variant; Radius, Xmod, Ymod: Integer): Boolean;
+var
+  I   : Integer;
+  TPA : TPointArray;
+begin
+  Result := False;
+  if radialWalkEx(tpa, MMCX, MMCY, TheColor, 0, StartRadial, EndRadial, Radius) then
+    for i := 0 to High(tpa) do
+    begin
+      mouse(tpa[i], Xmod, Ymod, MOUSE_LEFT);
+      FFlag(10);
+      Exit(true);
+    end;
+end;
+
+(*
+LinearWalk
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function linearWalk(TheColor: Integer; Direction: Variant; Radius, Xmod, Ymod: Integer): Boolean;
+
+Walks TheColor from Direction MIDDLE OUT!by performing windscreenlike scanning movements for Radius Distance
+Valid Arguments:
+
+    - TheColor. Any Color, but Road- or WaterColor will do fine :)
+    - Direction. See `variantToDirection` for information
+    - Radius. Distance from the centre of minimap, i.e. how far away
+      the mouse clicks. Use numbers 20-72.
+    - *XMod*, *YMod*: deviation from MouseFindFlag. -2 to 2.
+
+.. note::
+
+    by Nielsie95 from another original idea by WT-Fakawi
+
+Example:
+
+.. code-block:: pascal
+
+    while (linearWalk(GetRoadColor, 25.5, 50, -1, 2)) do
+      WriteLn('Walking in a ''line''!');
+
+*)
+function linearWalk(TheColor: Integer; Direction: Variant; Radius, Xmod, Ymod: Integer): Boolean;
+var
+  I   : Integer;
+  TPA : TPointArray;
+begin
+  Result := False;
+  if linearWalkEx(tpa, MMCX, MMCY, TheColor, 0, Direction, Radius) then
+    for i := 0 to High(tpa) do
+    begin
+      mouse(tpa[i], Xmod, Ymod, MOUSE_LEFT);
+      FFlag(10);
+      Exit(true);
+    end;
+end;
+
+(*
+LinearWalkTolerance
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function linearWalkTolerance(TheColor: Integer; Direction: Variant; Radius, Xmod, Ymod, Tol : Integer): Boolean;
+
+Same as linearWalk, but with a tolerance.
+
+.. note::
+
+    by Nielsie95
+
+Example:
+
+.. code-block:: pascal
+
+    while (linearWalkTolerance(clRed, 25.5, 50, -1, 2, 5)) do
+      WriteLn('Walking in a ''line''... with tolerance!');
+
+*)
+function linearWalkTolerance(TheColor: Integer; Direction: Variant; Radius, Xmod, Ymod, Tol : Integer): Boolean;
+var
+  i,h : Integer;
+  TPA : TPointArray;
+begin
+  Result := False;
+
+  if linearWalkEx(TPA, MMCX, MMCY, TheColor, Tol, Direction, Radius) then
+  begin
+    h := High(TPA);
+    for i := 0 to High(tpa) do
+    begin
+      mouse(tpa[i], Xmod, Ymod, MOUSE_LEFT);
+      FFlag(10);
+      Exit(true);
+    end;
+  end;
+end;
+
+(*
+RadialWalkTolerance
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function radialWalkTolerance(Color: Integer; sRadial, eRadial: Variant; r, modX, modY, Tol: Integer): Boolean;
+
+Same as radialWalk, but with a tolerance.
+
+.. note::
+
+    by Coh3n
+    Last modified: Jan. 14, 2014 by Flight
+
+Example:
+
+.. code-block:: pascal
+
+    while (radialWalkTolerance(clRed, 25.5, 60.0, 50, -1, 2, 5)) do
+      WriteLn('Walking in a ''line''... with tolerance!');
+
+*)
+function radialWalkTolerance(Color: Integer; sRadial, eRadial: Variant; r, modX, modY, Tol: Integer): Boolean;
+var
+  i,h : Integer;
+  TPA : TPointArray;
+begin
+  Result := False;
+
+  if radialWalkEx(TPA, MMCX, MMCY, Color, Tol, sRadial, eRadial, r) then
+  begin
+    h := High(TPA);
+    for i := 0 to h do
+    begin
+      mouse(tpa[i], modX, modY, MOUSE_LEFT);
+      Result := waitFunc(@flagPresent, 50, 500);
+      Exit;
+    end;
+  end;
+end;

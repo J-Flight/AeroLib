@@ -1,0 +1,116 @@
+{*******************************************************************************
+function OpenBox: Boolean;
+by: Ashaman88
+Description: Opens the box.
+*******************************************************************************}
+function Box_open(): Boolean;
+var
+  x, y, i,BoxDTM : Integer;
+begin
+  Result := False;
+  gameTab(TAB_INV);
+  Wait(100 + Random(50));
+  BoxDTM := DTMFromString('mwQAAAHic42RgYHBiYmAwQ8J+SNgZiN2A+BlQ3QMGCP0GiO8C8SMo/wMU97W0AElGvNiIgTDAbwIEwwEAyPkMaQ==');
+  if findDTM(BoxDTM, x, y, MIX1, MIY1, MIX2, MIY2) then
+  begin
+    Mouse(point(x,y), 4, 4, MOUSE_LEFT);
+    wait(randomRange(1500,2500));
+    if (GetColor(487, 39) = 13567) and (GetColor(350, 295) = 2304814) then
+      Result := True;
+  end;
+  freedtm(boxdtm);
+end;
+
+{*******************************************************************************
+procedure Box_getQuestion(var num: Integer; var shape: String);
+by: pups
+Description: Gets the number or shape
+*******************************************************************************}
+procedure Box_getQuestion(var num: Integer; var shape: string);
+var
+  x, y, i: Integer;
+  text: string;
+begin
+  num := 10;
+  shape := '';
+  for i := 0 to 14 do
+  begin
+    case i of
+      0: text := '0'; //Zero
+      1: text := '1'; //One
+      2: text := '2'; //Two
+      3: text := '3'; //Three
+      4: text := '4'; //Four
+      5: text := '5'; //Five
+      6: text := '6'; //Six
+      7: text := '7'; //Seven
+      8: text := '8'; //Eight
+      9: text := '9'; //Nine
+      10: text := 'Circle'; //Circle
+      11: text := 'Triangle'; //Triangle
+      12: text := 'Square'; //Square
+      13: text := 'Star'; //Star
+      14: text := 'Pentagon'; //Pentagon
+    end;
+    if (findText(x, y, Text, upchars07, intToBox(110,250,415,275))) then
+    begin
+      if (i < 10) then
+        num := i;
+      if (i >= 10) then
+        shape := text;
+      Exit;
+    end;
+  end;
+end;
+
+function Box_solve(): Boolean;
+var
+  T      : Timer;
+  shape,
+  tS,Ans : String;
+  num,tN : Integer;
+  X,Y    : Integer;
+  found  : Boolean;
+  bmp    : TMufasaBitmap;
+begin
+  result := false;
+  while Box_Open() do
+  begin
+    Box_getQuestion(tN, tS);
+    Ans := '';
+
+    T.start();
+    repeat
+      bmp.init(client.getMBitmaps());
+      bmp.copyClientToBitmap(client.getIOManager, true, 140, 31, 375, 256);
+      bmp.setSize(236, 226);
+      //bmp.setSize(300, 300);
+      try
+        ProcessPicture(bmp, shape, num, 3);
+        if ((not (shape = '')) and (inRange(num, 0, 9))) then
+        if (shape = tS) then
+          Ans := toStr(num)
+        else if (num = tN) then
+          Ans := shape;
+      except
+
+      end;
+
+      bmp.Free;
+      //wait(randomRange(400,800));
+    until((not (Ans = '')) or (T.timeElapsed() > randomRange(5000,6000)));
+
+    if (not (Ans = '')) then
+    begin
+      warn('Answer is ' + ans, WT_RANDOM);
+      if findText(x, y, Ans, upchars07, intToBox(118,286,180,311)) then
+        mouseBox(intToBox(118,286,180,311), MOUSE_LEFT);
+      if FindText(x, y, Ans, upchars07, intToBox(238,286,301,311)) then
+        mouseBox(intToBox(238,286,301,311), MOUSE_LEFT);
+      if FindText(x, y, Ans, upchars07, intToBox(350,286,417,311)) then
+        mouseBox(intToBox(350,286,417,311), MOUSE_LEFT);
+      wait(randomRange(2000,3500));
+    end;
+    result := true;
+  end;
+end;

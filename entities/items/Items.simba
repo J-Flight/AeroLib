@@ -5,6 +5,139 @@ Items
 }
 
 
+type TItem = record
+    Name      : string;      // *
+    DTM       : integer;     // *
+    BMP       : integer;     // *
+    BMP_TOL   : integer;     // *
+    Wieldable : boolean;     // *
+  end;
+
+
+(*
+InvBox
+~~~~~~
+
+.. code-block:: pascal
+
+    Function invBox(i :Integer): TBox;
+
+Returns TBox of surrounding Inventory SlotBox
+1-2-3-4
+5-6-7-8
+etc.
+
+.. note::
+
+    by Boreas
+
+Example:
+
+.. code-block:: pascal
+
+    iBox := invBox(12);
+    MMouse(randomRange(iBox.x1, iBox.x2), randomRange(iBox.y1, iBox.y2), 0, 0);
+
+*)
+function invBox(I : Integer): TBox;
+var
+  Slot1, Slot6: TBox;
+begin
+  if not InRange(I, 1, 28) then
+  begin
+    Result := IntToBox(-1,-1,-1,-1);
+    Writeln('Incorrect index: ' + IntToStr(i));
+    Exit;
+  end;
+  Slot1 := IntToBox(563, 213, 594, 244);
+  Slot6 := IntToBox(605, 249, 31415, 92653);
+  Result.x1 := Slot1.X1 + ((((i + 3) mod 4)) * (Slot6.X1 - Slot1.X1));
+  Result.y1 := Slot1.Y1 + ((((i - 1) div 4)) * (Slot6.Y1 - Slot1.Y1));
+  Result.x2 := Result.x1 + (Slot1.X2 - Slot1.X1);
+  Result.y2 := Result.y1 + (Slot1.Y2 - Slot1.Y1);
+end;
+
+function pntToItem(Pnt: TPoint): Integer;
+begin
+  if not pointInBox(Pnt, AREA_INV) then
+    exit;
+  for Result := 1 to 28 do
+    if pointInBox(Pnt, invBox(result)) then
+      exit;
+  Result := 0;
+end;
+
+(*
+ItemInSlot
+~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function itemInSlot(i: Integer): Boolean;
+
+Checks if item in inventory at specified position exists
+
+.. note::
+
+    by WT-Fakawi
+
+Example:
+
+.. code-block:: pascal
+
+    for i := 1 to 28 do
+      if itemInSlot(i) then
+        Inc(Count);
+
+*)
+function itemInSlot(I: Integer): Boolean;
+var
+  X, Y: Integer;
+  TB: TBox;
+begin
+  if not inRange(I, 1, 28) then
+    Exit;
+  gameTab(TAB_INV);
+  TB := invBox(I);
+  result := findColor(x, y, clOutline_black, TB.x1, TB.y1, TB.x2, TB.y2);
+end;
+
+(*
+InvCount
+~~~~~~~~
+
+.. code-block:: pascal
+
+    function getInvCount(): Integer;
+
+Returns amount of items in your inventory
+
+.. note::
+
+    by RsN
+
+Example:
+
+.. code-block:: pascal
+
+    totalCount := InvCount;
+
+*)
+function getInvCount(): Integer;
+var
+  i: Integer;
+begin
+  Result := 0;
+  for i := 1 to 28 do
+    if (itemInSlot(I)) then
+     inc(Result);
+end;
+
+function isInvFull(): Boolean;
+begin
+  result := (getInvCount() > 27);
+end;
+
 (*
 GetItemAmount
 ~~~~~~~~~~~~
@@ -48,11 +181,6 @@ begin
   if not PointInBox(Pnt, Box) then
     Exit;
   Box := intToBox(Pnt.X-32,Pnt.Y-32,Pnt.X+32,Pnt.Y+32);
-  if Box.X1 < 0 then Box.X1 := 0;
-  if Box.Y1 < 0 then Box.Y1 := 0;
-  if Box.X2 > 764 then Box.X2 := 764;
-  if Box.Y2 > 502 then Box.Y2 := 502;
-
   if not cs_FindColorsTolerance(TPA, 65536, 0, Box, cs_CTS) then
     Exit;
 
@@ -63,7 +191,7 @@ begin
   SortATPAFromMidPoint(ATPA, Pnt);
 
   Box  := getTPABounds(ATPA[0]);
-  Col  := [65535, 65278, 16777215, 8453888];
+  Col  := [65535, 65278, 16777215, 8453888]; // Yellow, white, green and ...?
   Pnt  := Point(round((Box.X1+Box.X2)/2), Box.Y1);
   Box  := intToBox(Pnt.x-20, Pnt.y-15, Pnt.x+20, Pnt.y+15);
   TPA  := [];
@@ -72,7 +200,7 @@ begin
   for i:=0 to High(Col) do
     if cs_FindColors(TPA, Col[i], Box, cs_CTS) then
     begin
-      S := getTextAtExWrap(Box.x1, Box.y1, Box.x2, Box.y2, 0, 1, 1, Col[i], 0, StatChars07);
+      S := cs_GetTextAtEx(Box, 0, 1, 1, Col[i], 0, StatChars07, cs_CTS);
       Result := strToIntDef(GetNumbers(S), 1);
       Case I of
         2: Result := Result * 1000;
@@ -80,4 +208,109 @@ begin
       end;
       Exit;
    end;
+end;
+
+function interactSlot(Slot: Integer; action: Variant): Boolean;
+var
+  x,y : Integer;
+begin
+  result := false;
+  if ((not (action = MOUSE_MOVE)) and (not itemInSlot(Slot))) then
+    exit;
+
+  mouseBox(invBox(Slot), MOUSE_MOVE);
+  if action = MOUSE_MOVE then
+    exit(true);
+  if action = MOUSE_LEFT then
+  begin
+    fastClick(MOUSE_LEFT);
+    exit(true);
+  end;
+
+  fastClick(MOUSE_RIGHT);
+  result := waitOption(action, 200);
+end;
+
+procedure moveItemTo(Slot, targetSlot: Integer);
+var
+  b,b2 : TBox;
+begin
+  if not itemInSlot(Slot) then
+    exit;
+  b  := invBox(Slot);
+  b2 := invBox(targetSlot);
+  dragMouseBox(b, b2);
+end;
+
+(*
+SlotActivated
+~~~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function slotActivated(Slot: Integer): Boolean;
+
+Checks if item in specified inventory slot has a white outline.
+Returns True if the item has a white outline, otherwise returns false.
+
+.. note::
+
+    by marpis
+
+Example:
+
+.. code-block:: pascal
+
+    Result := ItemActivated(4);
+
+*)
+function slotActivated(Slot: Integer): Boolean;
+var
+  x,y : Integer;
+  TB  : TBox;
+begin
+  result := false;
+  if not gameTab(TAB_INV) then
+    exit;
+  TB := invBox(Slot);
+  Result := findColor(x, y, clOutline_white, TB.x1, TB.y1, TB.x2, TB.y2);
+end;
+
+function TItem.findIn(Area: TBox; var fPnt: TPoint): Boolean;
+var
+  x,y : Integer;
+begin
+  result := False;
+  gameTab(TAB_INV);
+  if DTMExists(self.DTM) then
+    result := cs_findDTM(self.DTM, x, y, Area, cs_CTS);
+  if not result then
+    if bitmapExists(self.BMP) then
+      result := cs_findBitmapToleranceIn(self.BMP, x, y, self.BMP_TOL, Area, cs_CTS);
+
+  fPnt := point(x, y);
+end;
+
+function TItem.getAmount(): Integer;
+var
+  i,c : Integer;
+  b   : Boolean;
+  pnt : TPoint;
+begin
+  result := 0;
+  gameTab(TAB_INV);
+  b := Interfaces[BANKSCREEN].isVisible();
+  if b then
+    if Self.findIn(Area_BS, pnt) then
+      exit(getItemAmount(pnt));
+
+  for i := 1 to 28 do
+    if itemInSlot(i) then
+      if Self.findIn(invBox(i), pnt) then
+      begin
+        c := getItemAmount(pnt);
+        if (c > 1) then
+          exit(c);
+        inc(Result);
+      end;
 end;

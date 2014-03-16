@@ -4,7 +4,6 @@ Boxes
 =====
 }
 
-// Import Brandon's box attributes functions
 Function TBox.Width: Integer;
 Begin
   Result := Abs(Self.X2 - Self.X1);
@@ -19,6 +18,39 @@ Function TBox.MidPoint: TPoint;
 Begin
   Result := MiddleBox(Self);
 End;
+
+Function TBox.CX: Integer;
+Begin
+  Result := round((Self.X1 + Self.X2)/2);
+End;
+
+Function TBox.CY: Integer;
+Begin
+  Result := round((Self.Y1 + Self.Y2)/2);
+End;
+
+procedure TBox.getDimensions(var W, H: Integer);
+begin
+  W := Self.X2-Self.X1;
+  H := Self.Y2-Self.Y1;
+end;
+
+// Scales the box from the center
+procedure TBox.scale(W, H: Integer);
+var
+  mPnt  : TPoint;
+  gW,gH : Integer;
+begin
+  Self.getDimensions(gW, gH);
+  if (inRange(gW, W-1, W+1) and inRange(gH, H-1, H+1)) then
+    Exit;
+
+  mPnt := Self.MidPoint;
+  Self.X1 := round(mPnt.X-(W/2));
+  Self.Y1 := round(mPnt.Y-(H/2));
+  Self.X2 := round(mPnt.X+(W/2));
+  Self.Y2 := round(mPnt.Y+(H/2));
+end;
 
 Function TBoxArray.Bounds: TBox;
 var
@@ -150,27 +182,4 @@ begin
     result := point(RandomRange(b.X1,b.x2),RandomRange(b.y1,b.y2))
   else
     result := TPA[random(length(tpa))];
-end;
-
-procedure getBoxDimensions(const B: TBox; var W, H: Integer);
-begin
-  W := B.X2-B.X1;
-  H := B.Y2-B.Y1;
-end;
-
-// Scales the box from the center
-procedure scaleBox(var B: TBox; W, H: Integer);
-var
-  mPnt  : TPoint;
-  gW,gH : Integer;
-begin
-  getBoxDimensions(B, gW, gH);
-  if (inRange(gW, W-1, W+1) and inRange(gH, H-1, H+1)) then
-    Exit;
-
-  mPnt := middleBox(B);
-  B.X1 := round(mPnt.X-(W/2));
-  B.Y1 := round(mPnt.Y-(H/2));
-  B.X2 := round(mPnt.X+(W/2));
-  B.Y2 := round(mPnt.Y+(H/2));
 end;

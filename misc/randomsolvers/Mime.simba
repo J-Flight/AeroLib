@@ -1,0 +1,22 @@
+(**
+ * Author: Coh3n & NCDS
+ * Updated 09/03/2013 - Justin
+ * Description: Returns true if player is in the random.
+ *)
+function Mime_Detect(): boolean;
+var
+  i: integer;
+begin
+  if not isLoggedIn() then
+    exit;
+
+  for i := TAB_COMBAT to TAB_MAGIC do
+    if (tabExists(i)) then
+      exit;
+  Result := (countMMDots('npc') = 1) and (not tabExists(TAB_EMOTES)) and (getMusic() = 'Artistry');
+end;
+
+function Mime_Solve(): boolean;
+begin
+  result := false;
+end;

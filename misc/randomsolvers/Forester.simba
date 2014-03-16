@@ -1,0 +1,26 @@
+(**
+ * Author: Coh3n
+ * Description: Detects if a player is in the random.
+ * Updated on 02/06/2012 - [J]ustin (Thanks J J for the report)
+ *)
+function FF_Detect(): boolean;
+var
+  Pnt : TPoint;
+  tpa : TPointArray;
+begin
+  if (countMMDots('npc') > 9) then //Possible 10 NPCS at Yanille (14+ NPCS at random event)
+    if cs_findColorsTolerance(tpa, 214809, 20, AREA_MM, cs_CTS) then // dark green tree color
+    begin
+      if Length(tpa) > 750 then
+      begin
+        Pnt := getMiniMapDots('npc').midPnt();
+        filterPointsPie(tpa,0,360,0,20,Pnt.x,Pnt.y);
+        Result := Length(tpa) < 10;
+      end;
+    end;
+end;
+
+function FF_Solve(): boolean;
+begin
+  Result := false;
+end;

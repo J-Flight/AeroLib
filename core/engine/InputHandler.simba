@@ -7,13 +7,46 @@ InputHandler
 var
   MouseSpeed: Integer;
 
-procedure getRealMousePos(var X,Y: Integer); forward;
-function getRealMousePnt: TPoint;
+function FindAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean; forward;
+procedure getRealMousePos(var X, Y : Integer);
+var
+  KMTarget, ITarget: Integer;
+begin
+  {$IFDEF SMART}
+    KMTarget := GetKeyMouseTarget;
+    ITarget := GetImageTarget;
+    FindAndSetTarget('SMART', True);
+    GetMousePos(X, Y);
+    FreeTarget(GetImageTarget);
+    SetKeyMouseTarget(KMTarget);
+    SetImageTarget(ITarget);
+
+    X := X - 3;
+    Y := Y - 25;
+  {$ELSE}
+    GetMousePos(X, Y);
+  {$ENDIF}
+end;
+
+function getRealMousePnt(): TPoint;
 var
   x,y : integer;
 begin
   getRealMousePos(X, Y);
   Result := Point(X, Y);
+end;
+
+function getMousePnt(): TPoint;
+var
+  x,y : integer;
+begin
+  getMousePos(X, Y);
+  Result := Point(X, Y);
+end;
+
+function isMouseInClient(): Boolean;
+begin
+  result := pointInBox(getRealMousePnt(), intToBox(MSX1,MSY1,MIX2,MIY2));
 end;
 
 {*******************************************************************************
@@ -151,27 +184,34 @@ begin
   MouseSpeed := MSP;
 end;
 
+function isUptextMulti(Text: TStringArray): Boolean; forward;
 {*******************************************************************************
-Procedure humanWindMouse(xs, ys, xe, ye, gravity, wind, minWait,
-  maxWait, targetArea: extended);
+Function humanWindMouse(xs, ys, xe, ye, gravity, wind, minWait,
+  maxWait, targetArea: extended): Boolean;
 By: Flight
 Description: ....
 *******************************************************************************}
-Procedure humanWindMouse(xs, ys, xe, ye, gravity, wind, minWait, maxWait, targetArea: extended);
+Function humanWindMouse(xs, ys, xe, ye, gravity, wind, minWait, maxWait, targetArea: extended; TxtArr: TStringArray = []): Boolean;
 var
   T : Timer;
   veloX,veloY,windX,windY,veloMag,dist,randomDist,lastDist,D: extended;
   lastX,lastY,MSP,W,TDist: integer;
   sqrt2,sqrt3,sqrt5,maxStep,rCnc: extended;
+  txt : TStringArray;
 begin
+  Result := False;
   MSP  := MouseSpeed;
   sqrt2:= sqrt(2);
   sqrt3:= sqrt(3);
   sqrt5:= sqrt(5);
 
+  txt := TxtArr;
   TDist := Distance(Round(xs), Round(ys), Round(xe), Round(ye));
   T.start();
   repeat
+    if length(txt) > 0 then
+      if isUpTextMulti(txt) then
+        Exit(true);
     if (T.timeElapsed>10000) then
       break;
 
@@ -229,15 +269,16 @@ begin
     W := (Random((Round(100/MSP)))*6);
     if (W < 5) then
       W := 5;
-    W := Round(W*0.9);
+    if length(txt) >= 1 then
+      W := Round(W*0.6) // Speed it up a little for compensation
+    else
+      W := Round(W*0.9);
     wait(W);
     lastdist:= dist;
   until(hypot(xs - xe, ys - ye) < 1)
 
   if (Round(xe) <> Round(xs)) or (Round(ye) <> Round(ys)) then
     MoveMouse(Round(xe), Round(ye));
-
-  MouseSpeed := MSP;
 end;
 
 {*******************************************************************************
@@ -365,8 +406,20 @@ begin
   MouseSpeed := MS;
 end;
 
+Function humanMMouseTxt(Pnt: TPoint; ranX, ranY: Integer; TxtArr: TStringArray): Boolean;
+var
+  randSpeed: extended;
+  X,Y,MS: integer;
+begin
+  Result    := False;
+  MS        := MouseSpeed;
+  randSpeed := (random(MouseSpeed) / 2.0 + MouseSpeed) / 10.0;
+  getMousePos(X, Y);
+  Result := humanWindMouse(X, Y, RandomRange(Pnt.X-ranX, Pnt.X+ranX), RandomRange(Pnt.Y-ranY,Pnt.Y+ranY), 7, 5, 10.0 / randSpeed, 15.0 / randSpeed, 10.0 * randSpeed, TxtArr);
+end;
+
 {*******************************************************************************
-procedure humanMMouse(Pnt: TPoint; ranX, ranY: Integer);
+function humanMMouse(Pnt: TPoint; ranX, ranY: Integer): Boolean;
 By: Flight
 Description:...
 *******************************************************************************}
@@ -378,7 +431,7 @@ begin
   MS        := MouseSpeed;
   randSpeed := (random(MouseSpeed) / 2.0 + MouseSpeed) / 10.0;
   getMousePos(X, Y);
-  humanWindMouse(X, Y, RandomRange(Pnt.X-ranX, Pnt.X+ranX), RandomRange(Pnt.Y-ranY,Pnt.Y+ranY), 7, 5, 10.0 / randSpeed, 15.0 / randSpeed, 10.0 * randSpeed);
+  humanWindMouse(X, Y, RandomRange(Pnt.X-ranX, Pnt.X+ranX), RandomRange(Pnt.Y-ranY,Pnt.Y+ranY), 7, 5, 10.0 / randSpeed, 15.0 / randSpeed, 10.0 * randSpeed, []);
   MouseSpeed := MS;
 end;
 
@@ -517,7 +570,7 @@ procedure fastClick(button: Integer);
 var
   x, y: integer;
 begin
-  if (button = MOUSE_MOVE) then Exit;
+  if ((button = MOUSE_MOVE) or (button = -1)) then Exit;
   getMousePos(x, y);
   holdMouse(x, y, button);
 
@@ -634,6 +687,7 @@ end;
 procedure mouse(Pnt: TPoint; rX, rY, clickType: Integer);
 begin
   humanMMouse(Pnt, rX, rY);
+  wait(randomRange(50,150));
   fastClick(clickType);
 end;
 
@@ -704,6 +758,25 @@ begin
   Result := pointInBox(Point(X, Y), Box);
 end;
 
+procedure dragMouseBox(BoxA, BoxB: TBox);
+var
+  x,y : Integer;
+begin
+  if not mouseInBox(BoxA) then
+  begin
+    mouseBox(BoxA, MOUSE_MOVE);
+    Wait(150 + Random(20));
+  end;
+
+  getMousePos(x, y);
+  HoldMouse(x, y, MOUSE_LEFT);
+  Wait(250 + Random(320));
+  mouseBox(BoxB, MOUSE_MOVE);
+  Wait(250 + Random(120));
+  getMousePos(x, y);
+  ReleaseMouse(x, y, MOUSE_LEFT);
+end;
+
 procedure mouseCircle(cx, cy, radius, clickType: Integer);
 var
   rPnt : TPoint;
@@ -724,38 +797,6 @@ begin
     3: missMouse(rPnt, 0,0);
   end;
   fastClick(clickType);
-end;
-
-(*
-DragMouse
-~~~~~~~~~
-
-.. code-block:: pascal
-
-    procedure dragMouse(StartX, StartY, SRandX, SRandY, EndX, EndY, ERandX, ERandY: Integer);
-
-Leftclicks StartX, StartY and drags mouse to EndX, EndY.
-
-.. note::
-
-    by NaumanAkhlaQ (modded by Flight)
-
-Example:
-
-.. code-block:: pascal
-
-*)
-procedure dragMouse(StartX, StartY, SRandX, SRandY, EndX, EndY, ERandX, ERandY: Integer);
-begin
-  missMouse(Point(StartX,StartY), SRandX, SRandY);
-  Wait(150 + Random(20));
-  getMousePos(StartX, StartY);
-  holdMouse(StartX, StartY, mouse_left);
-  Wait(250 + Random(320));
-  brakeMMouse(Point(EndX,EndY), ERandX, ERandY, True);
-  Wait(250 + Random(120));
-  getMousePos(EndX, EndY);
-  releaseMouse(EndX, EndY, mouse_left);
 end;
 
 Procedure typeByte(B: Byte);

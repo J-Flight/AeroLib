@@ -8,9 +8,6 @@ var
   WorldArray: Array of Integer;
   ArrayNumber: Integer;
 
-function logoutPlayer(): Boolean; forward;
-function loginPlayer(Safe: Boolean): Boolean; forward;
-
 (*
 ExitWorldScreen
 ~~~~~~~~~~~~~~~
@@ -32,11 +29,11 @@ Example:
 *)
 function exitWorldScreen(): Boolean;
 begin
-  if not (Me.getLoginState() = LS_WORLDSCREEN) then
+  if not (getLoginState() = LS_WORLDSCREEN) then
     Exit(True);
 
   mousebox(intToBox(719,6,750,15), MOUSE_LEFT);
-  result := not (Me.getLoginState() = LS_WORLDSCREEN);
+  result := not (getLoginState() = LS_WORLDSCREEN);
 end;
 
 (*
@@ -62,7 +59,7 @@ function getCurrentWorldLS(): integer;
 var
   txt :  String;
 begin
-  if not (Me.getLoginState() = LS_LOGGEDOUT) then
+  if not (getLoginState() = LS_LOGGEDOUT) then
     exit(-1);
   txt := cs_GetTextAtEx(intToBox(61,465,88,480), 0, 5, 2, 16777215, 2, 'UpChars07', cs_CTS);
   result := strToIntDef(txt, 0);
@@ -91,18 +88,18 @@ function openWorldScreen(): Boolean;
 var
   T : Timer;
 begin
-  if (Me.getLoginState() = LS_WORLDSCREEN) then
+  if (getLoginState() = LS_WORLDSCREEN) then
     exit(true);
   mousebox(intToBox(13,468,98,491), MOUSE_LEFT);
 
   T.start();
   repeat
     wait(100);
-    if (Me.getLoginState() = LS_WORLDSCREEN) then
+    if (getLoginState() = LS_WORLDSCREEN) then
       break;
   until(T.timeElapsed() >= 6000);
 
-  result := (Me.getLoginState() = LS_WORLDSCREEN);
+  result := (getLoginState() = LS_WORLDSCREEN);
 end;
 
 (*
@@ -255,7 +252,7 @@ Example:
 *)
 Function orderWorlds(): boolean;
 begin
-  if not (Me.getLoginState() = LS_WORLDSCREEN)then
+  if not (getLoginState() = LS_WORLDSCREEN)then
     exit;
 
   mousebox(intToBox(297,8,306,13), MOUSE_LEFT);
@@ -286,7 +283,7 @@ var
   txt: string;
   checkbox: tbox;
 begin
-  if not (Me.getLoginState() = LS_WORLDSCREEN) then
+  if not (getLoginState() = LS_WORLDSCREEN) then
     exit(false);
   checkbox := worldIndexToMSBox(World);
   txt := cs_GetTextAtEx(intToBox(checkbox.x1+44,checkbox.y1,checkbox.x2-10,checkbox.y2), 0, 4, 2, 16777215, 0, 'StatChars07', cs_CTS);
@@ -316,7 +313,7 @@ Example:
 function getWorldBox(W: integer): TBox;
 begin
   result:=inttobox(0,0,0,0);
-  if not (Me.getLoginState() = LS_WORLDSCREEN) then
+  if not (getLoginState() = LS_WORLDSCREEN) then
     Exit;
 
   if not worldsOrdered() then
@@ -369,32 +366,27 @@ begin
   if (getCurrentWorldLS() = w) then
     exit(true);
 
-  if Length(WorldArray) < 1 then
-    worldarray :=
-    [301,320,341,360,+
-     302,321,342,361,+
-     303,322,343,362,+
-     304,344,365,+      // 325 removed
-     305,326,345,366,+
-     306,327,346,367,+
-     309,328,349,368,+
-     310,329,350,369,+
-     311,330,351,370,+
-     312,333,352,373,+
-     313,334,353,374,+
-     314,335,354,375,+
-     317,336,357,376,+
-     318,358,377,+      // 337 removed
-     319,338,359,378];
-  for i:=0 to high(worldarray) do
-  begin
-    if worldarray[i]=W then
-    begin
-      arraynumber := i;
-      validworld := true;
-      break;
-    end
-  end;
+  worldarray :=
+  [301,320,341,360,+
+   302,321,342,361,+
+   303,322,343,362,+
+   304,344,365,+      // 325 removed
+   305,326,345,366,+
+   306,327,346,367,+
+   309,328,349,368,+
+   310,329,350,369,+
+   311,330,351,370,+
+   312,333,352,373,+
+   313,334,353,374,+
+   314,335,354,375,+
+   317,336,357,376,+
+   318,358,377,+      // 337 removed
+   319,338,359,378];
+
+  if inIntArray(worldarray, W) then
+    validworld := true
+  else
+    validworld := false;
 
   if not validworld then
   begin
@@ -405,7 +397,7 @@ begin
 
   if openWorldScreen() then
   begin
-    worldbox:= getWorldBox(I);
+    worldbox:= getWorldBox(w);
     if worldbox.x1 = 0 then
     begin
       exitWorldScreen();
@@ -418,11 +410,11 @@ begin
   T.start();
   repeat
     wait(randomrange(400,500));
-    if not (Me.getLoginState() = LS_WORLDSCREEN) then
+    if not (getLoginState() = LS_WORLDSCREEN) then
       break;
   until(T.timeElapsed() > 6000);
 
-  if (Me.getLoginState() = LS_WORLDSCREEN) then
+  if (getLoginState() = LS_WORLDSCREEN) then
     exitWorldScreen();
 
   wait(randomrange(400,500));

@@ -1,0 +1,57 @@
+{
+====
+Misc
+====
+}
+
+Var
+  NicknameBMP,EC_ScreenText,
+  EX_ScreenText : Integer;
+
+function foundEvilChicken(): Boolean;
+var
+  x,y: Integer;
+begin
+  Result := False;
+  if findColor(x, y, 65535, MSX1, MSY1, MSX2, MSY2) then
+    if findBitmapMaskTolerance(EC_ScreenText, x, y, MSX1, MSY1, MSX2, MSY2, 0, 40) then
+      Result := findBitmapMaskTolerance(NickNameBMP, x, y, MSX1, MSY1, MSX2, MSY2, 0, 40);
+end;
+
+function foundStrangePlant(out Pnt: TPoint): Boolean;
+var
+  tpa : TPointArray;
+  cs  : cs_TColorSettings;
+begin
+  cs := cs_ToColorSettings(2, 0.34, 1.17);
+  cs_findColorsTolerance(tpa, 612431, 4, intToBox(MSCx-100,MSCy-100,MSCx+100,MSCy+100), cs);
+  result := (length(tpa) > 50);
+
+  if Result then
+    Pnt := tpa.midPnt();
+end;
+
+function foundSwarm(out Pnt: TPoint): Boolean;
+var
+  i,C  : Integer;
+  tpa  : TPointArray;
+  atpa : T2DPointArray;
+  cs   : cs_TColorSettings;
+begin
+  if not Me.inCombat() then Exit(false);
+  cs := cs_ToColorSettings(2, 0.29, 3.23);
+  cs_findColorsTolerance(tpa, 996435, 3, intToBox(MSCx-50,MSCy-50,MSCx+50,MSCy+50), cs);
+  if not inRange(length(tpa), 10, 100) then Exit(false);
+
+  atpa := clusterTPA(tpa, 7);
+  for i:=0 to high(atpa) do
+  begin
+    C := getPixelShiftTPA(100, atpa[i]);
+    result := (C > 1);
+    if Result then
+    begin
+      Pnt := tpa.midPnt();
+      exit(true);
+    end;
+  end;
+end;
