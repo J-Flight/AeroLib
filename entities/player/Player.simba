@@ -78,7 +78,7 @@ begin
     B.Y2   := Pnt.Y;
     Result := foundHPBarIn(B);
   end else
-    Result := foundHPBarIn(intToBox(220, 120, 295, 168));
+    Result := foundHPBarIn(toBox(220, 120, 295, 168));
 end;
 
 Procedure definePlayerModel(maxW, maxH: Integer);
@@ -138,6 +138,21 @@ begin
 
   Me.ModelSet := True;
   warn('Player entity defined', WT_CORE);
+end;
+
+function getDisplayName(): String;
+var
+  xMod,Y,B : Integer;
+begin
+  B := BitmapFromString(3, 15, 'meJxLKGtIAKPGuWs6l25uXrAOjoA' +
+        'iLYs3AQWBDLggUARCMjAwIIsD2VgRRAqoGKgFLlIzexVcF5AEWgEA' +
+        'K3dMew==');
+
+  cs_findBitmapToleranceIn(B, xMod, Y, 10, toBox(10,458,150,478), cs_CTS);
+  freeBitmap(B);
+  if Y < 458 then Exit;
+
+  result := getTextAtExWrap(10, 460, xMod, 476, 0, 5, 2, 0, 1, 'SmallChars07');
 end;
 
 (*

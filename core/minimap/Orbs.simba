@@ -11,8 +11,8 @@ var
   tpa : TPointArray;
 begin
   Result := 100;
-  cs_findColorsPie(tpa, 1184274, 13, 0, 360, 0, 15, 556, 58, intToBox(541,44,571,72), cs_CTS);
-  if length(tpa) < 1 then Exit;
+  if not createCol(1184274,13).findPie(toBox(541,44,571,72), 0, 360, 0, 15, 556, 58, tpa) then
+    exit;
   sortTPAByY(tpa, False);
   result := (((70-tpa[0].y)*4)-2);
   if result < 0 then result := 0;
@@ -24,7 +24,7 @@ var
   tpa : TPointArray;
 begin
   Result := 100;
-  cs_findColorsPie(TPA, 1184274, 13, 0, 360, 0, 15, 556, 102, intToBox(541,88,571,115), cs_CTS);
+  createCol(1184274,13).findPie(toBox(541,88,571,115), 0, 360, 0, 15, 556, 102, tpa);
   l := (length(tpa)-10);
   if l < 0 then l := 0;
   result := round((100-(l/316)*100));
@@ -34,7 +34,7 @@ function getCurrentHealth(): Integer;
 var
   tpa : TPointArray;
 begin
-  tpa    := returnTPAExceptColors([4938344, 0], [20, 0], intToBox(522,56,541,69));
+  tpa    := returnTPAExceptColors([4938344, 0], [20, 0], toBox(522,56,541,69));
   result := strToIntDef(getTextATPA(clusterTPAEx(tpa,1,10), 5, 'StatChars07'), 0);
 end;
 
@@ -42,7 +42,7 @@ function getPrayerPoints(): Integer;
 var
   tpa : TPointArray;
 begin
-  tpa    := returnTPAExceptColors([4938344, 0], [20, 0], intToBox(522,100,541,112));
+  tpa    := returnTPAExceptColors([4938344, 0], [20, 0], toBox(522,100,541,112));
   result := strToIntDef(getTextATPA(clusterTPAEx(tpa,1,10), 5, 'StatChars07'), 0);
 end;
 
@@ -50,7 +50,7 @@ function getRunEnergy(): Integer;
 var
   tpa : TPointArray;
 begin
-  tpa    := returnTPAExceptColors([4938344, 0], [20, 0], intToBox(546,136,566,148));
+  tpa    := returnTPAExceptColors([4938344, 0], [20, 0], toBox(546,136,566,148));
   result := strToIntDef(getTextATPA(clusterTPAEx(tpa,1,10), 5, 'StatChars07'), 0);
 end;
 
@@ -58,19 +58,19 @@ function isUsingRun(): Boolean;
 var
   tpa : TPointArray;
 begin
-  result := cs_findColorsPie(TPA, 6806252, 20, 0, 360, 0, 72, 582, 140, intToBox(571,127,595,152), cs_CTS);
+  result := createCol(6806252,20).findPie(toBox(571,127,595,152), 0, 360, 0, 72, 582, 140, tpa);
 end;
 
 function isPoisoned(): Boolean;
 var
   tpa : TPointArray;
 begin
-  result := cs_findColorsPie(TPA, 83208, 30, 0, 360, 0, 72, 556, 140, intToBox(544,46,567,69), cs_CTS);
+  result := createCol(83208,30).findPie(toBox(544,46,567,69), 0, 360, 0, 72, 556, 140, tpa);
 end;
 
 function isUsingQP(): Boolean;
 begin
-  result := (cs_countColorTolerance(14610138, 20, intToBox(544,90,568,114), cs_CTS) < 30);
+  result := (createCol(14610138,20).count(toBox(544,90,568,114)) < 30);
 end;
 
 function toggleRunning(Enable: Boolean): Boolean;
@@ -85,13 +85,13 @@ begin
       exit(true)
     else
     begin
-      mouseBox(intToBox(545,130,590,150), MOUSE_LEFT);
+      mouseBox(toBox(545,130,590,150), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
     if isUsingRun() then
     begin
-      mouseBox(intToBox(545,130,590,150), MOUSE_LEFT);
+      mouseBox(toBox(545,130,590,150), MOUSE_LEFT);
       Result := True;
     end;
 end;
@@ -108,13 +108,13 @@ begin
       exit(true)
     else
     begin
-      mouseBox(intToBox(522,96,565,113), MOUSE_LEFT);
+      mouseBox(toBox(522,96,565,113), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
     if isUsingRun() then
     begin
-      mouseBox(intToBox(522,96,565,113), MOUSE_LEFT);
+      mouseBox(toBox(522,96,565,113), MOUSE_LEFT);
       Result := True;
     end;
 end;

@@ -490,15 +490,15 @@ begin
 end;
 
 //by Home
-function areaToBoxArray(const AreaX1, AreaY1, AreaX2, AreaY2, Width, Height: Integer): TBoxArray;
+function areaToBoxArray(const Area: TBox; const Width, Height: Integer): TBoxArray;
 var
   AreaW,AreaH,
   BoxX,BoxY,
   x,y,i : Integer;
 begin
   // Calculate the area dimensions
-  AreaW := AreaX2 - AreaX1 + 1;
-  AreaH := AreaY2 - AreaY1 + 1;
+  AreaW := Area.X2 - Area.X1 + 1;
+  AreaH := Area.Y2 - Area.Y1 + 1;
 
   // Calculate the number of boxes in each dimension
   BoxX := AreaW div Width;
@@ -514,10 +514,10 @@ begin
   for y := 0 to BoxY - 1 do
     for x := 0 to BoxX - 1 do
     begin
-      Result[i] := IntToBox(AreaX1 + x * Width,
-        AreaY1 + y * Height,
-        Min(AreaX2, AreaX1 + (x + 1) * Width - 1),
-        Min(AreaY2, AreaY1 + (y + 1) * Height - 1));
+      Result[i] := toBox(Area.X1 + x * Width,
+        Area.Y1 + y * Height,
+        Min(Area.X2, Area.X1 + (x + 1) * Width - 1),
+        Min(Area.Y2, Area.Y1 + (y + 1) * Height - 1));
       Inc(i);
     end;
 end;
@@ -535,8 +535,8 @@ begin
   if not isLoggedIn() then
     Exit;
 
-  PBox := TPAFromBox(IntToBox(240, 130, 275, 185));
-  TBA  := areaToBoxArray(MSX1, MSY1, MSX2, MSY2, 35, 35);
+  PBox := TPAFromBox(toBox(240, 130, 275, 185));
+  TBA  := areaToBoxArray(AREA_MS, 35, 35);
   TIA  := pixelShiftMulti(TBA, 300);
 
   for H:=0 to High(TBA) do
@@ -607,10 +607,10 @@ var
 begin
   GetClientDimensions(W, H);
   SetArrayLength(B, 4);
-  B[0] := IntToBox(-300, -300, W, 0); //top
-  B[1] := IntToBox(0, H, W, H +300); //bottom
-  B[2] := IntToBox(0-300, 0, 0, H); //left
-  B[3] := IntToBox(W, 0, W +300, H); //right
+  B[0] := toBox(-300, -300, W, 0); //top
+  B[1] := toBox(0, H, W, H +300); //bottom
+  B[2] := toBox(0-300, 0, 0, H); //left
+  B[3] := toBox(W, 0, W +300, H); //right
 
   case Lowercase(Direction) of
     'top': i := 0;

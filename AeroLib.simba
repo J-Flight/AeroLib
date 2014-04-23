@@ -1,12 +1,13 @@
-{$include AeroLib/core/Globals.simba}
-{$include AeroLib/core/engine/Color.simba}
 {$include AeroLib/core/engine/Boxes.simba}
+{$include AeroLib/core/Globals.simba}
 {$include AeroLib/core/engine/TPA.simba}
+{$include AeroLib/core/engine/Color.simba}
 {$include AeroLib/core/engine/DTM.simba}
 {$include AeroLib/core/engine/Time.simba}
 {$include AeroLib/core/engine/Math.simba}
 {$include AeroLib/core/engine/InputHandler.simba}
-{$include AeroLib/core/engine/SimbaExt.simba}
+{$include AeroLib/core/engine/SimbaEx.simba}
+{$include AeroLib/core/engine/ColorEx.simba}
 
 {$include AeroLib/misc/Graphics.simba}
 {$include AeroLib/misc/Debugging.simba}
@@ -28,6 +29,9 @@
 {$include AeroLib/entities/player/Login.simba}
 {$include AeroLib/entities/player/WorldHandler.simba}
 {$include AeroLib/core/Bank.simba}
+
+{$include AeroLib/entities/npc/NPC.simba}
+{$include AeroLib/entities/object/Object.simba}
 
 {$include AeroLib/entities/items/Items.simba}
 
@@ -83,10 +87,14 @@ begin
   AL_checkVersion();
   setupGauss();
   AL_setBoxes();
+  loadObjDB();
 
   MouseSpeed := 20;
   ocr_LoadFont(AppPath + 'Fonts\UpChars07_s\', UpFont);
   addOnTerminate('freeSFonts');
+
+  setLength(IgnoreWorlds, 5);
+  IgnoreWorlds := [308, 316, 325, 337, 365];
   setupInterfaces();
   setupRandoms();
 

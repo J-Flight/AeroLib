@@ -5,7 +5,7 @@ WorldHandler
 }
 
 var
-  WorldArray: Array of Integer;
+  WorldArray: TIntegerArray;
   ArrayNumber: Integer;
 
 (*
@@ -32,7 +32,7 @@ begin
   if not (getLoginState() = LS_WORLDSCREEN) then
     Exit(True);
 
-  mousebox(intToBox(719,6,750,15), MOUSE_LEFT);
+  mousebox(toBox(719,6,750,15), MOUSE_LEFT);
   result := not (getLoginState() = LS_WORLDSCREEN);
 end;
 
@@ -61,7 +61,7 @@ var
 begin
   if not (getLoginState() = LS_LOGGEDOUT) then
     exit(-1);
-  txt := cs_GetTextAtEx(intToBox(61,465,88,480), 0, 5, 2, 16777215, 2, 'UpChars07', cs_CTS);
+  txt    := cs_GetTextAtEx(toBox(61,465,88,480), 0, 5, 2, 16777215, 2, 'UpChars07', cs_CTS);
   result := strToIntDef(txt, 0);
 end;
 
@@ -90,7 +90,7 @@ var
 begin
   if (getLoginState() = LS_WORLDSCREEN) then
     exit(true);
-  mousebox(intToBox(13,468,98,491), MOUSE_LEFT);
+  mousebox(toBox(13,468,98,491), MOUSE_LEFT);
 
   T.start();
   repeat
@@ -124,7 +124,7 @@ Example:
 *)
 function worldIndexToMSPoint(Index: Integer): TPoint;
 begin
-  Index := Index ;
+  Index  := Index ;
   Result := Point(200 + (Index mod 4) * 94, 86 + Floor(Index div 4) * 24);
 end;
 
@@ -255,7 +255,7 @@ begin
   if not (getLoginState() = LS_WORLDSCREEN)then
     exit;
 
-  mousebox(intToBox(297,8,306,13), MOUSE_LEFT);
+  mousebox(toBox(297,8,306,13), MOUSE_LEFT);
   result := true;
 end;
 
@@ -286,7 +286,7 @@ begin
   if not (getLoginState() = LS_WORLDSCREEN) then
     exit(false);
   checkbox := worldIndexToMSBox(World);
-  txt := cs_GetTextAtEx(intToBox(checkbox.x1+44,checkbox.y1,checkbox.x2-10,checkbox.y2), 0, 4, 2, 16777215, 0, 'StatChars07', cs_CTS);
+  txt := cs_GetTextAtEx(toBox(checkbox.x1+44,checkbox.y1,checkbox.x2-10,checkbox.y2), 0, 4, 2, 16777215, 0, 'StatChars07', cs_CTS);
   result:= arrinstr(['FULL','ENLL','FNLL','EULL'],txt);
 end;
 
@@ -312,7 +312,7 @@ Example:
 *)
 function getWorldBox(W: integer): TBox;
 begin
-  result:=inttobox(0,0,0,0);
+  result:=tobox(0,0,0,0);
   if not (getLoginState() = LS_WORLDSCREEN) then
     Exit;
 
@@ -370,7 +370,7 @@ begin
   [301,320,341,360,+
    302,321,342,361,+
    303,322,343,362,+
-   304,344,365,+      // 325 removed
+   304,344,365,325,+
    305,326,345,366,+
    306,327,346,367,+
    309,328,349,368,+
@@ -380,7 +380,7 @@ begin
    313,334,353,374,+
    314,335,354,375,+
    317,336,357,376,+
-   318,358,377,+      // 337 removed
+   318,358,377,337,+
    319,338,359,378];
 
   if inIntArray(worldarray, W) then
@@ -450,7 +450,7 @@ begin
   [301,320,341,360,+
    302,321,342,361,+
    303,322,343,362,+
-   304,344,365,+      // 325 removed
+   304,344,365,325,+
    305,326,345,366,+
    306,327,346,367,+
    309,328,349,368,+
@@ -460,7 +460,7 @@ begin
    313,334,353,374,+
    314,335,354,375,+
    317,336,357,376,+
-   318,358,377,+      // 337 removed
+   318,358,377,337,+
    319,338,359,378];
   H := Random(High(WorldArray));
 
@@ -493,7 +493,7 @@ begin
   result := getCurrentWorldLS = w;
   if not result then
     Result := selectWorld(W);
-  if Length(Me.WorldList) > 0 then
-    Me.WorldList[0]:=W;
+  //if Length(Me.WorldList) > 0 then
+    //Me.WorldList[0]:=W;
   loginPlayer(Safe);
 end;

@@ -789,7 +789,7 @@ begin
   if Col = 0 then
     Exit;
 
-  cs_findColorsTolerance(P, Col, 0, AREA_MM, cs_CTS);
+  createCol(Col,0).findAllIn(AREA_MM, P);
   aP := clusterTPA(P, 10);
   Hi := High(aP);
   loadSymbolBitmapColor(LowerCase(SymbolName));

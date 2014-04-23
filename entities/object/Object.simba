@@ -1,0 +1,226 @@
+{
+======
+Object
+======
+}
+
+type TMSObject = record
+  Name       : String;
+  UpText     : TStringArray;
+  InnerCols  : Array of TColEx;
+  OuterCols  : Array of TColEx;
+end;
+
+Const
+  PATH_OBJDB = IncludePath+'AeroLib/entities/object/ObjectDB.txt';
+
+Var
+  LoadedObjList : Array of TMSObject;
+
+{==============================================================================]
+  toObj (function)
+  * Explanation : Creates a TMSObject type
+  * Parameters  :
+    -Name   : Name to assign to the TMSObject
+    -UpText : Array of UpText to check while searching for object
+    -InnerCols : Array of TColEx to search for (most unique colors of the Obj)
+    -OuterCols : Array of TColEx near with the InnerCols
+[==============================================================================}
+
+function toObj(Name: string; UpText: TStringArray; InnerCols, OuterCols: Array of TColEx): TMSObject;
+begin
+  Result.Name      := Name;
+  Result.UpText    := Uptext;
+  Result.InnerCols := InnerCols;
+  Result.OuterCols := OuterCols;
+end;
+
+function TMSObject.doesExist(): Boolean;
+var
+  i : Integer;
+begin
+  for i:=0 to high(LoadedObjList) do
+    if (LoadedObjList[i].Name = Self.Name) then
+      Exit(True);
+end;
+
+procedure saveObjDB(Obj: TMSObject; Force: Boolean);
+var
+  sIndex    : String;
+  tmpI,tmpO : TColEx;
+  i,h,count : integer;
+begin
+  if not Force then
+    if Obj.doesExist() then
+    begin
+      warn('TMSObject ('+Obj.Name+') already exists', WT_CORE);
+      Exit;
+    end;
+
+// Check if index already exists
+  sIndex := readINI('ObjectDB_Main', 'Count', PATH_OBJDB);
+
+// Increase total count
+  sIndex := toStr(strToInt(sIndex)+1);
+  writeINI('ObjectDB_Main', 'Count', sIndex, PATH_OBJDB);
+
+// Write object name & uptext
+  writeINI('MSObj_'+sIndex, 'Name', Obj.Name, PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'UpText(C)', toStr(length(Obj.UpText)), PATH_OBJDB);
+  for i := 0 to high(Obj.UpText) do
+    WriteINI('MSObj_'+sIndex, 'UpText[' + intToStr(I) + ']', Obj.UpText[i], PATH_OBJDB);
+// Append TMSObject type
+  tmpI := Obj.InnerCols[0];
+  tmpO := Obj.OuterCols[0];
+// MSObj inner color
+  writeINI('MSObj_'+sIndex, 'ColI', toStr(tmpI.Col), PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'TolI', toStr(tmpI.Tol), PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'hModI', toStr(tmpI.hMod), PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'sModI', toStr(tmpI.sMod), PATH_OBJDB);
+// MSObj outer color
+  writeINI('MSObj_'+sIndex, 'ColO', toStr(tmpO.Col), PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'TolO', toStr(tmpO.Tol), PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'hModO', toStr(tmpO.hMod), PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'sModO', toStr(tmpO.sMod), PATH_OBJDB);
+end;
+
+procedure saveObjDB(Obj: TMSObject); overload;
+begin
+  saveObjDB(Obj, False);
+end;
+
+procedure loadObjDB();
+var
+  sIndex    : String;
+  i,h,count : Integer;
+  tmpObj    : TMSObject;
+begin
+  sIndex := readINI('ObjectDB_Main', 'Count', PATH_OBJDB);
+  if (strToInt(sIndex) < 1) then Exit;
+
+  for i:=1 to strToInt(sIndex) do
+  begin
+    setArrayLength(LoadedObjList, Length(LoadedObjList)+1);
+
+    with tmpObj do
+    begin
+      Name   := readINI('MSObj_'+sIndex, 'Name', PATH_OBJDB);
+      count  := strToIntDef(readINI('MSObj_'+sIndex, 'UpText(C)', PATH_OBJDB), 0);
+
+      setArrayLength(UpText, count);
+      for h:=0 to (count-1) do
+        UpText[h] := readINI('MSObj_'+sIndex, 'UpText[' + intToStr(h) + ']', PATH_OBJDB);
+
+      setLength(InnerCols, 1);
+      setLength(OuterCols, 1);
+      InnerCols[0].Col  := strToInt(readINI('MSObj_'+sIndex, 'ColI', PATH_OBJDB));
+      InnerCols[0].Tol  := strToInt(readINI('MSObj_'+sIndex, 'TolI', PATH_OBJDB));
+      InnerCols[0].hMod := strToFloat(readINI('MSObj_'+sIndex, 'hModI', PATH_OBJDB));
+      InnerCols[0].sMod := strToFloat(readINI('MSObj_'+sIndex, 'sModI', PATH_OBJDB));
+      OuterCols[0].Col  := strToInt(readINI('MSObj_'+sIndex, 'ColO', PATH_OBJDB));
+      OuterCols[0].Tol  := strToInt(readINI('MSObj_'+sIndex, 'TolO', PATH_OBJDB));
+      OuterCols[0].hMod := strToFloat(readINI('MSObj_'+sIndex, 'hModO', PATH_OBJDB));
+      OuterCols[0].sMod := strToFloat(readINI('MSObj_'+sIndex, 'sModO', PATH_OBJDB));
+    end;
+
+    LoadedObjList[High(LoadedObjList)] := tmpObj;
+  end;
+
+  if (strToInt(sIndex) >= 2) then
+    warn('Loaded '+sIndex+' MSObjects.', WT_CORE)
+  else
+    warn('Loaded '+sIndex+' MSObject.', WT_CORE);
+end;
+
+function getMSObjByName(ObjName: String): TMSObject;
+var
+  i : Integer;
+begin
+  for i:=0 to high(LoadedObjList) do
+    if (LoadedObjList[i].Name = ObjName) then
+      Exit(LoadedObjList[i]);
+end;
+
+function findMSObject(Obj: TMSObject; DistMod: Integer; var Pnt: TPoint): Boolean;
+var
+  i,h     : Integer;
+  tpa,tmp : TPointArray;
+  atpaI,
+  atpaO   : T2DPointArray;
+begin
+  if length(Obj.InnerCols) < 1 then Exit(false);
+  for i:=0 to high(Obj.InnerCols) do
+    if Obj.InnerCols[i].findAllIn(AREA_MS, tpa) then break;
+
+  if length(tpa) < 1 then Exit(false);;
+  atpaI := clusterTPA(tpa, DistMod);
+  tpa   := [];
+  if length(Obj.OuterCols) < 1 then
+  begin
+    for i:=0 to high(atpaI) do
+    begin
+      setArrayLength(tpa, Length(tpa)+1);
+      tpa[High(tpa)] := atpaI[i].midPnt();
+    end;
+  end else
+  begin
+    for i:=0 to high(Obj.OuterCols) do
+      if Obj.OuterCols[i].findAllIn(AREA_MS, tpa) then break;
+
+    if length(tpa) < 1 then Exit(false);
+    atpaO := clusterTPA(tpa, DistMod);
+    tpa   := [];
+
+    for i:=0 to high(atpaI) do
+      for h:=0 to high(atpaO) do
+      begin
+        tmp := CopyTPA(atpaI[i]);
+        FilterTPADistTPA(tmp, 0, DistMod, atpaO[h]);
+        if length(tmp) > 0 then
+        begin
+          setArrayLength(tpa, Length(tpa)+1);
+          tpa[High(tpa)] := tmp.midPnt();
+        end;
+      end;
+  end;
+
+  sortTPAFrom(tpa, point(MSCX,MSCY));
+
+  if (length(Obj.UpText) < 1)then
+  begin
+    Pnt := tpa[0];
+    exit(true);
+  end;
+
+  for i:=0 to high(tpa) do
+  begin
+    missMouse(tpa[i], 0, 0);
+    if waitUpTextMulti(Obj.UpText, 200) then
+    begin
+      Pnt := getMousePnt();
+      exit(true);
+    end;
+  end;
+end;
+
+function findMSObject(Obj: TMSObject; var Pnt: TPoint): Boolean; overload;
+begin
+  result := findMSObject(Obj, 10, Pnt);
+end;
+
+function findMSObjectSimple(Cols: TIntegerArray; UpTextArray: TStringArray): Boolean;
+var
+  pnt    : TPoint;
+  tmpObj : TMSObject;
+begin
+  if (length(Cols) < 1) then Exit(false);
+
+  with tmpObj do
+  begin
+    UpText := UpTextArray;
+    setLength(InnerCols, 1);
+    InnerCols[0].autoCreate(Cols);
+  end;
+
+  result := findMSObject(tmpObj, pnt);
+end;

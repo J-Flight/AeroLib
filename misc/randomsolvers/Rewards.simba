@@ -82,9 +82,9 @@ end;
  *)
 function RD_SolveXP(x, y: integer; uptext: string): boolean;
 var
-  Box   : TBox;
-  Slot  : TPoint;
-  skill : integer;
+  Box    : TBox;
+  Slot,p : TPoint;
+  skill  : integer;
 begin
   humanMMouse(point(x,y), 3, 3);
   if (waitUptext(uptext, 300)) then
@@ -93,7 +93,7 @@ begin
     warn('Clicked XP reward', WT_RANDOM);
 
 // the color of the HP logo
-    if (not waitFindColor(x, y, 85981, 5, AREA_MS, 5000)) then
+    if (not waitFindColor(p, 85981, 5, AREA_MS, 5000)) then
     begin
       warn('XP reward could not open', WT_RANDOM);
       exit(false);

@@ -39,7 +39,8 @@ Example:
 *)
 function setChat(state: string; chat: Integer): Boolean;
 var
-   x, y, mx, Color: Integer;
+  pnt : TPoint;
+  mx, Color: Integer;
 begin
   result := false;
   mx := 166 + (chat * 65); // adjust for use w/o game (has no options in OSRS)
@@ -61,7 +62,7 @@ begin
   end;
 
   // slightly adjust new coordinates
-  if (not findColor(x, y, Color, mx - 10, 490, mx + 10, 500)) then
+  if (not createCol(Color, 1).findIn(toBox(mx-10,490,mx+10,500), pnt)) then
   begin
     mouse(point(mx,495), 5, 5, MOUSE_RIGHT);
     Wait(RandomRange(50, 150));
@@ -74,7 +75,7 @@ begin
       end;
 
       Wait(RandomRange(50, 150));
-      Result := findColor(x, y, Color, mx - 10, 490, mx + 10, 500);
+      Result := createCol(Color, 1).findIn(toBox(mx-10,490,mx+10,500), pnt);
     end else
       Result := waitOption(Capitalize(State), 300);
   end;
@@ -179,8 +180,9 @@ begin
   Result := false;
 
   // only 1 blue color in chat.
-  cs_findColorsTolerance(bTxt, 16711680, 10, AREA_CB, cs_CTS);
-  cs_findColorsTolerance(wTxt, 16777215, 30, AREA_CB, cs_CTS);
+  createCol(16711680, 10).findAllIn(AREA_CB, bTxt);
+  createCol(16777215, 30).findAllIn(AREA_CB, wTxt);
+
   SearchTPA := combineTPA(bTxt, wTxt);
   if length(SearchTPA) < 1 then
     Exit(false);
@@ -213,10 +215,10 @@ var
   T : Timer;
   C : Integer;
 begin
-  C := countColor(0, MCX1, MCY1, MCX2, MCY2);
+  C := createCol(0,1).count(AREA_CB);
   T.start();
   while T.timeElapsed() < 5000 do
-    if (countColor(0, MCX1, MCY1, MCX2, MCY2) <> C) then
+    if (createCol(0,1).count(AREA_CB) <> C) then
       Exit(true);
 end;
 
@@ -228,8 +230,8 @@ var
   B   : TBox;
   pnt : TPoint;
 begin
-  if (not cs_findColorsTolerance(TPA, 16711680, 30, intToBox(230,443,381,457), cs_CTS) and
-    (not cs_findColorsTolerance(TPA, 16777215, 30, intToBox(230,443,381,457), cs_CTS)))  then
+  if ((not createCol(16711680, 30).findAllIn(toBox(230,443,381,457), TPA)) and
+    (not createCol(16777215, 30).findAllIn(toBox(230,443,381,457), TPA)))  then
     Exit(False);
   if length(TPA) < 1 then Exit(False);
 
@@ -332,7 +334,7 @@ var
 begin
   Result := '';
   P := getTextCoords(Line);
-  if (cs_findColorsTolerance(cArr, TextCol, 0, intToBox(MCX1,P.y,MCX2,P.y+13), cs_CTS)) then
+  if createCol(TextCol, 0).findAllIn(toBox(MCX1,P.y,MCX2,P.y+13), cArr) then
   begin
     B := cArr.getBounds();
     result := Trim(getTextAtExWrap(b.x1-1,p.y,B.x2+1,p.y+13,0,5,2,TextCol,0,SmallChars07));
@@ -643,17 +645,18 @@ end;
 
 function getChatOptions(): Array of TChatOption;
 var
-  B       : TBox;
-  mPnt    : TPoint;
-  i,x,y   : Integer;
+  B        : TBox;
+  mPnt,pnt : TPoint;
+  i,x,y    : Integer;
   bPnts,
-  wPnts   : TPointArray;
-  bAP,wAP : T2DPointArray;
+  wPnts    : TPointArray;
+  bAP,wAP  : T2DPointArray;
 begin
-  if not cs_findColorTolerance(x, y, 6383633, 30, intToBox(410,365,417,372), cs_CTS) then
+  if not createCol(6383633, 30).findIn(toBox(410,365,417,372), pnt) then
     Exit;
-  cs_FindColorsTolerance(bPnts, 0, 1, intToBox(MCX1,381,MCX2,MCY2), cs_CTS);
-  cs_FindColorsTolerance(wPnts, 16777215, 30, intToBox(MCX1,381,MCX2,MCY2), cs_CTS);
+
+  createCol(0,1).findAllIn(toBox(MCX1,381,MCX2,MCY2), bPnts);
+  createCol(16777215,30).findAllIn(toBox(MCX1,381,MCX2,MCY2), wPnts);
 
   if ((length(bPnts) < 1) and (length(wPnts) < 1)) then Exit;
 
@@ -737,10 +740,10 @@ end;
 
 function findNPCChatTextMulti(txt: TStringArray; Click,DoWait: Boolean): boolean;
 var
-  T      : Timer;
-  h,i,x,
-  y      : Integer;
-  Opts   : Array of TChatOption;
+  T    : Timer;
+  pnt  : TPoint;
+  h,i  : Integer;
+  Opts : Array of TChatOption;
 begin
   if not isLoggedIn() then Exit;
   Opts := getChatOptions();
@@ -758,7 +761,7 @@ begin
         begin
           T.start();
           repeat
-            if not cs_findColorTolerance(x, y, 6383633, 30, intToBox(410,365,417,372), cs_CTS) then
+            if not createCol(6383633,30).findIn(toBox(410,365,417,372), pnt) then
               break;
           until(T.timeElapsed() < 5000);
         end;
@@ -800,7 +803,7 @@ function doConversationEx(resultText: TStringArray; ClickResult: Boolean): boole
 var
   t,i: integer;
 begin
-  while (t < 25) do // max of 25 "click to continue's"
+  while (t < 25) do
   begin
     clickContinue(true);
     if length(resultText) > 0 then

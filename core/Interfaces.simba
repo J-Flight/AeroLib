@@ -41,7 +41,7 @@ begin
     FontColor := 2070783;
     ColorTol  := 5;
     Text      := 'mode';
-    TxtBounds := intToBox(119, 287, 149, 302);
+    TxtBounds := toBox(119, 287, 149, 302);
   end;
   with Interfaces[PINSCREEN] do
   begin
@@ -49,7 +49,7 @@ begin
     FontColor := 2070783;
     ColorTol  := 5;
     Text      := 'Please';
-    TxtBounds := intToBox(105, 62, 150, 75);
+    TxtBounds := toBox(105, 62, 150, 75);
   end;
   with Interfaces[PINPENDING] do
   begin
@@ -57,7 +57,7 @@ begin
     FontColor := 65535;
     ColorTol  := 10;
     Text      := 'asked';
-    TxtBounds := intToBox(114, 135, 204, 158);
+    TxtBounds := toBox(114, 135, 204, 158);
   end;
   with Interfaces[DEPOSITSCREEN] do
   begin
@@ -65,7 +65,7 @@ begin
     FontColor := 2070783;
     ColorTol  := 5;
     Text      := 'Box';
-    TxtBounds := intToBox(365, 33, 393, 48);
+    TxtBounds := toBox(365, 33, 393, 48);
   end;
   with Interfaces[SHOPSCREEN] do
   begin
@@ -73,7 +73,7 @@ begin
     FontColor := 2070783;
     ColorTol  := 5;
     Text      := 'shop';
-    TxtBounds := intToBox(145, 295, 175, 314);
+    TxtBounds := toBox(145, 295, 175, 314);
   end;
 end;
 
@@ -89,12 +89,14 @@ end;
 
 function closeInterface(): boolean;
 var
-  Pa         : TBox;
-  T          : Timer;
-  i,ii,l,x,y : Integer;
-  Col        : TIntegerArray;
-  a          : T2DPointArray;
-  b          : array[0..1] of TPointArray;
+  Pa      : TBox;
+  T       : Timer;
+  pnt     : TPoint;
+  i,ii,l,
+  x,y     : Integer;
+  Col     : TIntegerArray;
+  a       : T2DPointArray;
+  b       : array[0..1] of TPointArray;
 begin
   if menuOpen() then
   begin
@@ -109,9 +111,9 @@ begin
   end;
 
 // handles the advanced skill guide window
-  if (cs_findColorTolerance(x, y, 2994428, 20, intToBox(728,8,753,30), cs_CTS)) then
+  if createCol(2994428,20).findIn(toBox(728,8,753,30), pnt) then
   begin
-    BrakeMMouse(Point(X,Y), 3, 3, False);
+    BrakeMMouse(pnt, 3, 3, False);
     fastClick(MOUSE_LEFT);
     Exit(True);
   end;
@@ -130,7 +132,7 @@ begin
 
   if (Interfaces[BANKSCREEN].isVisible() or Interfaces[SHOPSCREEN].isVisible()) then
   begin
-    mouseBox(intToBox(479,33,495,50), MOUSE_MOVE);
+    mouseBox(toBox(479,33,495,50), MOUSE_MOVE);
     if (waitUptextMulti(['lose','ack','Cl','se'], 200)) then
     begin
       fastClick(MOUSE_LEFT);
@@ -147,8 +149,9 @@ begin
 
   for i:=0 to 5 do
   begin
-    cs_findColorsTolerance(b[0], Col[i * 2], 5, intToBox(MSCX,MSY1,MSX2,MSCY), cs_CTS);
-    cs_findColorsTolerance(b[1], Col[i * 2 + 1], 5, intToBox(MSCX,MSY1,MSX2,MSCY), cs_CTS);
+    createCol(Col[i * 2],5).findAllIn(toBox(MSCX,MSY1,MSX2,MSCY), b[0]);
+    createCol(Col[i * 2+1],5).findAllIn(toBox(MSCX,MSY1,MSX2,MSCY), b[1]);
+
     l := (High(b[0]) + High(b[1]));
 
     if inRange(l, 6, 53) or inRange(l, 94, 250) then

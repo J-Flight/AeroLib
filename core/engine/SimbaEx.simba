@@ -1,7 +1,7 @@
 {
-========
-SimbaExt
-========
+=======
+SimbaEx
+=======
 }
 
 type
@@ -507,6 +507,7 @@ Begin
   Result := Length(GetDirectoryName(Directory, Path)) > 0;
 End;
 
+// by Brandon
 Function getJavaPath(Console: Boolean): String;
 var
   Drive: String;
@@ -609,4 +610,40 @@ begin
       if SetAsTarget then SetTarget(T[I]);
       Exit;
     end;
+end;
+
+// by Brandon
+Procedure writeINIArray(const Section, KeyName, FileName: String; const StrArr: TStringArray);
+var
+  I   : Integer;
+  Str : String;
+begin
+  for I := 0 to high(StrArr) Do
+    Str := Str + StrArr[I] + #0;
+
+  writeINI(Section, KeyName, toStr(Length(StrArr)) + #0 + Str, FileName);
+end;
+
+// by Brandon
+function readINIArray(const Section, KeyName, FileName: String): TStringArray;
+var
+  Str: String;
+  I, J, K, Size: Integer;
+Begin
+  J := 0;
+  I := 1;
+  Str := readINI(Section, KeyName, FileName);
+  while (Str[Inc(I)] <> #0) Do;
+
+  Size := StrToIntDef(Copy(Str, 0, I), -1);
+  if (Size > 0) then
+  begin
+    setLength(Result, Size); //Optimisation..
+
+    for Inc(I) to Length(Str) do
+      if (Str[I] <> #0) Then
+        Result[J] := Result[J] + Str[I]
+      else
+        Inc(J);
+  end;
 end;

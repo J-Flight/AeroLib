@@ -6,35 +6,35 @@ Combat
 
 function getHPBars(): TPointArray;
 var
-  B     : TBox;
-  P     : TPoint;
-  i     : Integer;
+  B          : TBox;
+  P          : TPoint;
+  i          : Integer;
+  colG,colR  : TColEx;
   tpa,tpa2   : TPointArray;
   atpa,atpa2 : T2DPointArray;
 begin
   if not isLoggedIn() then Exit;
 
-  cs_findColorsTolerance(tpa, 65280, 0, AREA_MS, cs_CTS);
+  colG := createCol(65280, 0);
+  colR := createCol(255, 0);
 
-  if length(tpa) < 1 then
-    exit;
+  if not colG.findAllIn(AREA_MS, tpa) then exit;
 
   atpa := clusterTPA(tpa, 1);
   tpa  := [];
   for i:=0 to High(atpa) do
   begin
-    B := atpa[i].getBounds();
-    B := intToBox(B.X1-1, B.Y1, B.X2+1, B.Y2);
+    B    := atpa[i].getBounds();
+    B    := toBox(B.X1-1, B.Y1, B.X2+1, B.Y2);
     tpa2 := atpa[i];
-    cs_findColorsTolerance(tpa, 255, 0, B, cs_CTS);
-    if length(tpa) > 0 then
+
+    if colR.findAllIn(B, tpa) then
     begin
       sortTPAFrom(tpa, tpa.midPnt());
       P   := tpa[0];
       tpa := [];
-      B   := intToBox(P.X-1, P.Y-2, P.X+28, P.Y+2);
-      cs_findColorsTolerance(tpa, 255, 0, B, cs_CTS);
-      if length(tpa) > 1 then
+      B   := toBox(P.X-1, P.Y-2, P.X+28, P.Y+2);
+      if colR.findAllIn(B, tpa) then
       begin
         atpa2 := clusterTPA(tpa, 1);
         tpa   := [];

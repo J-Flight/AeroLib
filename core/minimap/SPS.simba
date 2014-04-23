@@ -405,8 +405,11 @@ begin
   T.start();
   while (not Result) and (T.timeElapsed < (10000 + random(2000))) and (Fails < 5) do
   begin
-    if (not isLoggedIn()) then
-      Exit(false);
+    try
+      if (not isLoggedIn()) then
+        Exit(false);
+    except
+    end;
 
     P := SPS_GetMyPos();
 

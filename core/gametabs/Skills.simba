@@ -31,7 +31,7 @@ begin
   if not FTab(TAB_COMBAT) then
     exit(-1);
 
-  Result := strToIntDef(ExtractFromStr(cs_GetTextAtEx(intToBox(662,230,700,240), 0, 3, 1, 2070783, 0, 'StatChars07', cs_CTS1), Numbers), -1);
+  Result := strToIntDef(ExtractFromStr(cs_GetTextAtEx(toBox(662,230,700,240), 0, 3, 1, 2070783, 0, 'StatChars07', cs_CTS1), Numbers), -1);
 end;
 
 (*
@@ -57,7 +57,7 @@ Example:
 *)
 function skillBoxCoords(Row,Column: ShortInt): TBox;
 begin
-  Result := intToBox(549+(63*(Row-1)),208+(31*(Column-1)),608+(63*(Row-1)),237+(31*(Column-1)));
+  Result := toBox(549+(63*(Row-1)),208+(31*(Column-1)),608+(63*(Row-1)),237+(31*(Column-1)));
 end;
 
 (*
@@ -87,9 +87,9 @@ var
 begin
   ResBox := skillBoxCoords(Row, Column);
   if TopHalf then
-    Result := intToBox(ResBox.X1,ResBox.Y1,ResBox.X2,ResBox.Y1+13)
+    Result := toBox(ResBox.X1,ResBox.Y1,ResBox.X2,ResBox.Y1+13)
   else
-    Result := intToBox(ResBox.X1,ResBox.Y2-13,ResBox.X2,ResBox.Y2)
+    Result := toBox(ResBox.X1,ResBox.Y2-13,ResBox.X2,ResBox.Y2)
 end;
 
 (*
@@ -294,11 +294,11 @@ begin
     Box := skillBoxHalf(TP.X,TP.Y,True)
   else
     Box := skillBoxHalf(TP.X,TP.Y,False);
-  if (not cs_findColors(TPA, 65535, Box, cs_CTS0)) then
+  if (not createCol(65535,0).findAllIn(Box, TPA)) then
     exit(-1);
 
   Box    := getTPABounds(TPA);
-  Result := strToIntDef(cs_getTextAtEx(intToBox(Box.X1-2,Box.Y1-2,Box.X2+2,Box.Y2+2),0,5,1,65535,0,'StatChars07', cs_CTS1),-1);
+  Result := strToIntDef(cs_getTextAtEx(toBox(Box.X1-2,Box.Y1-2,Box.X2+2,Box.Y2+2),0,5,1,65535,0,'StatChars07', cs_CTS1),-1);
 end;
 
 (*
@@ -374,7 +374,7 @@ begin
     Exit(-1);
 
   Wait(100 + Random(100));
-  Result := strToIntDef(Trim(cs_getTextAtEx(intToBox(705,442,735,452),0,5,1,65535,0,'StatChars07', cs_CTS1)),-1);
+  Result := strToIntDef(Trim(cs_getTextAtEx(toBox(705,442,735,452),0,5,1,65535,0,'StatChars07', cs_CTS1)),-1);
 end;
 
 (*
@@ -417,7 +417,7 @@ begin
   begin
     b := getTPABounds(tpa);
     wait(450 + random(150));
-    result := strToIntDef(getNumbers(cs_getTextAtEx(intToBox(b.x1+15, b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    result := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15, b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
   end;
 end;
 
@@ -463,8 +463,8 @@ begin
   begin
     b := getTPABounds(tpa);
     wait(450 + random(150));
-    CXP    := strToIntDef(getNumbers(cs_getTextAtEx(intToBox(b.x1+15,b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
-    XPNLA  := strToIntDef(getNumbers(cs_getTextAtEx(intToBox(b.x1+15, b.y2-15,b.x2-2,b.y2-2), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    CXP    := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15,b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    XPNLA  := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15, b.y2-15,b.x2-2,b.y2-2), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
     result := XPNLA-CXP;
     if (result < 0) then
       result := -1;

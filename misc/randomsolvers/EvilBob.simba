@@ -2,6 +2,7 @@ Var
   EB_targetLoc: String;
   EB_statueA,EB_statueB,
   EB_statueC : Integer;
+  EB_Stage : Integer = 0;
   EB_net,EB_rawFish,
   EB_cookedFish : TItem;
 
@@ -119,6 +120,7 @@ end;
 Function EB_determineSpot(): String;
 var
   T   : Timer;
+  S   : String;
   x,y : Integer;
 begin
   if not areTalking() then
@@ -141,14 +143,27 @@ begin
   while ((T.TimeElapsed < 8000) and findColor(x, y, 39423, 495, 23, 505, 31)) do
   begin
     if findDTM(EB_statueA, x, y, MSX1, MSY1, MSX2, MSY2) then
-      Exit('North');
+    begin
+      S := 'North';
+      break;
+    end;
     if findDTM(EB_statueB, x, y, MSX1, MSY1, MSX2, MSY2) then
-      Exit('South');
+    begin
+      S := 'South';
+      break;
+    end;
     if findDTM(EB_statueC, x, y, MSX1, MSY1, MSX2, MSY2) then
-      Exit('East');
+    begin
+      S := 'East';
+      break;
+    end;
   end;
 
-  Exit('West');
+  if (S = '') then
+    S := 'West';
+
+  Result   := S;
+  EB_Stage := 1;
 end;
 
 Function EB_hasItem(Which: String): Boolean;
@@ -198,15 +213,6 @@ begin
     'East' : sortTPAFrom(TPA, Point(MSX2, MSCY));
     'West' : sortTPAFrom(TPA, Point(MSX1, MSCY));
   end;
-
-  {
-  case Where of
-    'North': Pnt := Point(TPA[0].X, TPA[0].Y+5);
-    'South': Pnt := Point(TPA[0].X, TPA[0].Y-5);
-    'East' : Pnt := Point(TPA[0].X-5, TPA[0].Y);
-    'West' : Pnt := Point(TPA[0].X+5, TPA[0].Y);
-  end;
-  }
 
   case Where of
     'North': Pnt := Point(MMCX, 28);
@@ -265,6 +271,7 @@ var
 label
   Start;
 begin
+  EB_walkToClosestItem();
   cs := cs_ToColorSettings(2, 0.24, 1.29);
 
   Start:
@@ -445,7 +452,6 @@ begin
             warn('Acquired a raw fish', WT_RANDOM);
             Exit;
           end;
-
         break;
       end;
     end;
@@ -505,7 +511,7 @@ var
   i,x,y : Integer;
   arP   : TPointArray;
   ararP : T2DPointArray;
-  cs   : cs_TColorSettings;
+  cs    : cs_TColorSettings;
 begin
   Result := False;
   if not isLoggedIn() then
@@ -555,60 +561,66 @@ end;
 
 Function EB_solve(): Boolean;
 var
-  i : Integer;
+  T : Timer;
 begin
   Result := False;
   if not isLoggedIn() then
     Exit;
 
-  if tabExists(TAB_MAGIC) then
-    Exit(True);
-
   EB_setup();
-  if ((not EB_hasItem('Cooked fish')) and (not EB_hasItem('Raw fish'))) then
+  T.start();
+
+  while ((not tabExists(TAB_MAGIC) and (T.timeElapsed() < 60000))) do
   begin
-    if not EB_interactServant() then
-      EB_walkTo('Center');
+    if EB_Stage < 1 then
+    begin
+      if not EB_interactServant() then
+        EB_walkTo('Center');
 
-    EB_targetLoc := EB_determineSpot();
-    warn(''+EB_targetLoc+' location detected', WT_RANDOM);
+      EB_targetLoc := EB_determineSpot();
+      warn(''+EB_targetLoc+' location detected', WT_RANDOM);
+      T.start();
+    end;
 
-    for i:=0 to 3 do
+    if ((not EB_hasItem('Cooked fish')) and (not EB_hasItem('Raw fish'))) then
     begin
       if not EB_hasItem('Net') then
-      begin
-        warn('Grabbing a fishing net...', WT_RANDOM);
-        EB_walkToClosestItem();
         EB_takeNet();
-      end;
       if EB_hasItem('Net') then
-        break;
+      begin
+        warn('Walking to fishing spot...', WT_RANDOM);
+        EB_walkTo('Center');
+        EB_walkTo(EB_targetLoc);
+        EB_catchAFish();
+        EB_Stage := 2;
+        T.start();
+      end;
     end;
 
-    if EB_hasItem('Net') then
+    if (EB_hasItem('Cooked fish') and (EB_Stage = 2)) then
     begin
-      warn('Walking to fishing spot...', WT_RANDOM);
+      warn('Uncooking the fish...', WT_RANDOM);
       EB_walkTo('Center');
-      EB_walkTo(EB_targetLoc);
-      EB_catchAFish();
+      EB_uncookFish();
+      EB_Stage := 3;
+      T.start();
+    end;
+
+    if (EB_hasItem('Raw fish') and (EB_Stage = 3)) then
+    begin
+      warn('Feeding Bob...', WT_RANDOM);
+      EB_feedCat();
+      EB_Stage := 4;
+      T.start();
+    end;
+
+    if (EB_Stage = 4) then
+    begin
+      warn('Leaving island...', WT_RANDOM);
+      Result := EB_leaveIsland();
+      T.start();
+      if Result then
+        doConversation([]);
     end;
   end;
-
-  if not EB_hasItem('Raw fish') then
-  begin
-    warn('Uncooking the fish...', WT_RANDOM);
-    EB_walkTo('Center');
-    EB_uncookFish();
-  end;
-
-  if EB_hasItem('Raw fish') then
-  begin
-    warn('Feeding Bob...', WT_RANDOM);
-    EB_feedCat();
-  end;
-
-  warn('Leaving island...', WT_RANDOM);
-  Result := EB_leaveIsland();
-  if Result then
-    doConversation([]);
 end;

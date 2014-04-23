@@ -194,15 +194,19 @@ begin
 
   T.start();
   repeat
-    mousebox(intToBox(LOx1,LOy1,LOx2,LOy2), MOUSE_LEFT);
+    mousebox(toBox(LOx1,LOy1,LOx2,LOy2), MOUSE_LEFT);
     wait(randomRange(400,500));
     if (not isLoggedIn()) then
       exit(true);
   until(T.timeElapsed > 11000);
 end;
 
+var
+  IgnoreWorlds: TIntegerArray;
+
 function selectWorld(W: integer): boolean; forward;
 function randomWorld(): Integer; forward;
+function getCurrentWorldLS(): integer; forward;
 function loginPlayer(Safe: Boolean): Boolean;
 var
   T              : Timer;
@@ -252,6 +256,12 @@ begin
     Wait(RandomRange(1000,2000));
   until (RSReady);
 
+  if inIntArray(IgnoreWorlds, getCurrentWorldLS()) then
+  begin
+    warn('Ignore world detected, choosing another world', WT_CORE);
+    selectWorld(randomWorld());
+  end;
+
   warn('Logging player in...', WT_CORE);
 
   if isLoggedIn() then
@@ -260,12 +270,12 @@ begin
   if isSplashScreen() then
     goto SplashScreen;
 
-  if Length(Me.WorldList) > 0 then
-    selectWorld(Me.WorldList[0]);
+  //if Length(Me.WorldList) > 0 then
+    //selectWorld(Me.WorldList[0]);
 
-  if not cs_findColors(TPA, WHITE_TEXT, intToBox(439,313,484,327), cs_CTS1) then
+  if not createCol(WHITE_TEXT,1).findAllIn(toBox(439,313,484,327), TPA) then
   begin
-    mouseBox(intToBox(EUX1,EUY1,EUX2,EUY2), MOUSE_LEFT);
+    mouseBox(toBox(EUX1,EUY1,EUX2,EUY2), MOUSE_LEFT);
     T.start();
     while (T.timeElapsed < 60000) do
     begin
@@ -288,11 +298,11 @@ begin
   for W:=0 to 1 do
   begin
     if W = 0 then
-      Box := intToBox(PBX1, PBY1, PBX2, PBY2)
+      Box := toBox(PBX1, PBY1, PBX2, PBY2)
     else
-      Box := intToBox(UBX1, UBY1, UBX2, UBY2);
+      Box := toBox(UBX1, UBY1, UBX2, UBY2);
 
-    cs_findColors(TPA, LOGIN_TEXTCOLOUR, Box, cs_CTS1);
+    createCol(LOGIN_TEXTCOLOUR,1).findAllIn(Box, TPA);
 
     T.start();
     repeat
@@ -319,7 +329,7 @@ begin
         end;
         keyUp(VK_BACK);
       end;
-    until(not cs_findColors(TPA, LOGIN_TEXTCOLOUR, Box, cs_CTS1) or (T.timeElapsed > 120000));
+    until(not createCol(LOGIN_TEXTCOLOUR,1).findAllIn(Box, TPA) or (T.timeElapsed > 120000));
 
   end;
 
@@ -380,7 +390,7 @@ begin
         if (not (uH = uLen)) then
         begin
           wait(250 + random(250));
-          mouseBox(intToBox(UBX1,UBY1,UBX2,UBY2), MOUSE_LEFT);
+          mouseBox(toBox(UBX1,UBY1,UBX2,UBY2), MOUSE_LEFT);
         end;
       end;
 
@@ -388,7 +398,7 @@ begin
   end;
 
   EnterGame:
-  mouseBox(intToBox(GBx1,GBy1,GBx2,GBy2), MOUSE_LEFT);
+  mouseBox(toBox(GBx1,GBy1,GBx2,GBy2), MOUSE_LEFT);
 
   T.start();
   repeat
@@ -398,7 +408,7 @@ begin
     SetLength(Actions, 0);
 
     if (T.timeElapsed > 60000) then
-      Actions :=       ['One minute has passed... Debug: ' + ToStr(CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)),              0,    5,    'Terminate']
+      Actions :=       ['One minute has passed... Debug: ' + toStr(CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)),              0,    5,    'Terminate']
     else
     case (CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)) of
                         // WriteLn Error                  Wait for   Retrys     Action
@@ -470,7 +480,7 @@ begin
   SplashScreen:
   if isSplashScreen() then
   begin
-    mouseBox(intToBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
+    mouseBox(toBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
     i := 0;
     repeat
       i := i+1;

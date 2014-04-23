@@ -11,14 +11,11 @@ end;
 
 function isLoggedIn(): Boolean; forward;
 function menuOpen(): Boolean;
-var
-  tpa : TPointArray;
 begin
   if not isLoggedIn() then
     Exit;
 
-  cs_findColorsTolerance(TPA, 4674653, 0, intToBox(0,0,757,502), cs_CTS1);
-  result := (length(TPA) >= 100);
+  result := (createCol(4674653,0).count(toBox(0,0,757,502)) >= 100);
 end;
 
 function getOptions(): Array of TOptions;
@@ -32,14 +29,14 @@ begin
   target := getImageTarget();
   getClientDimensions(B.X2, B.Y2);
 
-  B := intToBox(0, 0, B.X2 - 1, B.Y2 - 1);
-  cs_findColorsTolerance(TPA, 4674653, 0, B, cs_CTS1);
+  B := toBox(0, 0, B.X2 - 1, B.Y2 - 1);
+  createCol(4674653,0).findAllIn(B, TPA);
   if (length(TPA) < 100) then
     Exit;
 
   B := TPA.getBounds();
   BigBox := B;
-  Yoff := IntToBox(B.X1, B.Y1 + 18, B.X2, B.Y2);
+  Yoff := toBox(B.X1, B.Y1 + 18, B.X2, B.Y2);
   cs_findColorsTolerance(TPA1, 0, 0, Yoff, cs_CTS3);
 
   ATPA := clusterTPA(TPA1, 1);
@@ -63,7 +60,7 @@ begin
 
   SetLength(ATPA, h div 15);
   for i:=0 to High(ATPA) do
-    cs_findColorsTolerance(ATPA[i], clRed, 0, intToBox(0,2+(i*15),w-1,15+(i*15)), cs_CTS1); //16+(i*15)
+    createCol(clRed,0).findAllIn(toBox(0,2+(i*15),w-1,15+(i*15)), ATPA[i]);
 
   sortATPAFromFirstPointY(ATPA, Point(w div 2, 0));
   setArrayLength(Result, Length(ATPA));
@@ -76,7 +73,7 @@ begin
     sortATPAFromFirstPointX(tempatpa, Point(0, 0));
     Result[i].Str := getTextATPA(tempatpa, 5, 'UpChars07');
     BB := ATPA[i].getBounds();
-    Result[i].Bounds := IntToBox(BB.X1 + Yoff.X1, BB.Y1 + Yoff.Y1,
+    Result[i].Bounds := toBox(BB.X1 + Yoff.X1, BB.Y1 + Yoff.Y1,
                 Result[0].BigBox.X2, BB.Y2 + Yoff.Y1);
     setlength(tempatpa,0);
     setlength(TPA,0);

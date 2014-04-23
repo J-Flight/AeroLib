@@ -15,7 +15,7 @@ end;
 
 function isPlayerWalking(): Boolean;
 begin
-  Result := isPlayerWalkingEx(intToBox(MMCX-30, MMCY-30, MMCX+30, MMCY+30), 100);
+  Result := isPlayerWalkingEx(toBox(MMCX-30, MMCY-30, MMCX+30, MMCY+30), 100);
 end;
 
 (*
@@ -70,12 +70,11 @@ begin
   ED := Trunc(FixD(ED + 0.0));
 
   try
-    cs_findColorsTolerance(tpa, TheColor, tol, AREA_MM, cs_CTS);
-    filterPointsPie(tpa, SD, ED, 10, Radius, cx, cy);
+    createCol(TheColor,tol).findPie(AREA_MM, SD, ED, 10, Radius, cx, cy, tpa);
     linearSort(tpa, cx, cy, Direction, False);
     Result := (Length(tpa) > 0);
   except
-    Writeln('LWex error!');
+    warn('LWex error!', WT_CORE);
     Exit;
   end;
 end;
@@ -144,12 +143,11 @@ begin
 
   T.start();
   try
-    cs_findColorsTolerance(tpa, TheColor, tol, AREA_MM, cs_CTS);
-    filterPointsPie(tpa, SD, ED, 10, Radius, cx, cy);
+    createCol(TheColor,tol).findPie(AREA_MM, SD, ED, 10, Radius, cx, cy, tpa);
     sortCircleWise(tpa, cx, cy, StartRadial, False, StartRadial > EndRadial);
     Result := (Length(tpa) > 0);
   except
-    Writeln('An exception has occured'); Exit;
+    warn('An exception has occured', WT_CORE); Exit;
   end;
 end;
 

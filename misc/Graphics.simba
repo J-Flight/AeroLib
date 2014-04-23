@@ -120,7 +120,7 @@ End;
 
 Procedure TGraphics.ClearArea(X1, Y1, X2, Y2: Integer);
 Begin
-  Self.ClearArea(IntToBox(X1, Y1, X2, Y2));
+  Self.ClearArea(toBox(X1, Y1, X2, Y2));
 End;
 
 Procedure TGraphics.ClearArea(Area: TBox); overload;
@@ -133,7 +133,7 @@ End;
 
 Procedure TGraphics.DrawBox(X1, Y1, X2, Y2: Integer; Fill: Boolean = False; Colour: TColor = clRed);
 Begin
-  Self.DrawBox(IntToBox(X1, Y1, X2, Y2), Fill, Colour);
+  Self.DrawBox(toBox(X1, Y1, X2, Y2), Fill, Colour);
 End;
 
 Procedure TGraphics.DrawBox(Box: TBox; Fill: Boolean = False; Colour: TColor = clRed); overload;
@@ -254,7 +254,7 @@ Begin
   TPA := TPAFromText(Text, Font, W, H);
   OffsetTPA(TPA, Position);
   For I := 0 To High(TPA) do
-    If (PointInBox(TPA[I], IntToBox(0, 0, Self.__Bmp.GetWidth - 1, Self.__Bmp.GetHeight - 1))) then
+    If (PointInBox(TPA[I], toBox(0, 0, Self.__Bmp.GetWidth - 1, Self.__Bmp.GetHeight - 1))) then
       Self.__Bmp.DrawTPA([TPA[I]], Colour);
 End;
 

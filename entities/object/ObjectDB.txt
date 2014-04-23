@@ -1,0 +1,16 @@
+[ObjectDB_Main]
+Count=1
+
+[MSObj_1]
+Name=FishingSpot
+UpText(C)=2
+UpText[0]=Fishing spot
+UpText[1]=ng sp
+ColI=14137748
+TolI=13
+hModI=0.22
+sModI=1.71
+ColO=8613988
+TolO=10
+hModO=0.1
+sModO=0.48

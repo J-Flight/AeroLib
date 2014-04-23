@@ -4,6 +4,11 @@ Boxes
 =====
 }
 
+Function toBox(Xs,Ys,Xe,Ye: Integer): TBox;
+begin
+  Result := intToBox(Xs,Ys,Xe,Ye);
+end;
+
 Function TBox.Width: Integer;
 Begin
   Result := Abs(Self.X2 - Self.X1);

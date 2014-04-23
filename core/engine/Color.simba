@@ -1,77 +1,4 @@
 //By Janilabo
-function TPADelete(var TPA: TPointArray; x: Integer): Boolean;
-var
-  i, h: Integer;
-begin
-  h := High(TPA);
-  Result := ((x <= h) and (x > -1));
-  if not Result then
-    Exit;
-  for i := x to (h - 1) do
-    TPA[i] := TPA[(i + 1)];
-  SetLength(TPA, h);
-end;
-
-function safePnts(TPA: TPointArray): TPointArray;
-var
-  i,l  : integer;
-  ctpa : TPointArray;
-begin
-  if length(TPA) < 1 then
-    exit;
-
-  for i:=0 to high(TPA) do
-    if not PointInBox(TPA[i], intToBox(0,0,764,502)) then
-      TPADelete(TPA, i);
-end;
-
-procedure checkAreaBounds(var Area: TBox);
-begin
-  if Area.X1 < 0 then Area.X1 := 0;
-  if Area.Y1 < 0 then Area.Y1 := 0;
-  if Area.X2 > 764 then Area.X2 := 764;
-  if Area.Y2 > 502 then Area.Y2 := 502;
-end;
-
-// By ProphesyOfWolf
-procedure returnValues(colors: TIntegerArray; var HueMod, SatMod: Extended; var color, Tolerance: Integer);
-Var
-  h, s, t: Extended;
-  I,II : integer;
-  HSLColor : Array[1..3] of Extended;
-  HSL : Array[0..1] of Array[1..3] of Extended;
-begin
-  For I:= 1 to 3 do
-  begin;
-    HSL[0][i] := 255;
-  end;
-
-  For I:= 0 to High(Colors) do
-  begin;
-    ColortoHSL(Colors[i],HSLColor[1],HSLColor[2],HSLColor[3]);
-    For II:= 1 to 3 do
-    begin;
-      HSL[0][II] := MinE(HSLColor[II],HSL[0][II]);
-      HSL[1][II] := MaxE(HSLColor[II],HSL[1][II]);
-    end;
-  end;
-
-  H := (HSL[1][1] - HSL[0][1]);
-  S := (HSL[1][2] - HSL[0][2]);
-  T := (HSL[1][3] - HSL[0][3]);
-
-  try
-    HueMod := (H/T);
-    SatMod := (S/T);
-    Tolerance := Round(t);
-  except
-    HueMod := 0;
-    SatMod := 0;
-    Tolerance := Round(0.0);
-  end;
-
-  Color := HSLToColor((HSL[1][1] + HSL[0][1]) / 2,(HSL[1][2] + HSL[0][2]) / 2,(HSL[1][3] + HSL[0][3]) / 2);
-end;
 
 {==============================================================================]
   Explanation: Constants for Simba's default CTS-related settings. Used in cs_CTS(Ex) functions.
@@ -578,7 +505,7 @@ Example:
 
 .. code-block:: pascal
 
-    iTPA := InverseColors([4410947, 5003083], [10, 10], IntToBox(MCX1, MCY1, MCX2, MCY2));
+    iTPA := returnTPAExceptColors([4410947, 5003083], [10, 10], IntToBox(MCX1, MCY1, MCX2, MCY2));
 *)
 function returnTPAExceptColors(cols, tols: TIntegerArray; area: TBox): TPointArray;
 var

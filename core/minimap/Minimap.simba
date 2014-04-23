@@ -62,31 +62,31 @@ end;
 
 function getCompassRadians(): Extended;
 var
-  Angles: Array [0..2] of Extended;
-  Vectors: Array [0..2] of TVector;
-  I: Integer;
-  SouthPoint: TPoint;
-  TPA: TPointArray;
+  I          : Integer;
+  SouthPoint : TPoint;
+  TPA        : TPointArray;
+  Angles     : Array [0..2] of Extended;
+  Vectors    : Array [0..2] of TVector;
 begin
   Result := -1;
-  findColors(TPA, 920735, 545, 4, 576, 36); //Searches for red of South, East, and West points on compass.
-  RAaSTPA(TPA, 7); // the point are small clusters of pixels, so by doing this, we are left with four points: the three cardinal points, and the center of the red arrow on the compass.
-  SortTPAFrom(TPA, Point(561, 20)); //Sort from center of the compass, so the first point in the array is the point that is the center of the red arrow.
-  InvertTPA(TPA); //Invert the array so that the arrow's center point is now at the end of the array and out of the way.
-  if (Length(TPA) <> 4) then //If we don't have four points, something has gone wrong.
+  createCol(920735,0).findAllIn(toBox(545,4,576,36), TPA);    //Searches for red of South, East, and West points on compass.
+  RAaSTPA(TPA, 7);                                            //The point are small clusters of pixels, so by doing this, we are left with four points: the three cardinal points, and the center of the red arrow on the compass.
+  SortTPAFrom(TPA, Point(561, 20));                           //Sort from center of the compass, so the first point in the array is the point that is the center of the red arrow.
+  InvertTPA(TPA);                                             //Invert the array so that the arrow's center point is now at the end of the array and out of the way.
+  if (Length(TPA) <> 4) then                                  //If we don't have four points, something has gone wrong.
     Exit;
-  for I := 0 to 2 do //Creates normalized vectors from center of compass to three cardinal points.
+  for I := 0 to 2 do                                          //Creates normalized vectors from center of compass to three cardinal points.
     Vectors[i] := CreateVector(Point(561, 20), TPA[i], True); //Creates normalized vectors from center of compass out to the cardinal points.
-  Angles[0] := AngleBetween(Vectors[0], Vectors[1]); //Stores the angle between vectors 0 and 1 in Angles[0].
-  Angles[1] := AngleBetween(Vectors[0], Vectors[2]); //Stores the angle between vectors 0 and 2 in Angles[1].
-  Angles[2] := AngleBetween(Vectors[1], Vectors[2]); //Stores the angle between vectors 1 and 2 in Angles[2].
-  for I := 0 to 2 do //This loop determines which point is the southern point of the compass.
+  Angles[0] := AngleBetween(Vectors[0], Vectors[1]);          //Stores the angle between vectors 0 and 1 in Angles[0].
+  Angles[1] := AngleBetween(Vectors[0], Vectors[2]);          //Stores the angle between vectors 0 and 2 in Angles[1].
+  Angles[2] := AngleBetween(Vectors[1], Vectors[2]);          //Stores the angle between vectors 1 and 2 in Angles[2].
+  for I := 0 to 2 do                                          //This loop determines which point is the southern point of the compass.
   begin
-    if (Angles[i] > pi) then //If the angle is greater than pi radians (180 degrees),
-      Angles[i] := MATH_2PI - Angles[i]; //We subtract it from 2pi radians (360 degrees) to get something like a reference angle.
-    if (Angles[i] >= 2) then //If the angle is greater than 2 radians, then we know that the two vectors this angle is between
-    begin //are the East and West point vectors.
-      case I of //The vector that is not those two is the South point vector.
+    if (Angles[i] > pi) then                                  //If the angle is greater than pi radians (180 degrees),
+      Angles[i] := MATH_2PI - Angles[i];                      //We subtract it from 2pi radians (360 degrees) to get something like a reference angle.
+    if (Angles[i] >= 2) then                                  //If the angle is greater than 2 radians, then we know that the two vectors this angle is between
+    begin                                                     //are the East and West point vectors.
+      case I of                                               //The vector that is not those two is the South point vector.
         0: SouthPoint := TPA[2];
         1: SouthPoint := TPA[1];
         2: SouthPoint := TPA[0];
@@ -96,60 +96,9 @@ begin
   Result := FixRad((ArcTan2(-(SouthPoint.y - 20), SouthPoint.x - 561) + MATH_PIOVER2));
 end;
 
-(*
-GetCompassAngle
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block:: pascal
-
-    function getCompassAngle(): Extended;
-
-Returns the compass angle in radians.
-
-.. note::
-
-    by ReadySteadyGo, changes by euphemism & Flight
-
-Example:
-
-.. code-block:: pascal
-
-*)
 function getCompassAngle(): Extended;
-var
-  Angles: Array [0..2] of Extended;
-  Vectors: Array [0..2] of TVector;
-  I: Integer;
-  SouthPoint: TPoint;
-  TPA: TPointArray;
 begin
-  Result := -1;
-  FindColors(TPA, 920735, 545, 4, 576, 36); //Searches for red of South, East, and West points on compass.
-  RAaSTPA(TPA, 7); // the point are small clusters of pixels, so by doing this, we are left with four points: the three cardinal points, and the center of the red arrow on the compass.
-  SortTPAFrom(TPA, Point(561, 20)); //Sort from center of the compass, so the first point in the array is the point that is the center of the red arrow.
-  InvertTPA(TPA); //Invert the array so that the arrow's center point is now at the end of the array and out of the way.
-  if (Length(TPA) <> 4) then //If we don't have four points, something has gone wrong.
-    Exit;
-  for I := 0 to 2 do //Creates normalized vectors from center of compass to three cardinal points.
-    Vectors[i] := CreateVector(Point(561, 20), TPA[i], True); //Creates normalized vectors from center of compass out to the cardinal points.
-  Angles[0] := AngleBetween(Vectors[0], Vectors[1]); //Stores the angle between vectors 0 and 1 in Angles[0].
-  Angles[1] := AngleBetween(Vectors[0], Vectors[2]); //Stores the angle between vectors 0 and 2 in Angles[1].
-  Angles[2] := AngleBetween(Vectors[1], Vectors[2]); //Stores the angle between vectors 1 and 2 in Angles[2].
-  for I := 0 to 2 do //This loop determines which point is the southern point of the compass.
-  begin
-    if (Angles[i] > pi) then //If the angle is greater than pi radians (180 degrees),
-      Angles[i] := MATH_2PI - Angles[i]; //We subtract it from 2pi radians (360 degrees) to get something like a reference angle.
-    if (Angles[i] >= 2) then //If the angle is greater than 2 radians, then we know that the two vectors this angle is between
-    begin //are the East and West point vectors.
-      case I of //The vector that is not those two is the South point vector.
-        0: SouthPoint := TPA[2];
-        1: SouthPoint := TPA[1];
-        2: SouthPoint := TPA[0];
-      end;
-    end;
-  end;
-  Result := FixRad((ArcTan2(-(SouthPoint.y - 20), SouthPoint.x - 561) + MATH_PIOVER2));
-  Result := Degrees(FixD(Result));
+  Result := Degrees(FixD(getCompassRadians()));
 end;
 
 (*
@@ -501,7 +450,7 @@ begin
   end;
   Freeze;
   Radius := Max((Area.x2-Area.x1)div 2, (Area.y2-Area.y1)div 2);
-  cs_findColorsPie(TPA, 65536, 0, 0, 360, 0, radius, (Area.x1+Area.x2)div 2, (Area.y1+Area.y2)div 2, Area, cs_CTS);
+  createCol(65536,0).findPie(Area, 0, 360, 0, radius, (Area.x1+Area.x2)div 2, (Area.y1+Area.y2)div 2, TPA);
   Hi := High(TPA);
   SetLength(Result, Hi + 1);
   if (Hi < 0) then
@@ -593,8 +542,7 @@ function percentColorMM(Color, Tol: Integer): Integer;
 var
   TPA: TPointArray;
 begin
-  cs_findColorsTolerance(TPA, Color, Tol, Area_MM, cs_CTS);
-  filterPointsPie(TPA, 0, 360, 0, 73, MMCX, MMCY);
+  createCol(Color,Tol).findPie(AREA_MM, 0, 360, 0, 73, MMCX, MMCY, TPA);
   Result := ceil((Length(TPA) * 100) / ((Pi * (73 * 73)) * ((360 - 0) / 360.0)-((Pi * 0) * 1)));
 end;
 
@@ -624,16 +572,12 @@ var
   i,C,Count,MaxC : Integer;
   TPA  : TPointArray;
   Cols : TIntegerArray;
-  cs   : cs_TColorSettings;
 begin
   Result := -1;
   if not isLoggedIn() then
     Exit;
-  cs := cs_ToColorSettings(2, 100, 100);
 
-  cs_findColorsTolerance(TPA, clBlack, 3, Area_MM, cs);
-  if (Length(TPA) < 1) then Exit;
-
+  if not createColEx(clBlack, 3, 100, 100).findAllIn(AREA_MM, TPA) then Exit;
   Cols := getColors(TPA);
   clearSameIntegers(Cols);
 

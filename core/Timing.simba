@@ -126,20 +126,20 @@ waitFindColor
 
 .. code-block:: pascal
 
-    function waitFindColor(var X, Y: Integer; Color, Tol: Integer; Area: TBox; MaxTime: Integer): Boolean;
+    function waitFindColor(var Pnt: TPoint; Color, Tol: Integer; Area: TBox; MaxTime: Integer): Boolean;
 
 Waits for a color at (x, y) with tolerance Tol, returns true if found
 
 .. note::
 
-  by Rasta Magician, fixed by TRiLeZ
+  by Rasta Magician, fixed by TRiLeZ & Flight
 
 Example:
 
 .. code-block:: pascal
 
 *)
-function waitFindColor(var X, Y: Integer; Color, Tol: Integer; Area: TBox; MaxTime: Integer): Boolean;
+function waitFindColor(var Pnt: TPoint; Color, Tol: Integer; Area: TBox; MaxTime: Integer): Boolean;
 var
   T: Timer;
 begin
@@ -147,7 +147,7 @@ begin
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if cs_findColorTolerance(X, Y, Color, Tol, Area, cs_CTS1) then
+    if createCol(Color,Tol).findIn(Area, Pnt) then
       Exit(True);
     Wait(10 + Random(6));
   end;
@@ -180,8 +180,7 @@ begin
   T.start();
   while T.timeElapsed do
   begin
-    cs_findColorsTolerance(TPA, Color, Tol, Area, cs_CTS1);
-    if (Length(TPA) > 0) then
+    if createCol(Color,Tol).findAllIn(Area, TPA) then
       Exit(True);
     Wait(10 + Random(6));
   end;
@@ -215,7 +214,7 @@ begin
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if cs_findColorsTolerance(TPA, Color, Tol, Area, cs_CTS1) then
+    if createCol(Color,Tol).findAllIn(Area, TPA) then
       if InRange(Length(TPA), MinCount, MaxCount) then
         Exit(True);
     Wait(15 + Random(10));
@@ -279,15 +278,15 @@ Example:
 *)
 function waitColorGoneIn(Color, Tol: Integer; Area: TBox; MaxTime: integer): Boolean;
 var
-  T: Timer;
-  CX, CY: Integer;
+  T   : Timer;
+  pnt : TPoint;
 begin
   Result := False;
   if Tol = 0 then Tol := 1;
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if (not cs_findColorTolerance(cx, cy, Color, Tol, Area, cs_CTS1)) then
+    if (not createCol(Color,Tol).findIn(Area, pnt)) then
       Exit(True);
     Wait(10);
   end;

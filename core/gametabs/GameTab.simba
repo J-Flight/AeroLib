@@ -31,8 +31,9 @@ Example:
 
 function getCurrentTab(): Integer;
 var
-  TNB:TBox;
-  TabNum,X,Y:Integer;
+  TNB    : TBox;
+  pnt    : TPoint;
+  TabNum : Integer;
 begin
   Result := -1;
   if (not isLoggedIn()) then
@@ -41,25 +42,24 @@ begin
   for TabNum := 1 to 14 do
   begin
     case TabNum of
-    1: TNB:=IntToBox(535,172,540,176);
-    2: TNB:=IntToBox(564,172,571,176);
-    3: TNB:=IntToBox(596,172,600,176);
-    4: TNB:=IntToBox(630,172,635,176);
-    5: TNB:=IntToBox(663,172,670,176);
-    6: TNB:=IntToBox(696,172,703,176);
-    7: TNB:=IntToBox(730,173,736,180);
-    8: TNB:=IntToBox(525,469,534,473);
-    9: TNB:=IntToBox(563,469,570,473);
-    10:TNB:=IntToBox(596,469,602,473);
-    11:TNB:=IntToBox(629,469,634,473);
-    12:TNB:=IntToBox(662,469,669,473);
-    13:TNB:=IntToBox(695,469,700,473);
-    14:TNB:=IntToBox(728,469,733,473);
+    1: TNB:=toBox(535,172,540,176);
+    2: TNB:=toBox(564,172,571,176);
+    3: TNB:=toBox(596,172,600,176);
+    4: TNB:=toBox(630,172,635,176);
+    5: TNB:=toBox(663,172,670,176);
+    6: TNB:=toBox(696,172,703,176);
+    7: TNB:=toBox(730,173,736,180);
+    8: TNB:=toBox(525,469,534,473);
+    9: TNB:=toBox(563,469,570,473);
+    10:TNB:=toBox(596,469,602,473);
+    11:TNB:=toBox(629,469,634,473);
+    12:TNB:=toBox(662,469,669,473);
+    13:TNB:=toBox(695,469,700,473);
+    14:TNB:=toBox(728,469,733,473);
     end;
 
-    if cs_FindColorTolerance(X, Y, 1910383, 13, TNB, cs_CTS1) then
+    if createCol(1910383,13).findIn(TNB, pnt) then
       break;
-
   end;
 
   if TabNum<15 then
@@ -114,7 +114,7 @@ Example:
 *)
 function tabExists(tab: integer): boolean;
 var
-  X,Y : integer;
+  pnt : TPoint;
 begin
   if (not isLoggedIn()) then
     exit(false);
@@ -132,7 +132,7 @@ begin
   case tab of
     TAB_COMBAT : Result:=(GetColor(535,177)=65536);
     TAB_STATS  : Result:=(GetColor(565,187)=65536);
-    TAB_QUEST  : Result:=(cs_FindColorTolerance(X, Y, 15821910, 81, intToBox(600,175,620,196), cs_CTS1));
+    TAB_QUEST  : Result:=createCol(15821910,81).findIn(ToBox(600,175,620,196), pnt);
     TAB_INV    : Result:=(GetColor(642,173)=65536);
     TAB_EQUIP  : Result:=(GetColor(666,177)=65536);
     TAB_PRAYER : Result:=(GetColor(706,175)=65536);
@@ -158,7 +158,7 @@ begin
 
   if (not(InRange(Tab, TAB_COMBAT, TAB_MUSIC))) then
   begin
-    Writeln('GameTab ' + intToStr(Tab) + ' is not a valid tab number.');
+    warn('GameTab ' + intToStr(Tab) + ' is not a valid tab number.', WT_CORE);
     Exit(False);
   end;
 
@@ -169,20 +169,20 @@ begin
   if (tabExists(Tab)) then
   begin
     case Tab of
-      TAB_COMBAT : TNB:=IntToBox(533,174,552,197);
-      TAB_STATS  : TNB:=IntToBox(563,171,590,197);
-      TAB_QUEST  : TNB:=IntToBox(597,171,622,197);
-      TAB_INV    : TNB:=IntToBox(629,171,655,197);
-      TAB_EQUIP  : TNB:=IntToBox(662,171,688,197);
-      TAB_PRAYER : TNB:=IntToBox(695,171,719,197);
-      TAB_MAGIC  : TNB:=IntToBox(729,175,752,197);
-      TAB_CLAN   : TNB:=IntToBox(529,469,554,490);
-      TAB_FRIENDS: TNB:=IntToBox(564,469,587,495);
-      TAB_IGNORE : TNB:=IntToBox(597,469,620,495);
-      TAB_LOGOUT : TNB:=IntToBox(630,469,655,495);
-      TAB_OPTIONS: TNB:=IntToBox(662,469,688,495);
-      TAB_EMOTES : TNB:=IntToBox(697,469,720,495);
-      TAB_MUSIC  : TNB:=IntToBox(729,469,752,490);
+      TAB_COMBAT : TNB:=toBox(533,174,552,197);
+      TAB_STATS  : TNB:=toBox(563,171,590,197);
+      TAB_QUEST  : TNB:=toBox(597,171,622,197);
+      TAB_INV    : TNB:=toBox(629,171,655,197);
+      TAB_EQUIP  : TNB:=toBox(662,171,688,197);
+      TAB_PRAYER : TNB:=toBox(695,171,719,197);
+      TAB_MAGIC  : TNB:=toBox(729,175,752,197);
+      TAB_CLAN   : TNB:=toBox(529,469,554,490);
+      TAB_FRIENDS: TNB:=toBox(564,469,587,495);
+      TAB_IGNORE : TNB:=toBox(597,469,620,495);
+      TAB_LOGOUT : TNB:=toBox(630,469,655,495);
+      TAB_OPTIONS: TNB:=toBox(662,469,688,495);
+      TAB_EMOTES : TNB:=toBox(697,469,720,495);
+      TAB_MUSIC  : TNB:=toBox(729,469,752,490);
     end;
 
     Tries := 0;
@@ -235,14 +235,14 @@ begin
     Exit(false);
   if (not(InRange(Tab, TAB_COMBAT, TAB_MUSIC))) then
   begin
-    Writeln('FTab ' + IntToStr(Tab) + ' is not a valid tab number.');
+    warn('FTab ' + IntToStr(Tab) + ' is not a valid tab number.', WT_CORE);
     Exit(false);
   end;
 
 { LogOut Does not have a key AFAIK }
   if (Tab=TAB_LOGOUT) then
   begin
-    Writeln('FTab ' + intToStr(Tab) + ' is not a valid tab number.');
+    warn('FTab ' + intToStr(Tab) + ' is not a valid tab number.', WT_CORE);
     Exit(False);
   end;
 

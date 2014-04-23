@@ -16,32 +16,44 @@ end;
 
 Procedure TEntity.define(PntT, PntB: TPoint);
 var
-  tTPA       : TPointArray;
-  pCols      : TIntegerArray;
+  pC,pAC : TColEx;
+  tTPA   : TPointArray;
+  pCols  : TIntegerArray;
 begin
-  cs_findColorsTolerance(tTPA, getColor(PntT.X,PntT.Y), 20, intToBox(PntT.X-15,PntT.Y-20,PntT.X+15,PntT.Y+25), cs_CTS);
+  pC := createCol(getColor(PntT.X,PntT.Y), 20);
+  pC.findAllIn(toBox(PntT.X-15,PntT.Y-20,PntT.X+15,PntT.Y+25), tTPA);
+
   getColorsWrap(tTPA, pCols);
   clearSameIntegers(pCols);
-  returnValues(pCols, self.tHMod, self.tSMod, self.tCol, self.tTol);
+  pAC.autoCreate(pCols);
+  Self.tCol  := pAC.Col;
+  Self.tTol  := pAC.Tol;
+  Self.tHMod := pAC.hMod;
+  Self.tSMod := pAC.sMod;
 
   tTPA  := [];
   pCols := [];
 
-  cs_findColorsTolerance(tTPA, GetColor(PntB.X,PntB.Y), 20, intToBox(PntB.X-15,PntB.Y-20,PntB.X+15,PntB.Y+25), cs_CTS);
+  pC := createCol(getColor(PntB.X,PntB.Y), 20);
+  pC.findAllIn(toBox(PntB.X-15,PntB.Y-20,PntB.X+15,PntB.Y+25), tTPA);
   getColorsWrap(tTPA, pCols);
   clearSameIntegers(pCols);
-  returnValues(pCols, self.bHMod, self.bSMod, self.bCol, self.bTol);
-  self.BasePnt := Point(round((PntT.X+PntB.X)/2), round((PntT.Y+PntB.Y)/2));
+  pAC.autoCreate(pCols);
+  Self.bCol    := pAC.Col;
+  Self.bTol    := pAC.Tol;
+  Self.bHMod   := pAC.hMod;
+  Self.bSMod   := pAC.sMod;
+  Self.BasePnt := Point(round((PntT.X+PntB.X)/2), round((PntT.Y+PntB.Y)/2));
 end;
 
 function isPlayerWalking(): Boolean; forward;
 Procedure TEntity.update();
 var
+  pC        : TColEx;
   pPnt      : TPoint;
   tTPA,bTPA,
   fTPA      : TPointArray;
   atpa      : T2DPointArray;
-  cs        : cs_TColorSettings;
 begin
   while isPlayerWalking() do
     Wait(1);
@@ -49,12 +61,13 @@ begin
   self.FullTPA := [];
   pPnt := self.BasePnt;
 
-  cs := cs_ToColorSettings(2, self.tHMod, self.tSMod);
-  cs_findColorsTolerance(tTPA, self.tCol, self.tTol, intToBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), cs);
-  cs := cs_ToColorSettings(2, self.bHMod, self.bSMod);
-  cs_findColorsTolerance(bTPA, self.bCol, self.bTol, intToBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), cs);
-  combineTPAWrap(tTPA, bTPA, fTPA);
+  pC := createColEx(self.tCol, self.tTol, self.tHMod, self.tSMod);
+  pC.findAllIn(toBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), tTPA);
 
+  pC := createColEx(self.bCol, self.bTol, self.bHMod, self.bSMod);
+  pC.findAllIn(toBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), bTPA);
+
+  combineTPAWrap(tTPA, bTPA, fTPA);
   if (length(fTPA) < 1) then
   begin
     Writeln('[TEntity]: Colors not found...');

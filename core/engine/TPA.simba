@@ -3,6 +3,7 @@
 TPA
 ===
 }
+{$loadlib AND_TPA}
 
 function TPointArray.midPnt(): TPoint;
 var
@@ -29,4 +30,38 @@ end;
 function pointsMatch(Pnt1, Pnt2: TPoint): Boolean;
 begin
   result := ((Pnt1.X = Pnt2.X) and (Pnt1.Y = Pnt2.Y));
+end;
+
+function TPADelete(var TPA: TPointArray; x: Integer): Boolean;
+var
+  i, h: Integer;
+begin
+  h := High(TPA);
+  Result := ((x <= h) and (x > -1));
+  if not Result then
+    Exit;
+  for i := x to (h - 1) do
+    TPA[i] := TPA[(i + 1)];
+  SetLength(TPA, h);
+end;
+
+function safePnts(TPA: TPointArray): TPointArray;
+var
+  i,l  : integer;
+  ctpa : TPointArray;
+begin
+  if length(TPA) < 1 then
+    exit;
+
+  for i:=0 to high(TPA) do
+    if not PointInBox(TPA[i], intToBox(0,0,764,502)) then
+      TPADelete(TPA, i);
+end;
+
+procedure checkAreaBounds(var Area: TBox);
+begin
+  if Area.X1 < 0 then Area.X1 := 0;
+  if Area.Y1 < 0 then Area.Y1 := 0;
+  if Area.X2 > 764 then Area.X2 := 764;
+  if Area.Y2 > 502 then Area.Y2 := 502;
 end;

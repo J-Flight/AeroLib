@@ -11,13 +11,14 @@ begin
   gameTab(TAB_INV);
   Wait(100 + Random(50));
   BoxDTM := DTMFromString('mwQAAAHic42RgYHBiYmAwQ8J+SNgZiN2A+BlQ3QMGCP0GiO8C8SMo/wMU97W0AElGvNiIgTDAbwIEwwEAyPkMaQ==');
-  if findDTM(BoxDTM, x, y, MIX1, MIY1, MIX2, MIY2) then
-  begin
-    Mouse(point(x,y), 4, 4, MOUSE_LEFT);
-    wait(randomRange(1500,2500));
-    if (GetColor(487, 39) = 13567) and (GetColor(350, 295) = 2304814) then
-      Result := True;
-  end;
+  if isLoggedIn() then
+    if findDTM(BoxDTM, x, y, MIX1, MIY1, MIX2, MIY2) then
+    begin
+      Mouse(point(x,y), 4, 4, MOUSE_LEFT);
+      wait(randomRange(1500,2500));
+      if (GetColor(487, 39) = 13567) and (GetColor(350, 295) = 2304814) then
+        Result := True;
+    end;
   freedtm(boxdtm);
 end;
 

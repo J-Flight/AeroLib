@@ -45,12 +45,12 @@ var
 begin
   if not InRange(I, 1, 28) then
   begin
-    Result := IntToBox(-1,-1,-1,-1);
-    Writeln('Incorrect index: ' + IntToStr(i));
+    Result := toBox(-1,-1,-1,-1);
+    warn('Incorrect index: ' + IntToStr(i), WT_CORE);
     Exit;
   end;
-  Slot1 := IntToBox(563, 213, 594, 244);
-  Slot6 := IntToBox(605, 249, 31415, 92653);
+  Slot1 := toBox(563, 213, 594, 244);
+  Slot6 := toBox(605, 249, 31415, 92653);
   Result.x1 := Slot1.X1 + ((((i + 3) mod 4)) * (Slot6.X1 - Slot1.X1));
   Result.y1 := Slot1.Y1 + ((((i - 1) div 4)) * (Slot6.Y1 - Slot1.Y1));
   Result.x2 := Result.x1 + (Slot1.X2 - Slot1.X1);
@@ -177,11 +177,11 @@ var
 begin
   Result := 0;
 
-  Box := intToBox(0,0,755,500);
+  Box := toBox(0,0,755,500);
   if not PointInBox(Pnt, Box) then
     Exit;
-  Box := intToBox(Pnt.X-32,Pnt.Y-32,Pnt.X+32,Pnt.Y+32);
-  if not cs_FindColorsTolerance(TPA, 65536, 0, Box, cs_CTS) then
+  Box := toBox(Pnt.X-32,Pnt.Y-32,Pnt.X+32,Pnt.Y+32);
+  if not createCol(65536,0).findAllIn(Box, TPA) then
     Exit;
 
   Inc(Result);
@@ -193,14 +193,14 @@ begin
   Box  := getTPABounds(ATPA[0]);
   Col  := [65535, 65278, 16777215, 8453888]; // Yellow, white, green and ...?
   Pnt  := Point(round((Box.X1+Box.X2)/2), Box.Y1);
-  Box  := intToBox(Pnt.x-20, Pnt.y-15, Pnt.x+20, Pnt.y+15);
+  Box  := toBox(Pnt.x-20, Pnt.y-15, Pnt.x+20, Pnt.y+15);
   TPA  := [];
   ATPA := [];
 
   for i:=0 to High(Col) do
-    if cs_FindColors(TPA, Col[i], Box, cs_CTS) then
+    if createCol(Col[i],0).findAllIn(Box, TPA) then
     begin
-      S := cs_GetTextAtEx(Box, 0, 1, 1, Col[i], 0, StatChars07, cs_CTS);
+      S := cs_getTextAtEx(Box, 0, 1, 1, Col[i], 0, StatChars07, cs_CTS);
       Result := strToIntDef(GetNumbers(S), 1);
       Case I of
         2: Result := Result * 1000;

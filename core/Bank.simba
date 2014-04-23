@@ -71,6 +71,8 @@ Example:
 function inPin(Pin: string): Boolean;
 var
   T : Timer;
+  Col : TColEx;
+  pnt : TPoint;
   Tx,Ty,X,Y,I,J,Tries,ColorCount : Integer;
   Boxes : array of TBox;
 begin
@@ -89,9 +91,9 @@ begin
     Exit(False);
   end;
 
-  Boxes := [IntToBox(37, 107, 100, 170), IntToBox(127, 107, 190, 170), IntToBox(217, 107, 280, 170), IntToBox(307, 107, 370, 170),
-            IntToBox(37, 179, 100, 242), IntToBox(127, 179, 190, 242), IntToBox(217, 179, 280, 242),
-            IntToBox(37, 251, 100, 314), IntToBox(127, 251, 190, 314), IntToBox(217, 251, 280, 314)];
+  Boxes := [toBox(37, 107, 100, 170), toBox(127, 107, 190, 170), toBox(217, 107, 280, 170), toBox(307, 107, 370, 170),
+            toBox(37, 179, 100, 242), toBox(127, 179, 190, 242), toBox(217, 179, 280, 242),
+            toBox(37, 251, 100, 314), toBox(127, 251, 190, 314), toBox(217, 251, 280, 314)];
 
   while Interfaces[PINSCREEN].isVisible() do
   begin
@@ -99,11 +101,12 @@ begin
     begin
       if not Interfaces[PINSCREEN].isVisible() then Break;
 
-      ColorCount := countColorTolerance(clWhite, 150, 80, 380, 100, 10);
+      Col := createCol(clWhite, 10);
+      ColorCount := Col.count(toBox(150,80,380,100));
       // Counts the "Now click the NUM_X digit.". This is used later on.
 
       getMousePos(X, Y);
-      if (findText(Tx, Ty, Pin[I], upChars07, intToBox(30,100,383,319))) then
+      if (findText(Tx, Ty, Pin[I], upChars07, toBox(30,100,383,319))) then
       begin
         for J:=0 to High(Boxes) do
           if IntInBox(Tx, Ty, Boxes[J]) then
@@ -124,7 +127,7 @@ begin
       end;
 
       Wait(100);
-      while (cs_CountColorTolerance(clWhite, 10, intToBox(150,80,380,100), cs_CTS) = ColorCount) do
+      while (Col.count(toBox(150,80,380,100)) = ColorCount) do
         Wait(500);
 
       Wait(RandomRange(300, 600));
@@ -138,7 +141,8 @@ begin
       Wait(1);
 
     clickContinue(True);
-    while not findColor(Tx, Ty, 0, 7, 460, 69, 474) do
+
+    while not (createCol(0,1).findIn(toBox(7,460,69,474), pnt)) do
     begin
       Wait(500);
       if not isLoggedIn() then
@@ -209,11 +213,11 @@ Example:
 *)
 procedure fixBank();
 var
-  X,Y : Integer;
+  pnt : TPoint;
 begin
   if not isBankOpen() then Exit;
-  if not cs_findColorTolerance(X, Y, 4282469, 20, intToBox(487,76,491,77), cs_CTS) then
-    mouseBox(intToBox(484,76,494,83), MOUSE_LEFT);
+  if not createCol(4282469, 20).findIn(toBox(487,76,491,77), pnt) then
+    mouseBox(toBox(484,76,494,83), MOUSE_LEFT);
 end;
 
 Function scrollToItemDTM(DTM: Integer; var Pnt: TPoint): Boolean;
@@ -280,7 +284,7 @@ function depositItem(Slot, Amount: Integer): Boolean;
 var
   B   : TBox;
   T   : Timer;
-  X,Y : Integer;
+  pnt : TPoint;
 begin
   if isBankOpen() then
   begin
@@ -289,7 +293,7 @@ begin
   end else if isDepositBoxOpen() then
   begin
     B := depositItemBox(Slot);
-    if (not findColor(X, Y, clOutline_black, B.X1, B.Y1, B.X2, B.Y2)) then
+    if (not createCol(clOutline_black, 1).findIn(B, pnt)) then
       Exit(True);
   end;
 
@@ -323,7 +327,7 @@ begin
       if waitOptionMulti(['Deposit-X', 'it-X'], 300) then
       begin
          T.start();
-         while (T.timeElapsed < 10000) and (not InRange(CountColor(0, 211, 394, 308, 411), 200, 300)) do
+         while (T.timeElapsed < 10000) and (not InRange(createCol(0, 1).count(toBox(211,394,308,411)), 200, 300)) do
            Wait(50);
          Wait(RandomRange(75, 400));
          typeSend(intToStr(Amount));
@@ -365,8 +369,8 @@ begin
   if isBankOpen() then
   begin
     case lowercase(Which) of
-      'inventory','inv':          mouseBox(intToBox(428,291,460,322), MOUSE_LEFT);
-      'equipment','worn','equip': mouseBox(intToBox(465,291,497,322), MOUSE_LEFT);
+      'inventory','inv':          mouseBox(toBox(428,291,460,322), MOUSE_LEFT);
+      'equipment','worn','equip': mouseBox(toBox(465,291,497,322), MOUSE_LEFT);
       else
       begin
         warn('Invalid deposit method', WT_CORE);
@@ -417,7 +421,7 @@ begin
     exit(False);
 
   FixBank;
-  if findColors(TPA, clOutline_black, Pnt.X-20, Pnt.Y-20, Pnt.X+20, Pnt.Y+20) then
+  if createCol(clOutline_black, 1).findAllIn(toBox(Pnt.X-20,Pnt.Y-20,Pnt.X+20,Pnt.Y+20), TPA) then
   begin
     ATPA := clusterTPA(TPA, 5);
     sortATPAFromMidPoint(ATPA, Pnt);
@@ -457,7 +461,7 @@ begin
     if waitOptionMulti(['Withdraw-X', 'w-X', 'X'], 500) then
     begin
        T.start();
-       while (T.timeElapsed < 10000) and (not InRange(CountColor(0, 211, 394, 308, 411), 200, 300)) do
+       while (T.timeElapsed < 10000) and (not InRange(createCol(0, 1).count(toBox(211,394,308,411)), 200, 300)) do
          Wait(50);
        Wait(RandomRange(75, 400));
        typeSend(IntToStr(Amount));
@@ -481,7 +485,7 @@ begin
     Exit;
 
   if (Item = '') then
-    if (InRange(countColor(0, 211, 394, 308, 411), 200, 300)) then
+    if (InRange(createCol(0, 1).count(toBox(211,394,308,411)), 200, 300)) then
     begin
       humanMMouse(Point(399,307), 16, 16);
       fastClick(MOUSE_LEFT);
@@ -499,7 +503,7 @@ begin
     while ((Interfaces[BANKSCREEN].isVisible()) and (T.timeElapsed < 5000)) do
     begin
       Wait(250 + Random(350));
-      if (InRange(CountColor(0, 211, 394, 308, 411), 200, 300)) then
+      if (InRange(createCol(0, 1).count(toBox(211,394,308,411)), 200, 300)) then
       begin
         TypeSend(Item);
         Exit;
@@ -537,11 +541,11 @@ begin
     if SwitchOn then
     begin
       if (getColor(305, 318) = 5067345) then
-        mouseBox(intToBox(287,304,368,322), MOUSE_LEFT);
+        mouseBox(toBox(287,304,368,322), MOUSE_LEFT);
     end else
     begin
       if (getColor(230, 314) = 5067345) and (not SwitchOn) then
-        mouseBox(intToBox(203,304,282,322), MOUSE_LEFT);
+        mouseBox(toBox(203,304,282,322), MOUSE_LEFT);
     end;
 end;
 

@@ -34,7 +34,7 @@ begin
     Exit
   else
     Wait(250 + Random(100));
-  if not findColors(TPA, 3381759, 695, 210, 725, 222) then
+  if not createCol(3381759,1).findAllIn(toBox(695,210,725,222), TPA) then
     Exit;
   Box := getTPABounds(TPA);
   Result := StrToIntDef(ExtractFromStr(cs_getTextAtEx(Box, 0, 5, 1, 3381759, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
@@ -65,8 +65,9 @@ Example:
 *)
 function setFightMode(Mode: Integer): Boolean;
 var
-  i,x,y : Integer;
-  b : TBox;
+  b        : TBox;
+  pnt      : TPoint;
+  i        : Integer;
   cmbBoxes : TBoxArray;
 begin
   if (not isLoggedIn()) then
@@ -81,18 +82,18 @@ begin
     Exit(false);
   end;
 
-  cmbBoxes := [IntToBox(572, 255, 631, 290), IntToBox(656, 255, 715, 290),
-               IntToBox(572, 308, 631, 343), IntToBox(655, 308, 714, 343)];
+  cmbBoxes := [toBox(572, 255, 631, 290), toBox(656, 255, 715, 290),
+               toBox(572, 308, 631, 343), toBox(655, 308, 714, 343)];
   b := cmbBoxes[Mode - 1];
 
 { If no 4th weapon option goto 3rd option }
-  if (Mode = 4) and (not findColor(x, y, 2070783, 655, 308, 714, 343)) then
+  if (Mode = 4) and (not createCol(2070783,1).findIn(toBox(655,308,714,343), pnt)) then
     b := cmbBoxes[2];
 
   i := 0;
   while (i < 4) do
   begin
-    if cs_findColorTolerance(x, y, 1908609, 5, b, cs_CTS1) then
+    if createCol(1908609,5).findIn(b, pnt) then
       Exit(true);
     mouseBox(b, MOUSE_LEFT);
     Wait(200 + Random(300));
@@ -225,17 +226,17 @@ begin
   end;
 
   case I of
-    1 : Result := IntToBox(629, 213, 656, 240);
-    2 : Result := IntToBox(588, 252, 615, 279);
-    3 : Result := IntToBox(629, 252, 656, 279);
-    4 : Result := IntToBox(670, 252, 697, 279);
-    5 : Result := IntToBox(573, 291, 600, 318);
-    6 : Result := IntToBox(629, 291, 656, 318);
-    7 : Result := IntToBox(685, 291, 712, 318);
-    8 : Result := IntToBox(629, 331, 656, 358);
-    9 : Result := IntToBox(573, 371, 600, 398);
-    10: Result := IntToBox(629, 371, 656, 398);
-    11: Result := IntToBox(685, 371, 712, 398);
+    1 : Result := toBox(629, 213, 656, 240);
+    2 : Result := toBox(588, 252, 615, 279);
+    3 : Result := toBox(629, 252, 656, 279);
+    4 : Result := toBox(670, 252, 697, 279);
+    5 : Result := toBox(573, 291, 600, 318);
+    6 : Result := toBox(629, 291, 656, 318);
+    7 : Result := toBox(685, 291, 712, 318);
+    8 : Result := toBox(629, 331, 656, 358);
+    9 : Result := toBox(573, 371, 600, 398);
+    10: Result := toBox(629, 371, 656, 398);
+    11: Result := toBox(685, 371, 712, 398);
   end;
 end;
 
@@ -268,7 +269,7 @@ begin
   Result := Point(-1,-1);
   if not InRange(EquipSlot,1,11) then
   begin
-    Writeln('Invalid EquipSlot('+inttostr(EquipSlot)+') passed');
+    warn('Invalid EquipSlot('+inttostr(EquipSlot)+') passed', WT_CORE);
     Exit;
   end;
   ETB := getEquippedItemBounds(EquipSlot);
@@ -299,19 +300,19 @@ Example:
 *)
 function wearingItem(I: Integer): Boolean;
 var
-  X,Y : Integer;
   STB : TBox;
+  pnt : TPoint;
 begin
   if (not InRange(I, 1, 11)) then
   begin
-    Writeln('Equipment slot #' + IntToStr(I) + ' is not a valid equipment slot');
+    warn('Equipment slot #' + IntToStr(I) + ' is not a valid equipment slot', WT_CORE);
     Exit(False);
   end;
   if not gametab(TAB_EQUIP) then
     exit(false);
 
   STB := getEquippedItemBounds(I);
-  Result := findColor(X,Y,65536,STB.X1,STB.Y1,STB.X2,STB.Y2);
+  Result := createCol(65536,1).findIn(STB, pnt);
 end;
 
 (*
@@ -435,7 +436,7 @@ var
 begin
   if (not InRange(EmoteNumber, 1, 37)) then
   begin
-    Writeln('Invalid EmoteNumber: ' + IntToStr(EmoteNumber) + ', Valid Emotes: 1..46');
+    warn('Invalid EmoteNumber: ' + IntToStr(EmoteNumber) + ', Valid Emotes: 1..46', WT_CORE);
     Exit;
   end;
 
@@ -444,9 +445,9 @@ begin
 
   case EmoteNumber of
     01..20: if (getColor(721, 221) = 1777699) then
-              mouseBox(intToBox(722,222,735,240), MOUSE_LEFT);
+              mouseBox(toBox(722,222,735,240), MOUSE_LEFT);
     21..37: if (getColor(721, 448) = 1777699) then
-              mouseBox(intToBox(723,425,735,446), MOUSE_LEFT);
+              mouseBox(toBox(723,425,735,446), MOUSE_LEFT);
   end;
   Wait(100 + Random(200));
   if InRange(EmoteNumber, 1, 20) then
@@ -460,7 +461,7 @@ begin
 
   P := Point(569+(Row*44),235+(Col*49));
 
-  mouseBox(intToBox(P.X-3,P.Y-6,P.X+3,P.Y+6), MOUSE_LEFT);
+  mouseBox(toBox(P.X-3,P.Y-6,P.X+3,P.Y+6), MOUSE_LEFT);
 end;
 
 (*
