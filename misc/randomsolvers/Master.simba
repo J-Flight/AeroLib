@@ -379,7 +379,7 @@ label
 begin
   Start:
   cRan := false;
-  responses := ['lrigh','Okay','kay.','Yes','I supp','pose so','yeah','Yeah','Sure','ure'];
+  responses := ['lrigh','All right','ll rig','Okay','kay.','Yes','I supp','pose so','yeah','Yeah','Sure','ure'];
   for i:=1 to 5 do
     if DTM_findBestPointEx([DTM_RoyalFrog], AREA_MS, pnt) then
     begin
@@ -418,7 +418,10 @@ begin
   T.start();
   repeat
     if doConversation(responses) then
+    begin
+      warn('Chose correct response', WT_RANDOM);
       break;
+    end;
   until(T.timeElapsed() > 15000)
 
   if waitFunc(@areTalking, 10, 10000) then
@@ -506,6 +509,8 @@ Description: Searches screen for NickName and handles ALL Talking Randoms
 *******************************************************************************}
 function findTalk(): Boolean;
 var
+  txtCol : TColEx;
+  Pnt    : TPoint;
   ax,ay,yCount,zCount,Count2,x1,y1,x2,y2,
   X,Y,Count1,bmpScreen: Integer;
   NPCName: String;
@@ -514,19 +519,20 @@ begin
   Result := False;
   if not NicknameSet then Exit;
 
-  if findColor(ax, ay, 65535, MSX1, MSY1, MSX2, MSY2) then
+  txtCol := createCol(65535,1);
+  if txtCol.findIn(AREA_MS, Pnt) then  // ax,ay
   begin
     SetArrayLength(gtalksBox, 0);
     SetArrayLength(YelSkipBoxs, 0);
 
-    y1 := ay;
-    if ( ( ay + 5 ) > 334 ) then y2 := 334 else y2 := ay + 5;
+    y1 := Pnt.y;
+    if ( ( Pnt.y + 5 ) > 334 ) then y2 := 334 else y2 := Pnt.y + 5;
 
-    x1 := ax; x2 := x1;
+    x1 := Pnt.x; x2 := x1;
     zCount := 0;
 
     repeat
-      if findColor(ax, ay, 65535, x2, y1 + 2, x2 + 3, y2 + 3) then
+      if txtCol.findIn(toBox(x2,y1+2,x2+3,y2+3), Pnt) then
         zCount := 0
       else
         zCount := zCount + 1;
@@ -602,7 +608,7 @@ begin
           if not findDTM(DTM_RoyalFrog, x, y, MSX1, MSY1, MSX2, MSY2) then
           begin
             missMouse(point(ax,ay), 0, 0);
-            if waitUpTextMulti(['Talk','lk-to','ard','curity'], RandomRange(150,300)) then
+            if waitUpTextMulti(['Talk','lk-to','ttack','ard','curity'], RandomRange(150,300)) then
             begin
               NPCName := extractNPCNameUptext();
               fastClick(MOUSE_RIGHT);

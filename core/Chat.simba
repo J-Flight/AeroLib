@@ -594,7 +594,7 @@ Example:
 
 
 *)
-function InChat(Text: string): Boolean;
+function inChat(Text: string): Boolean;
 var
   s: string;
 begin
@@ -736,6 +736,20 @@ Example:
 function areTalking(): boolean;
 begin
   result := (getNPCChatName() <> '');
+end;
+
+function chatOptionScreen(): Boolean;
+var
+  pnt       : TPoint;
+  colO,colB : TColEx;
+begin
+  colO := createCol(125, 5);
+  colB := createCol(7238703, 25);
+
+  if not colB.findIn(toBox(33,371,39,375), pnt) then
+    Exit(False);
+
+  result := colO.findIn(toBox(90,363,430,377), pnt);
 end;
 
 function findNPCChatTextMulti(txt: TStringArray; Click,DoWait: Boolean): boolean;

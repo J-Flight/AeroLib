@@ -58,10 +58,14 @@ begin
       TPADelete(TPA, i);
 end;
 
-procedure checkAreaBounds(var Area: TBox);
+function TPointArray.foundInBox(Box: TBox): Boolean;
+var
+  i : Integer;
 begin
-  if Area.X1 < 0 then Area.X1 := 0;
-  if Area.Y1 < 0 then Area.Y1 := 0;
-  if Area.X2 > 764 then Area.X2 := 764;
-  if Area.Y2 > 502 then Area.Y2 := 502;
+  if length(self) < 1 then
+    exit(false);
+
+  for i:=0 to high(self) do
+    if pointInBox(self[i], Box) then
+      exit(true);
 end;

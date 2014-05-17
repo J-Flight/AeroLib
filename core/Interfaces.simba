@@ -40,8 +40,8 @@ begin
     FontType  := 'SmallChars07';
     FontColor := 2070783;
     ColorTol  := 5;
-    Text      := 'mode';
-    TxtBounds := toBox(119, 287, 149, 302);
+    Text      := 'Insert';
+    TxtBounds := toBox(125, 304, 170, 327);
   end;
   with Interfaces[PINSCREEN] do
   begin
@@ -82,24 +82,37 @@ begin
   result := findTextTPA(Self.FontColor, Self.ColorTol, Self.TxtBounds,Self.Text, Self.FontType, -1);
 end;
 
+function isInterfaceOpen(): Boolean;
+var
+  i : Integer;
+begin
+  for i:=BANKSCREEN to TELEOTHERSCREEN do
+    if Interfaces[i].isVisible() then
+      Exit(true);
+  result := false;
+end;
+
 (*
     by NaumanAkhlaQ, Narcle, Nava2, and Flight
     Updated: 18 December 2013 by Flight
 *)
 
+function getBankMode(): String; forward;
 function closeInterface(): boolean;
 var
   Pa      : TBox;
   T       : Timer;
   pnt     : TPoint;
   i,ii,l,
-  x,y     : Integer;
+  x,y,ms  : Integer;
   Col     : TIntegerArray;
   a       : T2DPointArray;
   b       : array[0..1] of TPointArray;
 begin
   if menuOpen() then
   begin
+    ms := mouseSpeed;
+    mouseSpeed := 25;
     T.start();
     while (T.timeElapsed() < 3000) do
     begin
@@ -108,6 +121,7 @@ begin
       if not menuOpen() then
         break;
     end;
+    mouseSpeed := ms;
   end;
 
 // handles the advanced skill guide window
@@ -130,9 +144,14 @@ begin
       Exit(True);
   end;
 
-  if (Interfaces[BANKSCREEN].isVisible() or Interfaces[SHOPSCREEN].isVisible()) then
+
+  if (Interfaces[BANKSCREEN].isVisible() or
+    Interfaces[SHOPSCREEN].isVisible()) then
   begin
-    mouseBox(toBox(479,33,495,50), MOUSE_MOVE);
+    if (getBankMode() = 'Standard') then
+      mouseBox(toBox(479,33,495,50), MOUSE_MOVE)
+    else if (getBankMode() = 'Tabbed') then
+      mouseBox(toBox(480,16,495,31), MOUSE_MOVE);
     if (waitUptextMulti(['lose','ack','Cl','se'], 200)) then
     begin
       fastClick(MOUSE_LEFT);

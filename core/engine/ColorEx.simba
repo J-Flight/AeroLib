@@ -61,6 +61,22 @@ begin
   setColorToleranceSpeed(tmpCTS);
 end;
 
+function TColEx.findIn(Area: TBox): Boolean; overload;
+var
+  pnt    : TPoint;
+  tmpCTS : Integer;
+begin
+  tmpCTS := getToleranceSpeed();
+  if ((Self.hMod <> 0.2) or (Self.sMod <> 0.2)) then
+  begin
+    setColorToleranceSpeed(2);
+    setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
+  end;
+  checkAreaBounds(Area);
+  Result := findColorTolerance(Pnt.x, Pnt.y, Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  setColorToleranceSpeed(tmpCTS);
+end;
+
 function TColEx.findAllIn(Area: TBox; var Points: TPointArray): Boolean;
 var
   tmpCTS : Integer;

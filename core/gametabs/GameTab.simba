@@ -85,7 +85,7 @@ begin
   else
     Result := Result;
 
-  if Interfaces[BANKSCREEN].isVisible() then
+  if isBankOpen() then
     Result := TAB_INV;
 end;
 
@@ -126,7 +126,7 @@ begin
   end;
 
   if (tab = TAB_INV) then
-    if Interfaces[BANKSCREEN].isVisible() then
+    if isBankOpen() then
       Exit(True);
 
   case tab of

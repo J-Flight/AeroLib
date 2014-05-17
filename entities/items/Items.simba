@@ -120,7 +120,7 @@ Example:
 
 .. code-block:: pascal
 
-    totalCount := InvCount;
+    totalCount := getInvCount();
 
 *)
 function getInvCount(): Integer;
@@ -261,7 +261,7 @@ Example:
 
 .. code-block:: pascal
 
-    Result := ItemActivated(4);
+    Result := slotActivated(4);
 
 *)
 function slotActivated(Slot: Integer): Boolean;
@@ -274,6 +274,15 @@ begin
     exit;
   TB := invBox(Slot);
   Result := findColor(x, y, clOutline_white, TB.x1, TB.y1, TB.x2, TB.y2);
+end;
+
+function anySlotActivated(): Boolean;
+var
+  i : Integer;
+begin
+  result := false;
+  for i:=1 to 28 do
+    if slotActivated(i) then exit(True);
 end;
 
 function TItem.findIn(Area: TBox; var fPnt: TPoint): Boolean;
@@ -291,18 +300,17 @@ begin
   fPnt := point(x, y);
 end;
 
-function TItem.getAmount(): Integer;
+function TItem.getAmount(ExcludeBank: Boolean): Integer;
 var
   i,c : Integer;
-  b   : Boolean;
   pnt : TPoint;
 begin
   result := 0;
   gameTab(TAB_INV);
-  b := Interfaces[BANKSCREEN].isVisible();
-  if b then
-    if Self.findIn(Area_BS, pnt) then
-      exit(getItemAmount(pnt));
+  if not ExcludeBank then
+    if isBankOpen() then
+      if Self.findIn(Area_BS, pnt) then
+        exit(getItemAmount(pnt));
 
   for i := 1 to 28 do
     if itemInSlot(i) then
@@ -312,5 +320,26 @@ begin
         if (c > 1) then
           exit(c);
         inc(Result);
+      end;
+end;
+
+function TItem.getAmount(): Integer; overload;
+begin
+  result := Self.getAmount(False);
+end;
+
+function TItem.getSlots(): TIntegerArray;
+var
+  i,c : Integer;
+  b   : Boolean;
+  pnt : TPoint;
+begin
+  gameTab(TAB_INV);
+  for i:=1 to 28 do
+    if itemInSlot(i) then
+      if Self.findIn(invBox(i), pnt) then
+      begin
+        setArrayLength(result, Length(result)+1);
+        result[High(result)] := i;
       end;
 end;

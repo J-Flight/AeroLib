@@ -115,8 +115,27 @@ begin
   Result := LS_LOGGEDOUT;
 end;
 
-function isLoggedIn(): Boolean;
+function connectionLost(): Boolean;
+var
+  Pnt : TPoint;
+  X,Y : Integer;
 begin
+  if (createCol(0,0).findIn(toBox(0,0,230,35), Pnt) and createCol(16777215,10).findIn(toBox(0,0,230,35), Pnt)) then
+    result := findText(X, Y, 'attem', 'SmallChars07', toBox(0,0,230,35));
+end;
+
+function isLoggedIn(): Boolean;
+var
+  T : Timer;
+begin
+  if connectionLost() then
+  begin
+    warn('Connection lost, please wait..', WT_CORE);
+    T.start();
+    while (connectionLost() and (T.timeElapsed() < 60000)) do
+      wait(1);
+  end;
+
   result := getLoginState() = LS_LOGGEDIN;
 end;
 
@@ -506,4 +525,7 @@ begin
     Inc(Attempts);
     goto EnterGame;
   end;
+
+  Result := isLoggedIn();
+  if Result then inc(count_Login);
 end;

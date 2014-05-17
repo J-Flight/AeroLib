@@ -9,7 +9,7 @@ var
   tpa : TPointArray;
 begin
   if (countMMDots('npc') > 9) then //Possible 10 NPCS at Yanille (14+ NPCS at random event)
-    if cs_findColorsTolerance(tpa, 214809, 20, AREA_MM, cs_CTS) then // dark green tree color
+    if cs_findColorsTolerance(tpa, 214809, 40, AREA_MM, cs_CTS) then // dark green tree color
     begin
       if Length(tpa) > 750 then
       begin

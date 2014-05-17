@@ -4,56 +4,147 @@ Settings
 ========
 }
 
-(*
-SetBrightness
-~~~~~~~~~~~~~
+{
+  1: Display
+  2: Audio
+  3: Chat
+  4: Controls
+}
+function openSettingsTab(Tab: Integer): Boolean;
+var
+  redCol : TColEx;
+  curTab : Integer;
+begin
+  if ((not isLoggedIn()) or (not gameTab(TAB_OPTIONS))) then
+    exit(false);
 
-.. code-block:: pascal
+  curTab := 0;
+  redCol := createCol(1974404, 5);
+  if redCol.findIn(pointToBox(point(573,226), 17)) then
+    curTab := 1
+  else if redCol.findIn(pointToBox(point(619,226), 17)) then
+    curTab := 2
+  else if redCol.findIn(pointToBox(point(665,226), 17)) then
+    curTab := 3;
 
-    function setBrightness(Brightness: Integer): Boolean;
+  if (curTab < 1) then
+    curTab := 4;
 
-Sets the Brightness level, returns true if changed.
+  if curTab = Tab then
+    exit(true);
 
-.. note::
+  case Tab of
+    1: mouseBox(pointToBox(point(573,226), 17), MOUSE_LEFT);
+    2: mouseBox(pointToBox(point(619,226), 17), MOUSE_LEFT);
+    3: mouseBox(pointToBox(point(665,226), 17), MOUSE_LEFT);
+    4: mouseBox(pointToBox(point(711,226), 17), MOUSE_LEFT);
+  end;
 
-    by ??
-    Last Modified: 06-12-2013 by Flight
+  result := true;
+end;
 
-Example:
+{
+            - Display settings -
+}
 
-.. code-block:: pascal
-
-*)
 function setBrightness(Brightness: Integer): Boolean;
 var
-  PA : TPointArray;
-  P  : TPoint;
+  Pnt    : TPoint;
+  PntArr : TPointArray;
 begin
-  if (not isLoggedIn()) then
-    exit(false);
-  if (not gameTab(TAB_OPTIONS)) then
+  if not openSettingsTab(1) then
     exit(false);
 
-  if (not inRange(Brightness, 0, 4)) then
+  if (not inRange(Brightness, 1, 4)) then
   begin
-    Writeln('SetBrightness must be between 0 and 4');
+    warn('SetBrightness must be between 1 and 4', WT_CORE);
     exit(false);
   end else
   begin
-    if (Brightness=0) then
-      exit(false);
-    setLength(PA,4);
-    PA := [Point(610,234),Point(641,234),Point(672,234),Point(706,234)];
-    P  := PA[(Brightness - 1)];
-    if (not (getColor(P.X, P.Y) = 16777215)) then
+    PntArr := [Point(614, 287),Point(645, 287),Point(676, 287),Point(710, 287)];
+    Pnt    := PntArr[(Brightness - 1)];
+    if (not (getColor(Pnt.X, Pnt.Y) = 16777215)) then
     begin
-      mouseBox(toBox(P.X,P.Y,P.X+4,P.Y+4), MOUSE_LEFT);
+      mouseBox(toBox(Pnt.X,Pnt.Y,Pnt.X+4,Pnt.Y+4), MOUSE_LEFT);
       exit(true);
-    end;
+    end else
+      result := true;
   end;
 end;
 
-// by Flight
+function toggleDataOrbs(Enable: Boolean): Boolean;
+begin
+  Result := False;
+  if not openSettingsTab(1) then
+    Exit;
+
+  if Enable then
+  begin
+    if (createCol(1777019,15).count(toBox(569,328,602,361)) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(toBox(569,328,602,361), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else if not Enable then
+    if (createCol(1777019,15).count(toBox(569,328,602,361)) > 50) then
+    begin
+      mouseBox(toBox(569,328,602,361), MOUSE_LEFT);
+      Result := True;
+    end;
+end;
+
+function toggleRoofRemoval(Enable: Boolean): Boolean;
+begin
+  Result := False;
+  if not openSettingsTab(1) then
+    Exit;
+
+  if Enable then
+  begin
+    if (createCol(1777019,15).count(toBox(624,328,659,361)) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(toBox(624,328,659,361), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else if not Enable then
+    if (createCol(1777019,15).count(toBox(624,328,659,361)) > 50) then
+    begin
+      mouseBox(toBox(624,328,659,361), MOUSE_LEFT);
+      Result := True;
+    end;
+end;
+
+function toggleRemainingXP(Enable: Boolean): Boolean;
+begin
+  Result := False;
+  if not openSettingsTab(1) then
+    Exit;
+
+  if Enable then
+  begin
+    if (createCol(1777019,15).count(toBox(682,328,717,361)) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(toBox(682,328,717,361), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else if not Enable then
+    if (createCol(1777019,15).count(toBox(682,328,717,361)) > 50) then
+    begin
+      mouseBox(toBox(682,328,717,361), MOUSE_LEFT);
+      Result := True;
+    end;
+end;
+
+{
+            - Audio settings -
+}
+
 procedure setAudioLevels(MusicVolume, EffectVolume, AreaVolume: Integer);
 var
   pnt    : TPoint;
@@ -61,33 +152,27 @@ var
   tpa,pa : TPointArray;
   atpa   : Array [0..2] of TPointArray;
 begin
-  if ((not InRange(MusicVolume, 0, 4)) or
-      (not InRange(EffectVolume, 0, 4)) or
-      (not InRange(AreaVolume, 0, 4))) then
+  if ((not InRange(MusicVolume, 1, 5)) or
+      (not InRange(EffectVolume, 1, 5)) or
+      (not InRange(AreaVolume, 1, 5))) then
   begin
-    warn('All volumes must be between 0 and 4', WT_CORE);
+    warn('All volumes must be between 1 and 5', WT_CORE);
     exit;
   end;
 
-// check if on audio toggle screen
-  if gameTab(TAB_OPTIONS) then
-    if createCol(7854059,15).findAllIn(toBox(554,219,587,253), tpa) then
-    begin
-      mouseBox(toBox(613,267,671,301), MOUSE_LEFT);
-      if not waitColorGoneIn(7854059, 15, toBox(554,219,587,253), 1500) then
-        Exit;
-    end;
+  if not openSettingsTab(2) then
+    exit;
 
-  atpa[0] := [Point(607,263),Point(631,263),Point(658,263),Point(684,263),Point(709,263)];
-  atpa[1] := [Point(607,306),Point(631,306),Point(658,306),Point(684,306),Point(709,306)];
-  atpa[2] := [Point(607,349),Point(631,349),Point(658,349),Point(684,349),Point(709,349)];
+  atpa[0] := [Point(609, 285),Point(633, 285),Point(660, 285),Point(686, 285),Point(711, 285)];
+  atpa[1] := [Point(610, 333),Point(634, 333),Point(661, 333),Point(687, 333),Point(712, 333)];
+  atpa[2] := [Point(609, 381),Point(633, 381),Point(660, 381),Point(686, 381),Point(711, 381)];
 
   for i:=0 to 2 do
   begin
     case i of
-      0 : pnt := atpa[0][MusicVolume];
-      1 : pnt := atpa[1][EffectVolume];
-      2 : pnt := atpa[2][AreaVolume];
+      0 : pnt := atpa[0][MusicVolume - 1];
+      1 : pnt := atpa[1][EffectVolume - 1];
+      2 : pnt := atpa[2][AreaVolume - 1];
     end;
 
     if (not (getColor(pnt.X, pnt.Y) = 16777215)) then
@@ -96,101 +181,129 @@ begin
       wait(RandomRange(200,1300));
     end;
   end;
-
-  mouseBox(toBox(705,219,719,234), MOUSE_LEFT);
 end;
 
-function setMouseButtons(Num: Integer): Boolean;
-begin
-  if (not gameTab(TAB_OPTIONS)) then
-    Exit(false);
-
-  if not inRange(Num, 1, 2) then
-  begin
-    warn('Invalid number: ' + intToStr(Num) + ', please use 1/2', WT_CORE);
-    Exit;
-  end;
-
-  if (Num = 2) then
-  begin
-    if (createCol(1777019,15).count(toBox(566,326,604,365)) > 50) then
-      exit(true)
-    else
-    begin
-      mouseBox(toBox(566,326,604,365), MOUSE_LEFT);
-      exit(true);
-    end;
-  end else if (Num = 1) then
-    if (createCol(1777019,15).count(toBox(566,326,604,365)) > 50) then
-    begin
-      mouseBox(toBox(566,326,604,365), MOUSE_LEFT);
-      exit(false);
-    end;
-end;
+{
+            - Chat settings -
+}
 
 function toggleChatEffects(Enable: Boolean): Boolean;
 begin
-  if (not gameTab(TAB_OPTIONS)) then
+  if not openSettingsTab(3) then
     exit(false);
 
   if Enable then
   begin
-    if (createCol(1777019,15).count(toBox(623,326,661,364)) > 50) then
+    if (createCol(1777019,15).count(toBox(567,326,602,364)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(623,326,661,364), MOUSE_LEFT);
+      mouseBox(toBox(567,326,602,364), MOUSE_LEFT);
       exit(true);
     end;
   end else
-    if (createCol(1777019,15).count(toBox(623,326,661,364)) > 50) then
+    if (createCol(1777019,15).count(toBox(567,326,602,364)) > 50) then
     begin
-      mouseBox(toBox(623,326,661,364), MOUSE_LEFT);
+      mouseBox(toBox(567,326,602,364), MOUSE_LEFT);
       exit(true);
     end;
 end;
 
 function toggleSplitChat(Enable: Boolean): Boolean;
 begin
-  if (not gameTab(TAB_OPTIONS)) then
+  if not openSettingsTab(3) then
     exit(false);
 
   if Enable then
   begin
-    if (createCol(1777019,15).count(toBox(679,326,718,363)) > 50) then
+    if (createCol(1777019,15).count(toBox(624,326,659,363)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(679,326,718,363), MOUSE_LEFT);
+      mouseBox(toBox(624,326,659,363), MOUSE_LEFT);
       exit(true);
     end;
   end else
-    if (createCol(1777019,15).count(toBox(679,326,718,363)) > 50) then
+    if (createCol(1777019,15).count(toBox(624,326,659,363)) > 50) then
     begin
-      mouseBox(toBox(679,326,718,363), MOUSE_LEFT);
+      mouseBox(toBox(624,326,659,363), MOUSE_LEFT);
       exit(true);
     end;
 end;
 
 function toggleChatFilter(Enable: Boolean): Boolean;
 begin
-  if (not gameTab(TAB_OPTIONS)) then
+  if not openSettingsTab(3) then
     exit(false);
 
   if Enable then
   begin
-    if (createCol(1777019,15).count(toBox(679,373,717,411)) > 50) then
+    if (createCol(1777019,15).count(toBox(681,373,716,411)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(679,373,717,411), MOUSE_LEFT);
+      mouseBox(toBox(681,373,716,411), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
-    if (createCol(1777019,15).count(toBox(679,373,717,411)) > 50) then
+    if (createCol(1777019,15).count(toBox(681,373,716,411)) > 50) then
     begin
-      mouseBox(toBox(679,373,717,411), MOUSE_LEFT);
+      mouseBox(toBox(681,373,716,411), MOUSE_LEFT);
       exit(true);
+    end;
+end;
+
+{
+            - Control settings -
+}
+function setMouseButtons(Num: Integer): Boolean;
+begin
+  if not openSettingsTab(4) then
+    Exit(false);
+
+  if not inRange(Num, 1, 2) then
+  begin
+    warn('Invalid number: ' + intToStr(Num) + ', please use 1 or 2', WT_CORE);
+    Exit;
+  end;
+
+  if (Num = 2) then
+  begin
+    if (createCol(1777019,15).count(toBox(589,277,624,311)) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(toBox(589,277,624,311), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else if (Num = 1) then
+    if (createCol(1777019,15).count(toBox(589,277,624,311)) > 50) then
+    begin
+      mouseBox(toBox(589,277,624,311), MOUSE_LEFT);
+      exit(false);
+    end;
+end;
+
+function toggleMouseCamera(Enable: Boolean): Boolean;
+begin
+  Result := False;
+  if not openSettingsTab(4) then
+    Exit;
+
+  if Enable then
+  begin
+    if (createCol(1777019,15).count(toBox(659,373,694,410)) > 50) then
+      exit(true)
+    else
+    begin
+      mouseBox(toBox(659,373,694,410), MOUSE_LEFT);
+      exit(true);
+    end;
+  end else if not Enable then
+    if (createCol(1777019,15).count(toBox(659,373,694,410)) > 50) then
+    begin
+      mouseBox(toBox(659,373,694,410), MOUSE_LEFT);
+      Result := True;
     end;
 end;
 
@@ -205,122 +318,19 @@ begin
 
   if Enable then
   begin
-    if (createCol(1777019,15).count(toBox(566,420,602,458)) > 50) then
+    if (createCol(1777019,15).count(toBox(567,420,602,458)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(566,420,602,458), MOUSE_LEFT);
+      mouseBox(toBox(567,420,602,458), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
-    if (createCol(1777019,15).count(toBox(566,420,602,458)) > 50) then
+    if (createCol(1777019,15).count(toBox(567,420,602,458)) > 50) then
     begin
-      mouseBox(toBox(566,420,602,458), MOUSE_LEFT);
+      mouseBox(toBox(567,420,602,458), MOUSE_LEFT);
       Result := True;
     end;
-end;
-
-function toggleDataOrbs(Enable: Boolean): Boolean;
-begin
-  Result := False;
-  if not isLoggedin() then
-    Exit;
-
-  if (not gameTab(TAB_OPTIONS)) then
-    Exit;
-
-  if Enable then
-  begin
-    if (createCol(1777019,15).count(toBox(623,373,660,411)) > 50) then
-      exit(true)
-    else
-    begin
-      mouseBox(toBox(623,373,660,411), MOUSE_LEFT);
-      exit(true);
-    end;
-  end else if not Enable then
-    if (createCol(1777019,15).count(toBox(623,373,660,411)) > 50) then
-    begin
-      mouseBox(toBox(623,373,660,411), MOUSE_LEFT);
-      Result := True;
-    end;
-end;
-
-function toggleMouseCamera(Enable: Boolean): Boolean;
-begin
-  Result := False;
-  if not isLoggedin() then
-    Exit;
-
-  if (not gameTab(TAB_OPTIONS)) then
-    Exit;
-
-  if Enable then
-  begin
-    if (createCol(1777019,15).count(toBox(566,373,602,410)) > 50) then
-      exit(true)
-    else
-    begin
-      mouseBox(toBox(566,373,602,410), MOUSE_LEFT);
-      exit(true);
-    end;
-  end else if not Enable then
-    if (createCol(1777019,15).count(toBox(566,373,602,410)) > 50) then
-    begin
-      mouseBox(toBox(566,373,602,410), MOUSE_LEFT);
-      Result := True;
-    end;
-end;
-
-(*
-SetGraphics
-~~~~~~~~~~~
-
-.. code-block:: pascal
-
-    procedure setGraphics(Bright,MVol,SEVol,ASEVol: Integer; TNMB,TCE,TSPC,TAA: Boolean);
-
-Sets graphic options through the Graphics Screen in GameTab 12.
-Use: Enter the desired Setting for the desired Option.
-
-
-Parameter    Option                     Setting
-Bright       Screen Brightness          Level: 1-4 (0 no change)
-MVol         Music Volume               Level: 1-4 (0 no change)
-SEVol        Sound Effect Volume        Level: 1-4 (0 no change)
-ASEVol       Area Sound Effect Volume   Level: 1-4 (0 no change)
-TNMB         Toggle MouseButton Num     Off / On
-TCE          Toggle Chat Effects        Off / On
-TSPC         Toggle SPrivate Chat       Off / On
-TAA          Toggle Accept Aid          Off / On
-
-|                    1   2   3   4
-|  Brightness :   <--o---o---o---o-->
-
-|                    1  2  3  4  5
-|  Volumes :      <--o--o--o--o--o-->
-
-.. note::
-
-    by DannyRS
-    Last Modified: Oct. 17th, 2013 by Flight
-
-Example:
-
-.. code-block:: pascal
-
-    SetGraphics(4,1,1,1,True,True,True,False);
-
-*)
-procedure setGraphics(Bright,MBN: Integer; TCE,TSC,TCF,TAA: Boolean);
-begin
-  if not isLoggedIn() then exit;
-  if setBrightness(Bright) then Wait(90 + Random(200));
-  if setMouseButtons(MBN) then Wait(90 + Random(200));
-  if toggleChatEffects(TCE) then Wait(90 + Random(200));
-  if toggleSplitChat(TSC) then Wait(90 + Random(200));
-  if toggleChatFilter(TCF) then Wait(90 + Random(200));
-  if toggleAcceptAid(TAA) then Wait(90 + Random(200));
 end;
 
 (*
@@ -336,7 +346,7 @@ Fixes the Graphic Options if LoggedIn
 .. note::
 
     by DannyRS
-    Last Modified: Oct. 17th, 2013 by Flight
+    Last Modified: 16-5-2014 by Flight
 
 Example:
 
@@ -345,6 +355,10 @@ Example:
 *)
 procedure fixGraphics();
 begin
-  setGraphics(4,2,True,True,False,False);
-  setAudioLevels(0, 0, 0);
+  if setBrightness(4) then Wait(90 + Random(200));
+  toggleDataOrbs(true);
+  toggleRoofRemoval(true);
+  setAudioLevels(1, 1, 1);
+  if toggleAcceptAid(False) then Wait(90 + Random(200));
+  if setMouseButtons(2) then Wait(90 + Random(200));
 end;

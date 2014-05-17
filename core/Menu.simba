@@ -78,7 +78,6 @@ begin
     setlength(tempatpa,0);
     setlength(TPA,0);
   end;
-  colorToleranceSpeed(1);
   setImageTarget(target);
   freeBitmap(bmp);
 end;

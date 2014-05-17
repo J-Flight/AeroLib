@@ -6,7 +6,12 @@ Boxes
 
 Function toBox(Xs,Ys,Xe,Ye: Integer): TBox;
 begin
-  Result := intToBox(Xs,Ys,Xe,Ye);
+  Result := intToBox(Xs, Ys, Xe, Ye);
+end;
+
+Function pointToBox(Point: TPoint; Size: Integer): TBox; overload;
+begin
+  Result := intToBox(Point.X-Size, Point.Y-Size, Point.X+Size, Point.Y+Size);
 end;
 
 Function TBox.Width: Integer;
@@ -107,7 +112,7 @@ Example:
 
 *)
 
-function BoxClosestPoint(p : TPoint; b : TBox) : TPoint;
+function boxClosestPoint(p : TPoint; b : TBox) : TPoint;
 var
   column,row,place : integer;
 begin
@@ -166,7 +171,7 @@ Example:
 .. code-block:: pascal
 
 *)
-function RandomPointBoxEx(p : TPoint; b : TBox; extraDist : integer) : TPoint;
+function randomPointBoxEx(p : TPoint; b : TBox; extraDist : integer) : TPoint;
 var
   TPA : TPointArray;
   Dist : integer;
@@ -187,4 +192,12 @@ begin
     result := point(RandomRange(b.X1,b.x2),RandomRange(b.y1,b.y2))
   else
     result := TPA[random(length(tpa))];
+end;
+
+procedure checkAreaBounds(var Area: TBox);
+begin
+  if Area.X1 < 0 then Area.X1 := 0;
+  if Area.Y1 < 0 then Area.Y1 := 0;
+  if Area.X2 > 764 then Area.X2 := 764;
+  if Area.Y2 > 502 then Area.Y2 := 502;
 end;

@@ -521,3 +521,29 @@ begin
   clearDoubleTPA(tpa);
   result := returnPointsNotInTPA(tpa, getTPABounds(tpa));
 end;
+
+(*
+GetColorsBox
+~~~~~~~~~~~~
+
+.. code-block:: pascal
+
+    function GetColorsBox(Area: TBox): TIntegerArray;
+
+Returns an array of all colors within the box 'Area'.
+
+.. note::
+
+    by Rasta Magician
+
+Example:
+
+.. code-block:: pascal
+
+
+*)
+function getColorsBox(Area: TBox): TIntegerArray;
+begin
+  Result := getColors(TPAFromBox(Area));
+  clearSameIntegers(Result);
+end;

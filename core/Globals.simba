@@ -62,13 +62,13 @@ const
   MCCX = 259;
   MCCY = 409;
 
-{ const MBX1, MBY1, MBX2, MBY2;
+{ var MBX1, MBY1, MBX2, MBY2;
   Description: BankScreen EdgePoints (where you click the items, does not include tabs). }
-const
-  MBX1 = 79;
-  MBY1 = 62;
-  MBX2 = 439;
-  MBY2 = 283;
+var
+  MBX1 : Integer = 60;
+  MBY1 : Integer = 60;
+  MBX2 : Integer = 446;
+  MBY2 : Integer = 288;
 
 { const MBCX, MBCY;
   Description: Bank Screen Centre Points. }
@@ -117,6 +117,7 @@ const
   TAB_MUSIC   = 34;
 
 var
+  count_Login : Integer;
   Area_MS,Area_Inv,Area_CB,
   Area_MM,Area_BS,Area_DS : TBox;
 

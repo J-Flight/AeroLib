@@ -141,7 +141,7 @@ begin
       Exit(LoadedObjList[i]);
 end;
 
-function findMSObject(Obj: TMSObject; DistMod: Integer; var Pnt: TPoint): Boolean;
+function findAllMSObjects(Obj: TMSObject; DistMod: Integer; SortFrom: TPoint; var Pnts: TPointArray): Boolean;
 var
   i,h     : Integer;
   tpa,tmp : TPointArray;
@@ -184,16 +184,33 @@ begin
       end;
   end;
 
-  sortTPAFrom(tpa, point(MSCX,MSCY));
+  if (length(tpa) < 1) then exit(false);
+  result := true;
+  sortTPAFrom(tpa, SortFrom);
+  Pnts := tpa;
+end;
 
+function findMSObject(Obj: TMSObject; DistMod: Integer; SortFrom: TPoint; var Pnt: TPoint): Boolean;
+var
+  i,h     : Integer;
+  tpa,tmp : TPointArray;
+  atpaI,
+  atpaO   : T2DPointArray;
+begin
+  if not findAllMSObjects(Obj, DistMod, SortFrom, tpa) then
+    exit(false);
+
+  result := true;
   if (length(Obj.UpText) < 1)then
   begin
     Pnt := tpa[0];
-    exit(true);
+    exit;
   end;
 
   for i:=0 to high(tpa) do
   begin
+    if isInterfaceOpen() then
+      Exit(false);
     missMouse(tpa[i], 0, 0);
     if waitUpTextMulti(Obj.UpText, 200) then
     begin
@@ -205,7 +222,7 @@ end;
 
 function findMSObject(Obj: TMSObject; var Pnt: TPoint): Boolean; overload;
 begin
-  result := findMSObject(Obj, 10, Pnt);
+  result := findMSObject(Obj, 10, point(MSCX,MSCY), Pnt);
 end;
 
 function findMSObjectSimple(Cols: TIntegerArray; UpTextArray: TStringArray): Boolean;
