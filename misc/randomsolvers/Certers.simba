@@ -135,5 +135,6 @@ begin
       break;
     end;
 
-  Result := true;  // This could be improved
+  Result := waitFunc(@areTalking, 10, 4000);
+  doConversation([]);
 end;

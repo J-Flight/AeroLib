@@ -14,15 +14,15 @@ begin
   Result := intToBox(Point.X-Size, Point.Y-Size, Point.X+Size, Point.Y+Size);
 end;
 
-Function TBox.Width: Integer;
-Begin
-  Result := Abs(Self.X2 - Self.X1);
-End;
+function TBox.Width(): Int32;
+begin
+  Result := (Self.X2 - Self.X1);
+end;
 
-Function TBox.Height: Integer;
-Begin
-  Result := Abs(Self.Y2 - Self.Y1);
-End;
+function TBox.Height(): Int32;
+begin
+  Result := (Self.Y2- Self.Y1);
+end;
 
 Function TBox.MidPoint: TPoint;
 Begin

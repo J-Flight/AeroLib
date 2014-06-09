@@ -11,11 +11,12 @@ type TPlayer = record
     Pass      : string;                  // * User Pass
     Nick      : string;                  // * Screen Name for random detection
     Pin       : string;                  // * Current Users Pin Number
+    Member    : boolean;                 // * Is player member
     WorldList : TIntegerArray;           // * List of preferred worlds
     Level     : array[0..24] of Integer; // * Levels of all skills.
-    Active    : Boolean;                 // * Set to True if Ok, False if Lost.
+    Active    : boolean;                 // * Set to True if Ok, False if Lost.
     Model     : TEntity;                 // * Player's specific entity
-    ModelSet  : Boolean;                 // * Has the player's model been set
+    ModelSet  : boolean;                 // * Has the player's model been set
     Status    : string;                  // * User Status
     Random    : string;                  // * Current random event
     LampSkill : Integer;                 // * Preferred skill to be increased upon upon XP reward

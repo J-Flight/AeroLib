@@ -105,6 +105,12 @@ begin
     else
       skill := Me.lampSkill;
 
+    if not Me.Member then
+      if inIntArray([SKILL_AGILITY,SKILL_HERBLORE,SKILL_THIEVING,
+                     SKILL_SLAYER,SKILL_FARMING,SKILL_FLETCHING,
+                     SKILL_CONSTRUCTION,SKILL_HUNTER], Me.LampSkill) then
+                      skill := SKILL_MINING;
+
     // slot returned by gridBox below
     case skill of
       SKILL_ATTACK              : slot := Point(0, 0);

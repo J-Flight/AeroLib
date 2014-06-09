@@ -799,13 +799,11 @@ begin
   if isBankOpen() or isDepositBoxOpen() then
     exit(true);
 
-  While isPlayerWalking() do
-    Wait(1);
-
-  case random(10) of
-    0..6:  missMouse(BankPoint, 5, 5);
-    7..10: humanMMouse(BankPoint, 5, 5);
-  end;
+  if not isUpTextMulti(['Bank','booth','eposit','t box']) then
+    case random(10) of
+      0..6:  missMouse(BankPoint, 5, 5);
+      7..10: humanMMouse(BankPoint, 5, 5);
+    end;
 
   if waitUpTextMulti(['Bank','booth','eposit','t box'], randomRange(150,300)) then
   begin

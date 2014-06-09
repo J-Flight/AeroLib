@@ -1,3 +1,5 @@
+{$DEFINE AEROLIB}
+
 {$include AeroLib/core/engine/Boxes.simba}
 {$include AeroLib/core/Globals.simba}
 {$include AeroLib/core/engine/TPA.simba}

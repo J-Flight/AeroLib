@@ -221,10 +221,12 @@ begin
 end;
 
 var
-  IgnoreWorlds: TIntegerArray;
+  IgnoreWorlds,
+  F2PWorlds : TIntegerArray;
+
 
 function selectWorld(W: integer): boolean; forward;
-function randomWorld(): Integer; forward;
+function randomWorld(Member: Boolean): Integer; forward;
 function getCurrentWorldLS(): integer; forward;
 function loginPlayer(Safe: Boolean): Boolean;
 var
@@ -278,7 +280,7 @@ begin
   if inIntArray(IgnoreWorlds, getCurrentWorldLS()) then
   begin
     warn('Ignore world detected, choosing another world', WT_CORE);
-    selectWorld(randomWorld());
+    selectWorld(randomWorld(Me.Member));
   end;
 
   warn('Logging player in...', WT_CORE);
@@ -513,7 +515,7 @@ begin
     RetryLogin := False;
     Inc(Attempts);
     TypeByte(vk_Escape);
-    selectWorld(randomWorld());
+    selectWorld(randomWorld(Me.Member));
     goto EnterName;
   end;
 

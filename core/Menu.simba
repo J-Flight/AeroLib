@@ -84,18 +84,21 @@ end;
 
 function exitMenu(): Boolean;
 var
-  T   : Timer;
-  x,y : Integer;
+  T      : Timer;
+  x,y,ms : Integer;
 begin
   result := false;
+  ms := MouseSpeed;
+  MouseSpeed := randomRange(25,30);
   T.start();
   while (T.timeElapsed() < 3000) do
   begin
     getMousePos(X, Y);
-    humanMMouse(Point(x,y-10), 0, 0);
+    missMouse(Point(x,y-10), 0, 0);
     if not menuOpen() then
       break;
   end;
+  MouseSpeed := ms;
   result := not menuOpen();
 end;
 

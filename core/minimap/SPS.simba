@@ -22,14 +22,16 @@ var
 
 // SPS Global variables
 var
-  SPS_Areas     : TStringArray;
-  SPS_AreaMaps  : T3DIntegerArray; // Grids of the combined SPS_Areas
+  SPS_Areas      : TStringArray;
+  SPS_MergedArea : TMufasaBitmap;
+  SPS_AreaMaps   : T3DIntegerArray; // Grids of the combined SPS_Areas
   SPS_Tolerance, SPS_MatchesPercent: extended;
-  SPS_Accuracy  : integer; // Splits minimap/areas into squares of this side length; used for area recognition
-  SPS_IsSetup   : boolean; // Used to make sure the user calls SPS_Setup
+  SPS_Accuracy   : integer; // Splits minimap/areas into squares of this side length; used for area recognition
+  SPS_IsSetup    : boolean; // Used to make sure the user calls SPS_Setup
 
-  bmpMMMask     : Integer;
-  mmPercent     : Extended;
+  SPS_lastLum    : Integer;
+  bmpMMMask      : Integer;
+  mmPercent      : Extended;
 
 //DegreeFix
 var
@@ -60,7 +62,7 @@ begin
 
   for x := W - 1 downto 0 do
     for y := H - 1 downto 0 do
-      if hypot(abs(74.0 - x), abs(74.0 - y)) > 74 then
+      if hypot(abs(90.0 - x), abs(90.0 - y)) > 90 then
       begin
         Minimap.SetPixel(X, Y, 0);
         continue;
@@ -289,67 +291,120 @@ begin
   result := result + '_'+toStr(tpa[0].y);
 end;
 
-// Author: marpis & SRL Community
-function SPS_GetMyPos(): TPoint;
+procedure SPS_AdjustTolerance();
 var
-  Minimap: TMufasaBitmap;
-  DegreeFix: TIntegerArray;
-  SmallMap: T3DIntegerArray;
-  DF, Z, a, FoundMatches: integer;
-  P: TPoint;
-  Searches: extended;
+  P,Pos        : TPoint;
+  FoundMatches : Integer;
+  Searches     : Extended;
+  Minimap      : TMufasaBitmap;
+  SmallMap     : T3DIntegerArray;
 begin
-  Result := Point(-1, -1);
-  //DegreeFix := [PrevDF,0,5,355,10,350,15,345,20,340];
-  DegreeFix := [PrevDF,0,3,357,5,355,7,354,10,350,13,348,15,345,17,342,20,340];
+  SPS_Tolerance := 300.0;
 
-  For Z:=0 to High(DegreeFix) do
+  if (SPS_MatchesPercent = 0.0) then
+    SPS_MatchesPercent := 0.50;
+
+  if (not SPS_IsSetup) then
   begin
-    DF := DegreeFix[Z];
-    if (not SPS_IsSetup) then
+    Warn('SPS_Setup was never called', WT_CORE);
+    exit;
+  end;
+
+  if (not isLoggedIn()) then
+    Exit;
+
+  setCompass(0);
+  Minimap := SPS_GatherMinimap();
+  SPS_FilterMap(Minimap);
+  SPS_BitmapToMap(Minimap, SPS_Accuracy, SmallMap);
+
+  while (SPS_Tolerance < 400) do
+  begin
+    FoundMatches := SPS_FindMapInMap(P.x, P.y, SPS_AreaMaps, SmallMap, SPS_Tolerance);
+    Searches     := ((Minimap.getWidth / SPS_Accuracy) * (Minimap.getHeight / SPS_Accuracy));
+    mmPercent    := (FoundMatches / Searches);
+    if (mmPercent > 0.50) then
+      Pos := SPS_LocalToGlobal(SPS_GetTopLeftCoords(SPS_Areas),
+                                  P.x * SPS_Accuracy + round(Minimap.getWidth / 2),
+                                  P.y * SPS_Accuracy + round(Minimap.getWidth / 2));
+
+    if (not pointsMatch(Pos, point(-1,-1)) and
+        not pointsMatch(Pos, point(0,0))) then
     begin
-      writeln('SPS ERROR: SPS_Setup was never called');
+      Minimap.Free;
+      Warn('SPS tolerance set to '+toStr(SPS_Tolerance), WT_CORE);
       exit;
     end;
 
-    if (not isLoggedIn()) then
-      Exit;
+    SPS_Tolerance := (SPS_Tolerance+10.0);
+  end;
+  Minimap.Free;
+end;
 
-    if (SPS_Tolerance < 1.0) then
-      SPS_Tolerance := 300.0;
+// Author: marpis & SRL Community
+function SPS_GetMyPos(): TPoint;
+var
+  P            : TPoint;
+  a,i,
+  FoundMatches : Integer;
+  Searches     : Extended;
+  Minimap      : TMufasaBitmap;
+  LumArray     : TIntegerArray;
+  SmallMap     : T3DIntegerArray;
+begin
+  Result    := Point(-1, -1);
+  LumArray  := [SPS_lastLum,0,5,-5,10,-10,15,-15,20,-20,30,-30];
 
-    if (SPS_MatchesPercent = 0.0) then
-      SPS_MatchesPercent := 0.4;
+  if (not SPS_IsSetup) then
+  begin
+    warn('SPS_Setup was never called', WT_CORE);
+    exit;
+  end;
 
-    a := round(getCompassAngle());
+  if (not isLoggedIn()) then
+    Exit;
 
-    if (SPS_AnyAngle) and (inRange(a, 20, 340)) then
-      Minimap := SPS_RotateMinimap()
-    else begin
-      if inRange(a, 21, 339) then
-        if setCompass(DF) then
-          setAngle(ANGLE_HIGH);
+  if (SPS_Tolerance < 1.0) then
+    SPS_Tolerance := 300.0;
 
-      Minimap := SPS_GatherMinimap();
-    end;
+  if (SPS_MatchesPercent = 0.0) then
+    SPS_MatchesPercent := 0.50;
+
+  For i:=0 to High(LumArray) do
+  begin
+    setCompass(0);
+    Minimap := SPS_GatherMinimap();
 
     SPS_FilterMap(Minimap);
+    Minimap.Brightness(LumArray[i]);
     SPS_BitmapToMap(Minimap, SPS_Accuracy, SmallMap);
 
     FoundMatches := SPS_FindMapInMap(P.x, P.y, SPS_AreaMaps, SmallMap, SPS_Tolerance);
     Searches     := ((Minimap.getWidth / SPS_Accuracy) * (Minimap.getHeight / SPS_Accuracy));
     mmPercent    := (FoundMatches / Searches);
+    Minimap.Free;
 
-    if ((FoundMatches / Searches) > SPS_MatchesPercent) then
+    if (mmPercent > SPS_MatchesPercent) then
+    begin
+      if not (SPS_lastLum = LumArray[i]) then
+      begin
+        warn('SPS map brightness set to: '+toStr(LumArray[i]), WT_CORE);
+        SPS_lastLum := LumArray[i];
+      end;
       Result := SPS_LocalToGlobal(SPS_GetTopLeftCoords(SPS_Areas),
                                   P.x * SPS_Accuracy + round(Minimap.getWidth / 2),
                                   P.y * SPS_Accuracy + round(Minimap.getWidth / 2));
+      incEx(result.X, 74);
+      incEx(result.Y, 74);
+    end;
 
-    Minimap.Free;
-
-    if not pointsMatch(Result, point(-1,-1)) then
-      Break;
+    if (not pointsMatch(Result, point(-1,-1)) and
+        not pointsMatch(Result, point(0,0))) then
+      exit(result);
   end;
+
+  Warn('Adjusting SPS_Tolerance...', WT_CORE);
+  SPS_AdjustTolerance();
 end;
 
 // Author: marpis
@@ -391,7 +446,7 @@ begin
   end;
 end;
 
-Function SPS_WalkPath(Path: TPointArray): boolean;
+Function SPS_WalkPath(Path: TPointArray; WaitForStop: Boolean): boolean;
 var
   T : Timer;
   I,H,D,Fails,lP: integer;
@@ -437,8 +492,12 @@ begin
           waitFunc(@isPlayerWalking, 10, 500);
           MMF := MM;
           if (I = H) then
-            FFlag(5)
-          else
+          begin
+            FFlag(5);
+            if WaitForStop then
+              while isPlayerWalking() do
+                waitEx(1);
+          end else
             FFlag(25);
           T.start();
  	        Break;
@@ -450,15 +509,16 @@ begin
   FFlag(5);
 end;
 
-function SPS_BlindWalk(P: TPoint): Boolean;
+function SPS_BlindWalk(P: TPoint; WaitForStop: Boolean): Boolean;
 var
   Tries: Integer;
   M: TPoint;
   ctrlPoints: TPointArray;
 begin
+  result := false;
   repeat
     if (not isLoggedIn()) then
-      Exit(false);
+      Exit;
 
     M := SPS_GetMyPos();
 
@@ -472,7 +532,7 @@ begin
     if (Tries > 20) then
       Exit;
 
-    Result := SPS_WalkPath(ctrlPoints);
+    Result := SPS_WalkPath(ctrlPoints, WaitForStop);
   until(Result);
 end;
 
