@@ -104,23 +104,23 @@ begin
 
     with tmpObj do
     begin
-      Name   := readINI('MSObj_'+sIndex, 'Name', PATH_OBJDB);
-      count  := strToIntDef(readINI('MSObj_'+sIndex, 'UpText(C)', PATH_OBJDB), 0);
+      Name   := readINI('MSObj_'+toStr(i), 'Name', PATH_OBJDB);
+      count  := strToIntDef(readINI('MSObj_'+toStr(i), 'UpText(C)', PATH_OBJDB), 0);
 
       setArrayLength(UpText, count);
       for h:=0 to (count-1) do
-        UpText[h] := readINI('MSObj_'+sIndex, 'UpText[' + intToStr(h) + ']', PATH_OBJDB);
+        UpText[h] := readINI('MSObj_'+toStr(i), 'UpText[' + intToStr(h) + ']', PATH_OBJDB);
 
       setLength(InnerCols, 1);
       setLength(OuterCols, 1);
-      InnerCols[0].Col  := strToInt(readINI('MSObj_'+sIndex, 'ColI', PATH_OBJDB));
-      InnerCols[0].Tol  := strToInt(readINI('MSObj_'+sIndex, 'TolI', PATH_OBJDB));
-      InnerCols[0].hMod := strToFloat(readINI('MSObj_'+sIndex, 'hModI', PATH_OBJDB));
-      InnerCols[0].sMod := strToFloat(readINI('MSObj_'+sIndex, 'sModI', PATH_OBJDB));
-      OuterCols[0].Col  := strToInt(readINI('MSObj_'+sIndex, 'ColO', PATH_OBJDB));
-      OuterCols[0].Tol  := strToInt(readINI('MSObj_'+sIndex, 'TolO', PATH_OBJDB));
-      OuterCols[0].hMod := strToFloat(readINI('MSObj_'+sIndex, 'hModO', PATH_OBJDB));
-      OuterCols[0].sMod := strToFloat(readINI('MSObj_'+sIndex, 'sModO', PATH_OBJDB));
+      InnerCols[0].Col  := strToInt(readINI('MSObj_'+toStr(i), 'ColI', PATH_OBJDB));
+      InnerCols[0].Tol  := strToInt(readINI('MSObj_'+toStr(i), 'TolI', PATH_OBJDB));
+      InnerCols[0].hMod := strToFloat(readINI('MSObj_'+toStr(i), 'hModI', PATH_OBJDB));
+      InnerCols[0].sMod := strToFloat(readINI('MSObj_'+toStr(i), 'sModI', PATH_OBJDB));
+      OuterCols[0].Col  := strToInt(readINI('MSObj_'+toStr(i), 'ColO', PATH_OBJDB));
+      OuterCols[0].Tol  := strToInt(readINI('MSObj_'+toStr(i), 'TolO', PATH_OBJDB));
+      OuterCols[0].hMod := strToFloat(readINI('MSObj_'+toStr(i), 'hModO', PATH_OBJDB));
+      OuterCols[0].sMod := strToFloat(readINI('MSObj_'+toStr(i), 'sModO', PATH_OBJDB));
     end;
 
     LoadedObjList[High(LoadedObjList)] := tmpObj;
@@ -200,11 +200,10 @@ begin
   if not findAllMSObjects(Obj, DistMod, SortFrom, tpa) then
     exit(false);
 
-  result := true;
   if (length(Obj.UpText) < 1)then
   begin
     Pnt := tpa[0];
-    exit;
+    exit(true);
   end;
 
   for i:=0 to high(tpa) do

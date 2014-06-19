@@ -145,7 +145,10 @@ Begin
   Else
     Begin
       TPA := EdgeFromBox(Box);
-      Self.__Bmp.DrawTPA(TPA, Colour);
+      try
+        Self.__Bmp.DrawTPA(TPA, Colour);
+      except
+      end;
     End;
 End;
 
