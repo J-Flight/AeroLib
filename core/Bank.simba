@@ -422,29 +422,31 @@ begin
   end;
 end;
 
-Function scrollToItemDTM(DTM: Integer; var Pnt: TPoint): Boolean;
+function itemsInBank(): Boolean;
+var
+  col_Black : TColEx;
+begin
+  col_Black.create(clOutline_black, 5);
+  result := col_Black.findIn(AREA_BS);
+end;
+
+Function scrollToItem(Item: TItem; var Pnt: TPoint): Boolean;
 var
   mPnt  : TPoint;
   X,Y,A : integer;
   rS    : extended;
 begin
-  if not isBankOpen() then
-    Exit(false);
+  if not isBankOpen() then Exit(false);
 
-  if findDTM(DTM, X, Y, MSx1, MSy1, MSx2, MSy2) then
-  begin
-    Pnt := Point(X, Y);
+  waitFunc(@itemsInBank, 10, 3000); // Anti-lag
+  if Item.findIn(AREA_BS, Pnt) then
     Exit(true);
-  end;
 
   fixBank();
   wait(randomRange(400,900));
 
-  if findDTM(DTM, X, Y, MSx1, MSy1, MSx2, MSy2) then
-  begin
-    Pnt := Point(X, Y);
+  if Item.findIn(AREA_BS, Pnt) then
     Exit(true);
-  end;
 
   A := MouseSpeed;
   if getBankMode() = 'Standard' then
@@ -461,21 +463,18 @@ begin
     rS := 0.1;
 
   if getBankMode() = 'Standard' then
-    windMouseDTM(X, Y, 489+RandomRange(-3,3), 265+RandomRange(-5,5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, DTM)
+    result := windMouseDTM(X, Y, 489+RandomRange(-3,3), 265+RandomRange(-5,5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM)
   else if getBankMode() = 'Tabbed' then
-    windMouseDTM(X, Y, 489+RandomRange(-3,3), 275+RandomRange(-5,5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, DTM);
+    result := windMouseDTM(X, Y, 489+RandomRange(-3,3), 275+RandomRange(-5,5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM);
 
   wait(randomRange(400,800));
   mPnt := getMousePnt();
   releaseMouse(mPnt.X, mPnt.Y, MOUSE_LEFT);
   Wait(RandomRange(200,400));
-  Result := findDTM(DTM, Pnt.X, Pnt.Y, MSx1, MSy1, MSx2, MSy2);
-
+  Result := Item.findIn(AREA_BS, Pnt);
   MouseSpeed := A;
 end;
 
-function itemInSlot(I: Integer): Boolean; forward;
-function invBox(I : Integer): TBox; forward;
 (*
 DepositItem
 ~~~~~~~~~~
@@ -548,7 +547,6 @@ begin
   end;
 end;
 
-function pntToItem(Pnt: TPoint): Integer; forward;
 function depositItem(Pnt: TPoint; Amount: Integer): Boolean; overload;
 begin
   result := depositItem(pntToItem(Pnt), Amount);
@@ -610,6 +608,14 @@ var
 begin
   for i:=Slot to 28 do
     depositItem(i, -1);
+end;
+
+procedure depositSlots(Slots: TIntegerArray);
+var
+  i : Integer;
+begin
+  for i:=0 to high(Slots) do
+    depositItem(slots[i], -1);
 end;
 
 (*
@@ -685,7 +691,7 @@ begin
          while (T.timeElapsed < 10000) and (not InRange(createCol(0, 1).count(toBox(211,394,308,411)), 200, 300)) do
            Wait(50);
          Wait(RandomRange(75, 400));
-         typeSend(IntToStr(Amount));
+         typeSend(intToStr(Amount), True);
          Result := True;
       end;
     end;
@@ -830,6 +836,7 @@ begin
     if (isBankOpen() or isDepositBoxOpen() or
       Interfaces[PINSCREEN].isVisible()) then
         break;
+    clickToContinue();
   until(T.timeElapsed() > 4000);
 
   if Interfaces[PINSCREEN].isVisible() then

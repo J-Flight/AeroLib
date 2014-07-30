@@ -1,5 +1,5 @@
 [ObjectDB_Main]
-Count=1
+Count=2
 
 [MSObj_1]
 Name=FishingSpot
@@ -14,3 +14,17 @@ ColO=8613988
 TolO=10
 hModO=0.1
 sModO=0.48
+
+[MSObj_2]
+Name=FreakyForester
+UpText(C)=2
+UpText[0]=to F
+UpText[1]=ky Fo
+ColI=12171713
+TolI=15
+hModI=0.19
+sModI=0.11
+ColO=341842
+TolO=6
+hModO=0.06
+sModO=1.92

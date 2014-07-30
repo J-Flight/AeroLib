@@ -3,13 +3,15 @@
 
 var
   __Smart__Pointers: Array Of Pointer;
-
 type TSmart = record
   __Target, __PID: Integer;
   __Width, __Height: Integer;
   __ForceNew: Boolean;
   __Graphics: TGraphics;
 end;
+
+var
+  OS_SMART : TSmart;
 
 Procedure TSmart.Create;
 Begin
@@ -320,7 +322,6 @@ Begin
 End;
 {$ENDIF}
 
-{$IFDEF SmartReflectionWrappers}
 Function TSmart.GetFieldArraySize(Reference: Integer; Path: String; Dimension: Integer): Integer;
 Begin
   Result := SmartGetFieldArraySize(Self.Target, Reference, Path, Dimension);
@@ -584,4 +585,3 @@ Begin
   Result := Replace(Result, #160, #32, [rfReplaceAll]);
   Self.FreeObject(JStr);
 End;
-{$ENDIF}

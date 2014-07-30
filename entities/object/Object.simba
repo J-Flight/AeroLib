@@ -35,6 +35,14 @@ begin
   Result.OuterCols := OuterCols;
 end;
 
+procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols, _OuterCols: Array of TColEx);
+begin
+  Self.Name      := _Name;
+  Self.UpText    := _Uptext;
+  Self.InnerCols := _InnerCols;
+  Self.OuterCols := _OuterCols;
+end;
+
 function TMSObject.doesExist(): Boolean;
 var
   i : Integer;

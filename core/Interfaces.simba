@@ -149,14 +149,10 @@ begin
     Interfaces[SHOPSCREEN].isVisible()) then
   begin
     if (getBankMode() = 'Standard') then
-      mouseBox(toBox(479,33,495,50), MOUSE_MOVE)
+      mouseBox(toBox(479,33,495,50), MOUSE_LEFT)
     else if (getBankMode() = 'Tabbed') then
-      mouseBox(toBox(480,16,495,31), MOUSE_MOVE);
-    if (waitUptextMulti(['lose','ack','Cl','se'], 200)) then
-    begin
-      fastClick(MOUSE_LEFT);
-      Exit(True);
-    end;
+      mouseBox(toBox(480,15,495,31), MOUSE_LEFT);
+    Exit(True);
   end;
 
   Col := [1118997,  1449250,  {Main typ 1}
@@ -187,8 +183,7 @@ begin
         if ((Pa.x2 - Pa.x1) > 50) or ((Pa.y2 - Pa.y1) > 50) then
           Continue;
 
-        gaussMouseBox(Pa.x1, Pa.y1, Pa.x2, Pa.y2, mouse_move);
-        if (waitUptextMulti(['lose','ack','Cl','se'], 400)) then
+        if humanMMouseTxt(Pa.MidPoint(), round(Pa.Width()/2), round(Pa.Height()/2), ['lose','ack','Cl','se']) then
         begin
           fastClick(MOUSE_LEFT);
           Exit(True);

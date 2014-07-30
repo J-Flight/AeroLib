@@ -10,7 +10,7 @@ begin
   Result := False;
   gameTab(TAB_INV);
   Wait(100 + Random(50));
-  BoxDTM := DTMFromString('mwQAAAHic42RgYHBiYmAwQ8J+SNgZiN2A+BlQ3QMGCP0GiO8C8SMo/wMU97W0AElGvNiIgTDAbwIEwwEAyPkMaQ==');
+  BoxDTM := DTMFromString('m6wAAAHic42ZgYNjHxMCwDYiPAPEJKD4DxSCxXUC8BYr3MaLiTUC8C4gPAfEJID4GxAeBeAcQT2hrYyjIyABjEJuBgREnlgOSyJgVD8ZtCiZGAgCQsRcF');
   if isLoggedIn() then
     if findDTM(BoxDTM, x, y, MIX1, MIY1, MIX2, MIY2) then
     begin

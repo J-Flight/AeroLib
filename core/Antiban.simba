@@ -677,7 +677,7 @@ begin
     end;
 
     Result := True;
-    WriteLn(Me.Name + ' leveled up!');
+    WriteLn(getDisplayName() + ' leveled up!');
   end;
 end;
 

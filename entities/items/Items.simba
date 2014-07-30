@@ -90,6 +90,7 @@ Example:
         Inc(Count);
 
 *)
+function gameTab(Tab: Integer): Boolean; forward;
 function itemInSlot(I: Integer): Boolean;
 var
   X, Y: Integer;
@@ -215,20 +216,27 @@ var
   x,y : Integer;
 begin
   result := false;
-  if ((not (action = MOUSE_MOVE)) and (not itemInSlot(Slot))) then
-    exit;
+  if (not itemInSlot(Slot)) then
+    if (not (action = MOUSE_MOVE)) then
+      exit;
 
   mouseBox(invBox(Slot), MOUSE_MOVE);
-  if action = MOUSE_MOVE then
-    exit(true);
-  if action = MOUSE_LEFT then
+  if variantIsInteger(action) then
   begin
-    fastClick(MOUSE_LEFT);
-    exit(true);
+    if (action = MOUSE_MOVE) then
+      exit(true);
+    if action = MOUSE_LEFT then
+    begin
+      fastClick(MOUSE_LEFT);
+      exit(true);
+    end;
   end;
 
   fastClick(MOUSE_RIGHT);
-  result := waitOption(action, 200);
+  if variantIsString(action) then
+    result := waitOption(action, 200)
+  else
+    result := true;
 end;
 
 procedure moveItemTo(Slot, targetSlot: Integer);
@@ -300,6 +308,7 @@ begin
   fPnt := point(x, y);
 end;
 
+function isBankOpen(): Boolean; forward;
 function TItem.getAmount(ExcludeBank: Boolean): Integer;
 var
   i,c : Integer;

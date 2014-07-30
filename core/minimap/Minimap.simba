@@ -154,20 +154,21 @@ begin
 
   // convert from variant to direction:
   DirectionDeg := variantToDirection(Direction);
-
   if (__setCompass_MinCheck(StartAngle, DirectionDeg) <= 8.0) then
   begin
     Result := True;
     Exit;
   end;
+
   Left := (Round((360 - StartAngle) + DirectionDeg) mod 360 <= Round((StartAngle + 360) - DirectionDeg) mod 360);
   KeyDown((Ord(not Left) * 2) + 37);
   Wait(10);
   T.Start();
   i := 0.0;
+
   repeat
     Wait(16);
-    Angle:= getCompassAngle();
+    Angle := getCompassAngle();
     if (((T.timeElapsed() > 6000)  and (i < 1.0)) or
         ((T.timeElapsed() > 10000) and (i < 2.0)) or
         ((T.timeElapsed() > 14000) and (i < 3.0))) then

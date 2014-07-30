@@ -12,23 +12,21 @@ Type TColEx = record
 end;
 
 
-{
-procedure TColEx.create(Col, Tol: Integer; hMod, sMod: Extended);
+procedure TColEx.create(_Col, _Tol: Integer; _hMod, _sMod: Extended);
 begin
-  Self.Col  := Col;
-  Self.Tol  := Tol;
-  Self.hMod := hMod;
-  Self.sMod := sMod;
+  Self.Col  := _Col;
+  Self.Tol  := _Tol;
+  Self.hMod := _hMod;
+  Self.sMod := _sMod;
 end;
 
-procedure TColEx.create(Col, Tol: Integer); overload;
+procedure TColEx.create(_Col, _Tol: Integer); overload;
 begin
-  Self.Col  := Col;
-  Self.Tol  := Tol;
+  Self.Col  := _Col;
+  Self.Tol  := _Tol;
   Self.hMod := 0.2;
   Self.sMod := 0.2;
 end;
-}
 
 function createColEx(Col, Tol: Integer; hMod, sMod: Extended): TColEx;
 begin

@@ -9,6 +9,9 @@ NPC
 type TNPC = record
   Name    : TStringArray;
   Level   : integer;
+  MSObj   : TMSObject;
 //Model   : TEntity;
   Busy    : boolean;
 end;
+
+

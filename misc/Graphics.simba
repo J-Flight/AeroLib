@@ -94,8 +94,8 @@ Procedure TGraphics.Free;
 Begin
   try
     Self.__Bmp.ResetPersistentMemory;
+    Self.__Bmp.Free;
   except end;
-  Self.__Bmp.Free;
   Self.__Init   := False;
   Self.__Width  := 0;
   Self.__Height := 0;
@@ -236,17 +236,6 @@ Begin
   If (Erase) then Self.Clear;
   FastDrawTransparent(Location.X, Location.Y, Bitmap.GetIndex, Self.__Bmp.GetIndex);
   //Self.__Bmp.FastDrawTransparent(Location.X, Location.Y, Bitmap);
-End;
-
-Procedure TMufasaBitmap.DrawText(Text, Font: String; Position: TPoint = Point(0, 0); Colour: TColor = clRed);
-var
-  W, H: Integer;
-  TPA: Array of TPoint;
-Begin
-  TPA := TPAFromText(Text, Font, W, H);
-  OffsetTPA(TPA, Position);
-  self.DrawTPA(TPA, Colour);
-  TPA := [];
 End;
 
 Procedure TGraphics.DrawClippedText(Text, Font: String; Position: TPoint; Colour: TColor = clRed);

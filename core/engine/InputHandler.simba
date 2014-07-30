@@ -339,13 +339,13 @@ begin
       MoveMouse(Round(xs), Round(ys));
 
     getMousePos(mX, mY);
-    B := intToBox(mX-5, mY-5, mX+5, mY+5);
+    B := toBox(mX-5, mY-5, mX+5, mY+5);
 
 // Search for the scroll bar near the mouse
     if not cs_findColorTolerance(fX, fY, 3359309, 30, B, cs_CTS1) then
-      Exit;
+      Exit(False);
 
-    if cs_FindDTM(DTM, X, Y, Area_MS, cs_CTS1) then
+    if findDTM(DTM, X, Y, MSx1, MSy1, MSx2, MSy2) then
       Exit(True);
 
     case Random(50) of
@@ -623,7 +623,7 @@ begin
     begin
       if (G > 8) then
         Exit;
-      Result := (R > 20);
+      Result := (R > 10);
     end else
     begin
       if (R > 5) then
@@ -818,6 +818,12 @@ begin
     Wait(20 + Random(40));
   end;
 
-  if (Send) Then
-    typeByte(VK_ENTER);
+  if Send then
+  begin
+    {$IFDEF SMART}
+      typeByte(VK_ENTER);
+    {$ELSE}
+      pressKey(VK_ENTER);
+    {$ENDIF}
+  end;
 end;

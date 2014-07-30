@@ -196,7 +196,6 @@ begin
   terminateScript();
 end;
 
-function gameTab(Tab: Integer): Boolean; forward;
 function logoutPlayer(): Boolean;
 var
   T : Timer;
