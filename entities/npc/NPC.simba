@@ -8,10 +8,48 @@ NPC
   Description: A record containting NPC information. }
 type TNPC = record
   Name    : TStringArray;
-  Level   : integer;
+  Level   : Integer;
   MSObj   : TMSObject;
 //Model   : TEntity;
-  Busy    : boolean;
+  Busy    : Boolean;
 end;
 
+function TNPC.getAllFree(HPBounds: TBox): TPointArray;
+var
+  HPB  : TBox;
+  i    : Integer;
+  pnts : TPointArray;
+begin
+  if not Self.MSObj.findAll(10, point(MSCX,MSCY), pnts) then
+    Exit;
 
+  if (length(pnts) < 1) then
+    Exit;
+
+  for i:=0 to High(pnts) do
+    if not foundHPBarIn(HPBounds) then
+    begin
+      setLength(Result, length(Result)+1);
+      Result[high(Result)] := pnts[i];
+    end;
+end;
+
+function TNPC.getAllFree(): TPointArray; overload;
+var
+  HPB  : TBox;
+  i    : Integer;
+  pnts : TPointArray;
+begin
+  if not Self.MSObj.findAll(10, point(MSCX,MSCY), pnts) then
+    Exit;
+
+  if (length(pnts) < 1) then
+    Exit;
+
+  for i:=0 to High(pnts) do
+    if not foundHPBarIn(toBox(pnts[i].X-30, pnts[i].Y-50, pnts[i].X+30, pnts[i].Y+10)) then
+    begin
+      setLength(Result, length(Result)+1);
+      Result[high(Result)] := pnts[i];
+    end;
+end;

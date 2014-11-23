@@ -103,6 +103,7 @@ var
   Pa      : TBox;
   T       : Timer;
   pnt     : TPoint;
+  tmpCol  : TColEx;
   i,ii,l,
   x,y,ms  : Integer;
   Col     : TIntegerArray;
@@ -125,7 +126,8 @@ begin
   end;
 
 // handles the advanced skill guide window
-  if createCol(2994428,20).findIn(toBox(728,8,753,30), pnt) then
+  tmpCol.create(2994428,20);
+  if tmpCol.findIn(toBox(728,8,753,30), pnt) then
   begin
     BrakeMMouse(pnt, 3, 3, False);
     fastClick(MOUSE_LEFT);
@@ -143,7 +145,6 @@ begin
     if not Interfaces[PINSCREEN].isVisible() then
       Exit(True);
   end;
-
 
   if (Interfaces[BANKSCREEN].isVisible() or
     Interfaces[SHOPSCREEN].isVisible()) then
@@ -164,8 +165,10 @@ begin
 
   for i:=0 to 5 do
   begin
-    createCol(Col[i * 2],5).findAllIn(toBox(MSCX,MSY1,MSX2,MSCY), b[0]);
-    createCol(Col[i * 2+1],5).findAllIn(toBox(MSCX,MSY1,MSX2,MSCY), b[1]);
+    tmpCol.create(Col[i * 2], 5);
+    tmpCol.findAllIn(toBox(MSCX,MSY1,MSX2,MSCY), b[0]);
+    tmpCol.create(Col[i * 2+1], 5);
+    tmpCol.findAllIn(toBox(MSCX,MSY1,MSX2,MSCY), b[1]);
 
     l := (High(b[0]) + High(b[1]));
 

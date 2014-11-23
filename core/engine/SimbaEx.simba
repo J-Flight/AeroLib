@@ -488,6 +488,20 @@ begin
   Pointers := Ptrs;
 end;
 
+function getGithubPage(const URL: String): String;
+var
+  NewURL: String;
+  p: Integer;
+begin
+  Result := '';
+  p := Pos('.com/', URL);
+  if (p = 0) then
+    Exit;
+
+  NewURL := Copy(URL, p + Length('.com/'), Length(URL) - p + Length('.com/'));
+  Result := GetPage('http://cdn.rawgit.com/' +  Replace(NewURL, 'blob/', '', [rfReplaceAll]));
+end;
+
 Function getDirectoryName(Directory, Path: String): String;
 var
   I: Integer;

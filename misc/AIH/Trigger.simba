@@ -1,0 +1,35 @@
+{
+  Trigger
+}
+
+type QType = (GENERAL,LOCATION,MYSKILLS,MYITEMS,MYEQUIPMENT,UNKNOWN);
+
+Var
+  aih_QG,aih_QL,aih_QMS,aih_QMI,aih_QME: TStringArray;
+
+// Load question database
+procedure aih_loadQDB();
+begin
+  setArrayLength(aih_QMS, 1);
+
+  aih_QMS := [
+              ];
+end;
+
+// Load answer database
+procedure aih_loadADQ();
+begin
+
+end;
+
+function aih_interactedWith(ChatStr: String; var host: String): boolean;
+begin
+  host   := '';
+  result := False;
+end;
+
+function aih_getQType(ChatStr: String): QType;
+begin
+  result := UNKNOWN;
+end;
+

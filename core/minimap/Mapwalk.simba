@@ -53,8 +53,9 @@ Example:
 *)
 function linearWalkEx(var TPA: TPointArray; cx, cy, TheColor, tol: Integer; Direction: Variant; Radius: Integer): Boolean;
 var
-  T     : Timer;
-  SD,ED : Integer;
+  T      : Timer;
+  tmpCol : TColEx;
+  SD,ED  : Integer;
 begin
   Result := False;
   if not isLoggedIn() then Exit;
@@ -69,8 +70,9 @@ begin
   SD := Trunc(FixD(SD + 0.0));
   ED := Trunc(FixD(ED + 0.0));
 
+  tmpCol.create(TheColor, tol);
   try
-    createCol(TheColor,tol).findPie(AREA_MM, SD, ED, 10, Radius, cx, cy, tpa);
+    tmpCol.findPie(AREA_MM, SD, ED, 10, Radius, cx, cy, tpa);
     linearSort(tpa, cx, cy, Direction, False);
     Result := (Length(tpa) > 0);
   except
@@ -115,8 +117,9 @@ Example:
 // TODO: Reorder params to clean up type changes?
 function radialWalkEx(var TPA: TPointArray; cx, cy, TheColor, tol: Integer; StartRadial, EndRadial: Variant; Radius: Integer): Boolean;
 var
-  T : Timer;
-  SD,ED : extended;
+  T      : Timer;
+  tmpCol : TColEx;
+  SD,ED  : Extended;
 begin
   Result := False;
   if not isLoggedIn() then Exit;
@@ -141,9 +144,10 @@ begin
     Result := linearWalkEx(tpa, cx, cy, TheColor, tol, StartRadial, Radius);
   end;
 
+  tmpCol.create(TheColor, tol);
   T.start();
   try
-    createCol(TheColor,tol).findPie(AREA_MM, SD, ED, 10, Radius, cx, cy, tpa);
+    tmpCol.findPie(AREA_MM, SD, ED, 10, Radius, cx, cy, tpa);
     sortCircleWise(tpa, cx, cy, StartRadial, False, StartRadial > EndRadial);
     Result := (Length(tpa) > 0);
   except

@@ -63,3 +63,8 @@ begin
   break_In_Ran := RandomRange(-D * 60000, D * 60000);
   warn('The next break will occur in '+msToTime((break_In+break_In_Ran),Time_Short), WT_CORE);
 end;
+
+function getTimeUntilBreak(): Integer;
+begin
+  result := ((break_In + break_In_Ran)-timer_Break.timeElapsed());
+end;

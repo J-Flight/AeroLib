@@ -9,6 +9,8 @@ var
   Size : Integer;
   tpa  : TPointArray;
 begin
+  result := false;
+  {
   if ((countMMDots('npc') < 11) or (percentBlackMM() > 10)) then
     Exit(false);
   if cs_findColorsTolerance(tpa, 214809, 40, AREA_MM, cs_CTS) then // dark green tree color
@@ -16,6 +18,7 @@ begin
     if Length(tpa) > 750 then
       result := ((getMusic() = 'Pheasant Peasant') or (getMusic() = 'Pbeasant Peasant'));
   end;
+  }
 end;
 
 function FF_Solve(): boolean;

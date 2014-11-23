@@ -28,20 +28,28 @@ begin
   Self.sMod := 0.2;
 end;
 
-function createColEx(Col, Tol: Integer; hMod, sMod: Extended): TColEx;
+function createCol(_Col, _Tol: Integer; _hMod, _sMod: Extended): TColEx;
 begin
-  Result.Col  := Col;
-  Result.Tol  := Tol;
-  Result.hMod := hMod;
-  Result.sMod := sMod;
+  Result.Col  := _Col;
+  Result.Tol  := _Tol;
+  Result.hMod := _hMod;
+  Result.sMod := _sMod;
 end;
 
-function createCol(Col, Tol: Integer): TColEx;
+function createCol(_Col, _Tol: Integer): TColEx;  overload;
 begin
-  Result.Col  := Col;
-  Result.Tol  := Tol;
+  Result.Col  := _Col;
+  Result.Tol  := _Tol;
   Result.hMod := 0.2;
   Result.sMod := 0.2;
+end;
+
+function NULL_TColEx: TColEx;
+begin
+  Result.Col  := -1;
+  Result.Tol  := -1;
+  Result.hMod := 0.0;
+  Result.sMod := 0.0;
 end;
 
 function TColEx.findIn(Area: TBox; var Point: TPoint): Boolean;
@@ -162,4 +170,15 @@ begin
   end;
 
   Self.Col := HSLToColor((HSL[1][1] + HSL[0][1]) / 2,(HSL[1][2] + HSL[0][2]) / 2,(HSL[1][3] + HSL[0][3]) / 2);
+end;
+
+function TColEx.waitFindIn(Area: TBox; waitPerLoop, maxWait: Integer): Boolean;
+var
+  T: Timer;
+begin
+  T.start;
+  repeat
+    if Self.findIn(Area) then Exit(true);
+    wait(waitPerLoop);
+  until(T.timeElapsed > maxWait);
 end;

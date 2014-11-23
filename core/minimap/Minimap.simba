@@ -62,14 +62,16 @@ end;
 
 function getCompassRadians(): Extended;
 var
-  I          : Integer;
   SouthPoint : TPoint;
+  tCol       : TColEx;
+  I          : Integer;
   TPA        : TPointArray;
   Angles     : Array [0..2] of Extended;
   Vectors    : Array [0..2] of TVector;
 begin
   Result := -1;
-  createCol(920735,0).findAllIn(toBox(545,4,576,36), TPA);    //Searches for red of South, East, and West points on compass.
+  tCol.create(920735,0);
+  tCol.findAllIn(toBox(545,4,576,36), TPA);    //Searches for red of South, East, and West points on compass.
   RAaSTPA(TPA, 7);                                            //The point are small clusters of pixels, so by doing this, we are left with four points: the three cardinal points, and the center of the red arrow on the compass.
   SortTPAFrom(TPA, Point(561, 20));                           //Sort from center of the compass, so the first point in the array is the point that is the center of the red arrow.
   InvertTPA(TPA);                                             //Invert the array so that the arrow's center point is now at the end of the array and out of the way.
@@ -161,7 +163,10 @@ begin
   end;
 
   Left := (Round((360 - StartAngle) + DirectionDeg) mod 360 <= Round((StartAngle + 360) - DirectionDeg) mod 360);
-  KeyDown((Ord(not Left) * 2) + 37);
+  if Left then
+    KeyDown(VK_Left)
+  else
+    KeyDown(VK_Right);
   Wait(10);
   T.Start();
   i := 0.0;
@@ -436,8 +441,10 @@ Usage : 'npc', 'yellow', 'n', 'y' : Yellow Dot;
 *******************************************************************************}
 function getMiniMapDotsIn(WhatDot: String; Area: TBox): TPointArray;
 var
-  I, Dif, Radius, Hi, C: Integer;
-  TPA: TPointArray;
+  tCol     : TColEx;
+  I,Radius,
+  Hi,C,Dif : Integer;
+  TPA      : TPointArray;
 begin
   case LowerCase(WhatDot) of
     'npc', 'n', 'yellow', 'y': Dif := 4369;
@@ -449,9 +456,11 @@ begin
   else
     writeln('"' + WhatDot + '" is not a valid dot type');
   end;
+
+  tCol.create(65536, 0);
   Freeze;
   Radius := Max((Area.x2-Area.x1)div 2, (Area.y2-Area.y1)div 2);
-  createCol(65536,0).findPie(Area, 0, 360, 0, radius, (Area.x1+Area.x2)div 2, (Area.y1+Area.y2)div 2, TPA);
+  tCol.findPie(Area, 0, 360, 0, radius, (Area.x1+Area.x2)div 2, (Area.y1+Area.y2)div 2, TPA);
   Hi := High(TPA);
   SetLength(Result, Hi + 1);
   if (Hi < 0) then
@@ -517,6 +526,20 @@ begin
   result := dots[0];
 end;
 
+procedure rotateToMMPoint(P: TPoint);
+var
+  BaseRad: Extended;
+  FinalAn,RMod,CAng: Integer;
+begin
+  CAng := (Round(getCompassRadians())-90);
+  if (CAng < 0) then
+    CAng := (360+CAng);
+
+  BaseRad := (ArcTan2((P.Y - MMCY),(P.X - MMCX)) + Radians(CAng));
+  FinalAn := round(Degrees(fixRad(BaseRad-Pi)));
+  setCompass(FinalAn);
+end;
+
 (*
 PercentColorMM
 ~~~~~~~~~~~~~~~~
@@ -541,9 +564,11 @@ Example:
 *)
 function percentColorMM(Color, Tol: Integer): Integer;
 var
-  TPA: TPointArray;
+  tCol : TColEx;
+  TPA  : TPointArray;
 begin
-  createCol(Color,Tol).findPie(AREA_MM, 0, 360, 0, 73, MMCX, MMCY, TPA);
+  tCol.create(Color, Tol);
+  tCol.findPie(AREA_MM, 0, 360, 0, 73, MMCX, MMCY, TPA);
   Result := ceil((Length(TPA) * 100) / ((Pi * (73 * 73)) * ((360 - 0) / 360.0)-((Pi * 0) * 1)));
 end;
 
@@ -570,15 +595,18 @@ Example:
 *)
 function getBlackBackground(): Integer;
 var
-  i,C,Count,MaxC : Integer;
-  TPA  : TPointArray;
-  Cols : TIntegerArray;
+  tCol    : TColEx;
+  i,MaxC,
+  Count,C : Integer;
+  TPA     : TPointArray;
+  Cols    : TIntegerArray;
 begin
   Result := -1;
   if not isLoggedIn() then
     Exit;
 
-  if not createColEx(clBlack, 3, 100, 100).findAllIn(AREA_MM, TPA) then Exit;
+  tCol.create(clBlack, 3, 100, 100);
+  if not tCol.findAllIn(AREA_MM, TPA) then Exit;
   Cols := getColors(TPA);
   clearSameIntegers(Cols);
 

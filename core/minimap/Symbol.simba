@@ -752,9 +752,9 @@ Example:
 .. code-block:: pascal
 
 *)
-function findSymbol(var rx, ry: Integer; Name: string): Boolean;
+function findSymbol(var Pnt: TPoint; Name: string): Boolean;
 begin
-  Result := (getSymbolColor(rx, ry, LowerCase(Name)) > 0);
+  Result := (getSymbolColor(Pnt.X, Pnt.Y, LowerCase(Name)) > 0);
 end;
 
 (*
@@ -779,17 +779,20 @@ Example:
 *)
 function findSymbols(var AnsTPA: TPointArray; SymbolName: string): Boolean;
 var
-  CTS, Col, Hi, i, x, y, fx, fy, L: integer;
-  aP: T2DPointArray;
-  P: TPointArray;
-  Pt: TPoint;
-  acc: Extended;
+  Pt           : TPoint;
+  tmpCol       : TColEx;
+  CTS,Col,Hi,i,
+  x,y,fx,fy,L  : Integer;
+  acc          : Extended;
+  P            : TPointArray;
+  aP           : T2DPointArray;
 begin
   Col := getSymbolColor(fx, fy, SymbolName);
   if Col = 0 then
     Exit;
 
-  createCol(Col,0).findAllIn(AREA_MM, P);
+  tmpCol.create(Col, 0);
+  tmpCol.findAllIn(AREA_MM, P);
   aP := clusterTPA(P, 10);
   Hi := High(aP);
   loadSymbolBitmapColor(LowerCase(SymbolName));

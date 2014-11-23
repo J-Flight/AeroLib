@@ -18,22 +18,14 @@ Var
   LoadedObjList : Array of TMSObject;
 
 {==============================================================================]
-  toObj (function)
+  TMSObject.create (function)
   * Explanation : Creates a TMSObject type
   * Parameters  :
-    -Name   : Name to assign to the TMSObject
-    -UpText : Array of UpText to check while searching for object
-    -InnerCols : Array of TColEx to search for (most unique colors of the Obj)
-    -OuterCols : Array of TColEx near with the InnerCols
+    _Name      : Name to assign to the TMSObject
+    _UpText    : Array of UpText to check while searching for object
+    _InnerCols : Array of TColEx to search for (most unique colors of the Obj)
+    _OuterCols : Array of TColEx near with the InnerCols
 [==============================================================================}
-
-function toObj(Name: string; UpText: TStringArray; InnerCols, OuterCols: Array of TColEx): TMSObject;
-begin
-  Result.Name      := Name;
-  Result.UpText    := Uptext;
-  Result.InnerCols := InnerCols;
-  Result.OuterCols := OuterCols;
-end;
 
 procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols, _OuterCols: Array of TColEx);
 begin
@@ -52,16 +44,16 @@ begin
       Exit(True);
 end;
 
-procedure saveObjDB(Obj: TMSObject; Force: Boolean);
+procedure TMSObject.saveToDB(Force: Boolean);
 var
   sIndex    : String;
   tmpI,tmpO : TColEx;
   i,h,count : integer;
 begin
   if not Force then
-    if Obj.doesExist() then
+    if Self.doesExist() then
     begin
-      warn('TMSObject ('+Obj.Name+') already exists', WT_CORE);
+      warn('TMSObject ('+Self.Name+') already exists', WT_CORE);
       Exit;
     end;
 
@@ -73,13 +65,13 @@ begin
   writeINI('ObjectDB_Main', 'Count', sIndex, PATH_OBJDB);
 
 // Write object name & uptext
-  writeINI('MSObj_'+sIndex, 'Name', Obj.Name, PATH_OBJDB);
-  writeINI('MSObj_'+sIndex, 'UpText(C)', toStr(length(Obj.UpText)), PATH_OBJDB);
-  for i := 0 to high(Obj.UpText) do
-    WriteINI('MSObj_'+sIndex, 'UpText[' + intToStr(I) + ']', Obj.UpText[i], PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'Name', Self.Name, PATH_OBJDB);
+  writeINI('MSObj_'+sIndex, 'UpText(C)', toStr(length(Self.UpText)), PATH_OBJDB);
+  for i := 0 to high(Self.UpText) do
+    WriteINI('MSObj_'+sIndex, 'UpText[' + intToStr(I) + ']', Self.UpText[i], PATH_OBJDB);
 // Append TMSObject type
-  tmpI := Obj.InnerCols[0];
-  tmpO := Obj.OuterCols[0];
+  tmpI := Self.InnerCols[0];
+  tmpO := Self.OuterCols[0];
 // MSObj inner color
   writeINI('MSObj_'+sIndex, 'ColI', toStr(tmpI.Col), PATH_OBJDB);
   writeINI('MSObj_'+sIndex, 'TolI', toStr(tmpI.Tol), PATH_OBJDB);
@@ -92,9 +84,9 @@ begin
   writeINI('MSObj_'+sIndex, 'sModO', toStr(tmpO.sMod), PATH_OBJDB);
 end;
 
-procedure saveObjDB(Obj: TMSObject); overload;
+procedure TMSObject.saveToDB(); overload;
 begin
-  saveObjDB(Obj, False);
+  Self.saveToDB(False);
 end;
 
 procedure loadObjDB();
@@ -149,21 +141,24 @@ begin
       Exit(LoadedObjList[i]);
 end;
 
-function findAllMSObjects(Obj: TMSObject; DistMod: Integer; SortFrom: TPoint; var Pnts: TPointArray): Boolean;
+function TMSObject.findAll(DistMod: Integer; SortFrom: TPoint; var Pnts: TPointArray): Boolean;
 var
   i,h     : Integer;
   tpa,tmp : TPointArray;
   atpaI,
   atpaO   : T2DPointArray;
 begin
-  if length(Obj.InnerCols) < 1 then Exit(false);
-  for i:=0 to high(Obj.InnerCols) do
-    if Obj.InnerCols[i].findAllIn(AREA_MS, tpa) then break;
+  if length(Self.InnerCols) < 1 then Exit(false);
 
-  if length(tpa) < 1 then Exit(false);;
+  for i:=0 to high(Self.InnerCols) do
+    if Self.InnerCols[i].findAllIn(AREA_MS, tpa) then break;
+
+  if length(tpa) < 1 then Exit(false);
+
   atpaI := clusterTPA(tpa, DistMod);
   tpa   := [];
-  if length(Obj.OuterCols) < 1 then
+
+  if length(Self.OuterCols) < 1 then
   begin
     for i:=0 to high(atpaI) do
     begin
@@ -172,8 +167,8 @@ begin
     end;
   end else
   begin
-    for i:=0 to high(Obj.OuterCols) do
-      if Obj.OuterCols[i].findAllIn(AREA_MS, tpa) then break;
+    for i:=0 to high(Self.OuterCols) do
+      if Self.OuterCols[i].findAllIn(AREA_MS, tpa) then break;
 
     if length(tpa) < 1 then Exit(false);
     atpaO := clusterTPA(tpa, DistMod);
@@ -198,17 +193,17 @@ begin
   Pnts := tpa;
 end;
 
-function findMSObject(Obj: TMSObject; DistMod: Integer; SortFrom: TPoint; var Pnt: TPoint): Boolean;
+function TMSObject.Find(DistMod: Integer; SortFrom: TPoint; var Pnt: TPoint): Boolean;
 var
   i,h     : Integer;
   tpa,tmp : TPointArray;
   atpaI,
   atpaO   : T2DPointArray;
 begin
-  if not findAllMSObjects(Obj, DistMod, SortFrom, tpa) then
+  if not Self.findAll(DistMod, SortFrom, tpa) then
     exit(false);
 
-  if (length(Obj.UpText) < 1)then
+  if (length(Self.UpText) < 1)then
   begin
     Pnt := tpa[0];
     exit(true);
@@ -219,7 +214,7 @@ begin
     if isInterfaceOpen() then
       Exit(false);
     missMouse(tpa[i], 0, 0);
-    if waitUpTextMulti(Obj.UpText, 200) then
+    if waitUpTextMulti(Self.UpText, 200) then
     begin
       Pnt := getMousePnt();
       exit(true);
@@ -227,9 +222,9 @@ begin
   end;
 end;
 
-function findMSObject(Obj: TMSObject; var Pnt: TPoint): Boolean; overload;
+function TMSObject.Find(var Pnt: TPoint): Boolean; overload;
 begin
-  result := findMSObject(Obj, 10, point(MSCX,MSCY), Pnt);
+  result := Self.Find(10, point(MSCX,MSCY), Pnt);
 end;
 
 function findMSObjectSimple(Cols: TIntegerArray; UpTextArray: TStringArray): Boolean;
@@ -246,5 +241,5 @@ begin
     InnerCols[0].autoCreate(Cols);
   end;
 
-  result := findMSObject(tmpObj, pnt);
+  result := tmpObj.Find(pnt);
 end;

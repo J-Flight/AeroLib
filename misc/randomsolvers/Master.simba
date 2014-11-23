@@ -76,8 +76,9 @@ Var
   RandomsSet, DisableRandoms, RandomScreenShot: boolean;
   DTM_RoyalFrogA: Integer;
   gtalksBox, YelSkipBoxs: array of TBox;
-  gTalksCount : Integer;
+  gTalksCount,dismissedRandoms : Integer;
   NicknameSet : boolean;
+  DISABLE_RANDOMS : Boolean = True;
 
 {*******************************************************************************
 procedure setScreenName(ScreenName: String);
@@ -519,8 +520,8 @@ begin
   Result := False;
   if not NicknameSet then Exit;
 
-  txtCol := createCol(65535,1);
-  if txtCol.findIn(AREA_MS, Pnt) then  // ax,ay
+  txtCol.create(65535, 1);
+  if txtCol.findIn(AREA_MS, Pnt) then
   begin
     SetArrayLength(gtalksBox, 0);
     SetArrayLength(YelSkipBoxs, 0);
@@ -603,6 +604,19 @@ begin
           begin
             wait(randomRange(2500,3500));
             Exit(false);
+          end;
+
+          if DISABLE_RANDOMS then
+          begin
+            missMouse(point(ax,ay), 0, 0);
+            if waitUpTextMulti(['Talk','lk-to','ttack','ard','curity'], RandomRange(150,300)) then
+            begin
+              fastClick(MOUSE_RIGHT);
+              if waitOptionMulti(['Dismi','smis'], 300) then
+                inc(dismissedRandoms);
+              FFlag(0);
+              Exit(true);
+            end;
           end;
 
           if not findDTM(DTM_RoyalFrog, x, y, MSX1, MSY1, MSX2, MSY2) then

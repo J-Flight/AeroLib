@@ -37,6 +37,7 @@
 {$include AeroLib/core/Bank.simba}
 
 {$include AeroLib/entities/object/Object.simba}
+{$include AeroLib/entities/items/GroundItems.simba}
 {$include AeroLib/entities/npc/NPC.simba}
 
 {$include AeroLib/core/minimap/Minimap.simba}
@@ -57,7 +58,7 @@
 
 Const
   AL_VERSION_MAIN = '1.0';
-  AL_VERSION_SUB  = '0.3';
+  AL_VERSION_SUB  = '0.4';
 
 procedure AL_checkVersion();
 var
@@ -97,6 +98,7 @@ begin
   setupGauss();
   AL_setBoxes();
   loadObjDB();
+  loadGIDB();
 
   MouseSpeed := 20;
   ocr_LoadFont(AppPath + 'Fonts\UpChars07_s\', UpFont);
@@ -109,7 +111,6 @@ begin
 
   {$IFDEF SMART}
     OS_SMART.Create;
-    OS_SMART.Pair;
 
     if not RSReady() then
     begin

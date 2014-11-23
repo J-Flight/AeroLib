@@ -75,10 +75,10 @@ Begin
     Self.Free;
 
   Indices := Self.GetPIDs(True);
-  Count := Length(Indices);
+  Count   := Length(Indices);
   If (Count > 0) Then
   begin
-    For I:= 0 To Count - 1 Do
+    For I:=0 To Count - 1 Do
     Begin
       Self.__Target := SmartPairClient(Indices[I]);
       If Self.__Target <> 0 then
@@ -86,7 +86,10 @@ Begin
         Self.__PID := Indices[I];
         SetEIOSTarget('libsmartremote', ToStr(Self.__PID));
         Writeln('Paired with SMART[' + ToStr(Self.__PID) + ']');
-        Self.__Graphics.Create(Self.__Width, Self.__Height, SmartDebugArray(Self.__Target));
+        try
+          Self.__Graphics.Create(Self.__Width, Self.__Height, SmartDebugArray(Self.__Target));
+        except
+        end;
         Insert(@Self, __Smart__Pointers);
         Result := True;
         Exit;

@@ -5,11 +5,11 @@ Debugging
 }
 
 {*******************************************************************************
-Procedure DebugBitmap(Bmp: Integer);
+Procedure debugBitmap(Bmp: Integer);
 By: Cazax
 Description: Shows a bitmap in the debug image window.
 *******************************************************************************}
-procedure DebugBitmap(Bmp: Integer);
+procedure debugBitmap(Bmp: Integer);
 var
   W, H: Integer;
 begin
@@ -23,12 +23,12 @@ begin
 end;
 
 {*******************************************************************************
-function DebugTPA(Points: TPointArray; BmpName: string): Boolean;
+function debugTPA(Points: TPointArray; BmpName: string): Boolean;
 By: Wizzup?
 Description: Shows an image of the Debug screen, plotting colors over the points
 stored in Points TPA. If a name is specified, an image will be saved to that path.
 *******************************************************************************}
-function DebugTPA(Points: TPointArray; BmpName: string): Boolean;
+function debugTPA(Points: TPointArray; BmpName: string): Boolean;
 var
   Bmp: integer;
   Box : TBox;
@@ -48,13 +48,13 @@ begin
 end;
 
 {*******************************************************************************
-function DebugATPA(aPoints: array of TPointArray; BmpName: string): Boolean;
+function debugATPA(aPoints: array of TPointArray; BmpName: string): Boolean;
 By: Wizzup
 Description: Shows an image of the client, plotting each TPA of the 2D point
              array aPoints. Each TPA is a different color. If a name is
              specified, an image will be saved.
 *******************************************************************************}
-function DebugATPA(aPoints: T2DPointArray; BmpName: string): Boolean;
+function debugATPA(aPoints: T2DPointArray; BmpName: string): Boolean;
 var
    Width, Height, ClientBMP: Integer;
    ATPA : T2DPointArray;
@@ -63,8 +63,8 @@ begin
   result := false;
   if length(aPoints) = 0 then
     exit;
-  Box := GetATPABounds(aPoints);
-  Width := box.x2 - box.x1 + 1;
+  Box    := GetATPABounds(aPoints);
+  Width  := box.x2 - box.x1 + 1;
   Height := box.y2 - box.y1 + 1;
   DisplayDebugImgWindow(Width, Height);
   ClientBMP := BitmapFromClient(box.x1,box.y1,box.x2,box.y2);
@@ -79,13 +79,13 @@ begin
 end;
 
 {*******************************************************************************
-procedure DebugATPABounds(aPoints: Array Of TPointArray);
+procedure debugATPABounds(aPoints: Array Of TPointArray);
 By: Wizzup?, lordsaturn, & caused
 Description: Shows an image of the client, plotting each TPA's bounds as a box
              of different colour per TPA. If a name is specified, an image
              will be saved.
 *******************************************************************************}
-procedure DebugATPABounds(aPoints: array Of TPointArray);
+procedure debugATPABounds(aPoints: array Of TPointArray);
 var
   Width, Height, ClientBMP, I: Integer;
   B, Box: TBox;
@@ -125,6 +125,17 @@ begin
   end;
   DrawBitmapDebugImg(clientBMP);
   FreeBitmap(ClientBmp);
+end;
+
+procedure debugBoxes(Boxes: Array of TBox);
+var
+  i    : Integer;
+  atpa : T2DPointArray;
+begin
+  setLength(atpa, length(Boxes));
+  for i:=0 to high(Boxes) do
+    atpa[i] := TPAFromBox(Boxes[i]);
+  debugATPABounds(atpa);
 end;
 
 Const

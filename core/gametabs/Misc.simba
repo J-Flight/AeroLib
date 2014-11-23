@@ -26,18 +26,20 @@ Example:
 *)
 function getCurrentWorld(): Integer;
 var
-  Box :TBox;
-  TPA :TPointArray;
+  Box  : TBox;
+  tCol : TColEx;
+  TPA  : TPointArray;
 begin
   Result := - 1;
   if not gameTab(TAB_FRIENDS) then
     Exit
   else
     Wait(250 + Random(100));
-  if not createCol(3381759,1).findAllIn(toBox(695,210,725,222), TPA) then
+  tCol.create(3381759, 1);
+  if not tCol.findAllIn(toBox(695,210,725,222), TPA) then
     Exit;
   Box := getTPABounds(TPA);
-  Result := StrToIntDef(ExtractFromStr(cs_getTextAtEx(Box, 0, 5, 1, 3381759, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
+  Result := strToIntDef(ExtractFromStr(cs_getTextAtEx(Box, 0, 5, 1, 3381759, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
   if (Result = - 1) then
     Writeln('Failed to get current world');
 end;
@@ -67,18 +69,19 @@ function setFightMode(Mode: Integer): Boolean;
 var
   b        : TBox;
   pnt      : TPoint;
+  tCol     : TColEx;
   i        : Integer;
   cmbBoxes : TBoxArray;
 begin
-  if (not isLoggedIn()) then
+  if not isLoggedIn() then
     exit(false);
-  if not(gameTab(TAB_COMBAT)) then
+  if not gameTab(TAB_COMBAT) then
     exit(false);
   Wait(100 + Random(100));
 
   if (not(inRange(Mode, 1, 4))) then
   begin
-    Writeln('setFightMode ' + IntToStr(Mode) + ' is not a valid fightmode number.');
+    warn('setFightMode ' + toStr(Mode) + ' is not a valid fightmode number.', WT_CORE);
     Exit(false);
   end;
 
@@ -87,13 +90,15 @@ begin
   b := cmbBoxes[Mode - 1];
 
 { If no 4th weapon option goto 3rd option }
-  if (Mode = 4) and (not createCol(2070783,1).findIn(toBox(655,308,714,343), pnt)) then
+  tCol.create(2070783, 1);
+  if (Mode = 4) and (not tCol.findIn(toBox(655,308,714,343), pnt)) then
     b := cmbBoxes[2];
 
   i := 0;
+  tCol.create(1908609, 5);
   while (i < 4) do
   begin
-    if createCol(1908609,5).findIn(b, pnt) then
+    if tCol.findIn(b, pnt) then
       Exit(true);
     mouseBox(b, MOUSE_LEFT);
     Wait(200 + Random(300));
@@ -126,7 +131,19 @@ Example:
 Function getWeaponName(): String;
 begin
   if FTab(TAB_COMBAT) then
-    Result := cs_getTextAtEx(intToBox(555,210,730,230), 0, 3, 1, 2070783, 0, 'CharsNPC07', cs_CTS1);
+    Result := cs_getTextAtEx(toBox(555,210,730,230), 0, 3, 1, 2070783, 0, 'CharsNPC07', cs_CTS1);
+end;
+
+Function getSpecialPercent(): Integer;
+var
+  S : String;
+begin
+  if FTab(TAB_COMBAT) then
+  begin
+    S := cs_getTextAtEx(toBox(665,415,681,428), 0, 3, 1, 1048576, 0, 'StatChars07', cs_CTS1);
+    wait(randomRange(70,130));
+    Result := strToIntDef(S, 0);
+  end;
 end;
 
 (*
@@ -156,8 +173,8 @@ begin
     exit;
 
   if Enable then
-    if not (cs_GetTextAtEx(intToBox(644,379,667,392), 0, 5, 1, 2070783, 20, 'UpChars07', cs_CTS1) ='(On)') then
-      mouseBox(intToBox(572,362,713,397), MOUSE_LEFT);
+    if not (cs_GetTextAtEx(toBox(644,379,667,392), 0, 5, 1, 2070783, 20, 'UpChars07', cs_CTS1) ='(On)') then
+      mouseBox(toBox(572,362,713,397), MOUSE_LEFT);
   FTab(TAB_INV);
 end;
 
@@ -186,7 +203,7 @@ function getEquippedItemBounds(Which: Variant): TBox;
 var
   I : Integer;
 begin
-  Result := IntToBox(0, 0, 0, 0);
+  Result := toBox(0, 0, 0, 0);
 
   I := -1;
 
@@ -215,13 +232,13 @@ begin
       'ring' :
         I := 11;
     end
-  else if VariantIsInteger(Which) then
-    if (InRange(Which, 1, 11)) then
+  else if variantIsInteger(Which) then
+    if (inRange(Which, 1, 11)) then
       I := Which;
 
   if (I = -1) then
   begin
-    Writeln('Invalid entry (' + ToStr(Which) + ')');
+    warn('Invalid entry (' + ToStr(Which) + ')', WT_CORE);
     Exit;
   end;
 
@@ -267,7 +284,7 @@ var
   ResPoint : TPoint;
 begin
   Result := Point(-1,-1);
-  if not InRange(EquipSlot,1,11) then
+  if not inRange(EquipSlot,1,11) then
   begin
     warn('Invalid EquipSlot('+inttostr(EquipSlot)+') passed', WT_CORE);
     Exit;
@@ -300,19 +317,21 @@ Example:
 *)
 function wearingItem(I: Integer): Boolean;
 var
-  STB : TBox;
-  pnt : TPoint;
+  STB  : TBox;
+  pnt  : TPoint;
+  tCol : TColEx;
 begin
   if (not InRange(I, 1, 11)) then
   begin
-    warn('Equipment slot #' + IntToStr(I) + ' is not a valid equipment slot', WT_CORE);
+    warn('Equipment slot #' + toStr(I) + ' is not a valid equipment slot', WT_CORE);
     Exit(False);
   end;
   if not gametab(TAB_EQUIP) then
     exit(false);
 
-  STB := getEquippedItemBounds(I);
-  Result := createCol(65536,1).findIn(STB, pnt);
+  tCol.create(65536, 1);
+  STB    := getEquippedItemBounds(I);
+  Result := tCol.findIn(STB, pnt);
 end;
 
 (*
@@ -345,13 +364,14 @@ begin
   SB := getEquippedItemBounds(I);
 
   T.start();
-  while (T.timeElapsed < 5000) do
+  while (T.timeElapsed() < 5000) do
   begin
     mouseBox(SB, MOUSE_LEFT);
     Wait(200 + Random(350));
     if not wearingItem(I) then
       Exit(True);
   end;
+
   Result := False;
 end;
 
@@ -434,13 +454,13 @@ var
   I,Row,Col : Integer;
   P : TPoint;
 begin
-  if (not InRange(EmoteNumber, 1, 37)) then
+  if (not inRange(EmoteNumber, 1, 37)) then
   begin
-    warn('Invalid EmoteNumber: ' + IntToStr(EmoteNumber) + ', Valid Emotes: 1..46', WT_CORE);
+    warn('Invalid EmoteNumber: ' + toStr(EmoteNumber) + ', Valid Emotes: 1..46', WT_CORE);
     Exit;
   end;
 
-  if not GameTab(TAB_EMOTES) then
+  if not gameTab(TAB_EMOTES) then
     exit;
 
   case EmoteNumber of
@@ -449,12 +469,13 @@ begin
     21..37: if (getColor(721, 448) = 1777699) then
               mouseBox(toBox(723,425,735,446), MOUSE_LEFT);
   end;
+
   Wait(100 + Random(200));
-  if InRange(EmoteNumber, 1, 20) then
+  if inRange(EmoteNumber, 1, 20) then
     I := 1
   else
-    if InRange(EmoteNumber, 21, 37) then I := 21;
-  DecEx(EmoteNumber, I);
+    if inRange(EmoteNumber, 21, 37) then I := 21;
+  decEx(EmoteNumber, I);
 
   Col:=(Round(EmoteNumber/4));
   Row :=(EmoteNumber -(Col*4));
@@ -486,8 +507,8 @@ Example:
 *)
 function getMusic(): string;
 begin
-  if not gameTab(TAB_MUSIC) then
+  if not FTab(TAB_MUSIC) then
     Exit('');
   Wait(100 + Random(200));
-  Result := Trim(cs_getTextAtEx(intToBox(550,239,730,253), 0, 5, 1, 65280, 0, 'UpChars07', cs_CTS1));
+  Result := Trim(cs_getTextAtEx(toBox(550,239,730,253), 0, 5, 1, 65280, 0, 'UpChars07', cs_CTS1));
 end;

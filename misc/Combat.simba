@@ -6,80 +6,58 @@ Combat
 
 function getHPBars(): TPointArray;
 var
-  B          : TBox;
-  P          : TPoint;
-  i          : Integer;
-  colG,colR  : TColEx;
-  tpa,tpa2   : TPointArray;
-  atpa,atpa2 : T2DPointArray;
+  B,B2 : TBox;
+  colG : TColEx;
+  i    : Integer;
+  tpa  : TPointArray;
+  atpa : T2DPointArray;
 begin
   if not isLoggedIn() then Exit;
 
-  colG := createCol(65280, 1);
-  colR := createCol(255, 1);
-
-  if not colG.findAllIn(AREA_MS, tpa) then exit;
-
-  atpa := clusterTPA(tpa, 1);
-  tpa  := [];
-  for i:=0 to High(atpa) do
+  colG.create(65280, 1);
+  if colG.findAllIn(AREA_MS, tpa) then
   begin
-    B    := atpa[i].getBounds();
-    B    := toBox(B.X1-1, B.Y1, B.X2+1, B.Y2);
-    tpa2 := atpa[i];
-
-    if colR.findAllIn(B, tpa) then
+    atpa := clusterTPA(tpa, 1);
+    for i:=0 to high(atpa) do
     begin
-      sortTPAFrom(tpa, tpa.midPnt());
-      P   := tpa[0];
-      tpa := [];
-      B   := toBox(P.X-1, P.Y-2, P.X+28, P.Y+2);
-      if colR.findAllIn(B, tpa) then
+      B  := atpa[i].getBounds();
+      B2 := toBox(B.X1,B.Y1,B.X1+29,B.Y2);
+      if inRange(B2.Height, 4, 6) then
       begin
-        atpa2 := clusterTPA(tpa, 1);
-        tpa   := [];
-        sortATPAFromFirstPoint(atpa2, P);
-        combineTPAWrap(tpa2, atpa2[0], tpa);
+        setArrayLength(Result, Length(Result)+1);
+        Result[High(Result)] := B2.MidPoint;
       end;
-    end;
-
-    if length(tpa) > 0 then
-      B := tpa.getBounds()
-    else
-      B := atpa[i].getBounds();
-
-    if (inRange(B.Width, 27, 31) and (inRange(B.Height, 4, 6))) then
-    begin
-      setArrayLength(Result, Length(Result)+1);
-      Result[High(Result)] := B.MidPoint;
     end;
   end;
 end;
 
 function getDeadHPBars(): TPointArray;
 var
-  B          : TBox;
-  P          : TPoint;
-  i          : Integer;
-  colG,colR  : TColEx;
-  tpa,tpa2   : TPointArray;
-  atpa,atpa2 : T2DPointArray;
+  B,B2  : TBox;
+  colG,
+  colR  : TColEx;
+  i     : Integer;
+  tpa   : TPointArray;
+  atpa  : T2DPointArray;
 begin
   if not isLoggedIn() then Exit;
 
-  colR := createCol(255, 1);
+  colG.create(65280, 1);
+  colR.create(255, 1);
 
-  if not colr.findAllIn(AREA_MS, tpa) then exit;
-
-  atpa := clusterTPA(tpa, 1);
-  tpa  := [];
-  for i:=0 to High(atpa) do
+  if colR.findAllIn(AREA_MS, tpa) then
   begin
-    B    := atpa[i].getBounds();
-    if (inRange(B.Width, 27, 31) and (inRange(B.Height, 4, 6))) then
+    atpa := clusterTPA(tpa, 1);
+    for i:=0 to high(atpa) do
     begin
-      setArrayLength(Result, Length(Result)+1);
-      Result[High(Result)] := B.MidPoint;
+      B  := atpa[i].getBounds();
+      B2 := toBox(B.X1-29,B.Y1,B.X1,B.Y2);
+      if inRange(B2.Height, 4, 6) then
+        if not colG.findAllIn(B2, tpa) then
+        begin
+          setArrayLength(Result, Length(Result)+1);
+          Result[High(Result)] := B.MidPoint;
+        end;
     end;
   end;
 end;

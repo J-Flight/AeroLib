@@ -141,13 +141,15 @@ Example:
 *)
 function waitFindColor(var Pnt: TPoint; Color, Tol: Integer; Area: TBox; MaxTime: Integer): Boolean;
 var
-  T: Timer;
+  T      : Timer;
+  tmpCol : TColEx;
 begin
   Result := False;
+  tmpCol.create(Color,Tol);
   T.start();
-  while T.timeElapsed < MaxTime do
+  while T.timeElapsed() < MaxTime do
   begin
-    if createCol(Color,Tol).findIn(Area, Pnt) then
+    if tmpCol.findIn(Area, Pnt) then
       Exit(True);
     Wait(10 + Random(6));
   end;
@@ -174,13 +176,16 @@ Example:
 *)
 function waitFindColors(var TPA: TPointArray; Color, Tol: Integer; Area: TBox; MaxTime: Integer): Boolean;
 var
-  T: Timer;
+  T      : Timer;
+  tmpCol : TColEx;
 begin
   Result := False;
+  tmpCol.create(Color,Tol);
+
   T.start();
-  while T.timeElapsed do
+  while T.timeElapsed < MaxTime do
   begin
-    if createCol(Color,Tol).findAllIn(Area, TPA) then
+    if tmpCol.findAllIn(Area, TPA) then
       Exit(True);
     Wait(10 + Random(6));
   end;
@@ -207,16 +212,18 @@ Example:
 *)
 function waitColorCount(Color, Tol: Integer; Area: TBox; MinCount, MaxCount, MaxTime: integer):boolean;
 var
-  T: Timer;
-  TPA: TPointArray;
+  T      : Timer;
+  tmpCol : TColEx;
+  Count  : Integer;
 begin
   Result := False;
+  tmpCol.create(Color,Tol);
+
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if createCol(Color,Tol).findAllIn(Area, TPA) then
-      if InRange(Length(TPA), MinCount, MaxCount) then
-        Exit(True);
+    if inRange(tmpCol.count(Area), MinCount, MaxCount) then
+      Exit(True);
     Wait(15 + Random(10));
   end;
 end;
@@ -278,15 +285,18 @@ Example:
 *)
 function waitColorGoneIn(Color, Tol: Integer; Area: TBox; MaxTime: integer): Boolean;
 var
-  T   : Timer;
-  pnt : TPoint;
+  T      : Timer;
+  pnt    : TPoint;
+  tmpCol : TColEx;
 begin
   Result := False;
   if Tol = 0 then Tol := 1;
+  tmpCol.create(Color,Tol);
+
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if (not createCol(Color,Tol).findIn(Area, pnt)) then
+    if (not tmpCol.findIn(Area, pnt)) then
       Exit(True);
     Wait(10);
   end;
@@ -324,6 +334,21 @@ begin
   while T.timeElapsed < MaxTime do
   begin
     if (cs_findDTM(DTM, x, y, Area, cs_CTS1)) then
+      Exit(True);
+    wait(WaitPerLoop);
+  end;
+end;
+
+function findTextEx(var cx, cy: Integer; txt, fonts: TStringArray; Area: TBox): Boolean; forward;
+function waitFindText(var Pnt: TPoint; txt, font: string; Area: TBox; WaitPerLoop, MaxTime: integer): boolean;
+var
+  T: Timer;
+begin
+  T.start();
+
+  while T.timeElapsed() < MaxTime do
+  begin
+    if findTextEx(Pnt.X, Pnt.Y, [txt], [font], Area) then
       Exit(True);
     wait(WaitPerLoop);
   end;

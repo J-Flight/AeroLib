@@ -165,6 +165,13 @@ begin
   writeln('[           Randoms Report           ]');
   writeln('[____________________________________]');
 
+  if DISABLE_RANDOMS then
+  begin
+    WriteLn('[' + centerStringEx('Dismissed '+toStr(dismissedRandoms)+' random events', 36, ' ') + ']');
+    writeln('[====================================]');
+    Exit;
+  end;
+
   for i:=0 to (RANDOMS_COUNT-1) do
   begin
     if (length(RandomEvents[i].name) > 0) then
@@ -177,4 +184,9 @@ begin
     end;
   end;
   writeln('[====================================]');
+end;
+
+function getPerHour(Variable: Integer): Integer;
+begin
+  result := Round((Variable*60) / maxE(1, (getTimeRunning()/60000)));
 end;

@@ -20,7 +20,7 @@ var
   tTPA   : TPointArray;
   pCols  : TIntegerArray;
 begin
-  pC := createCol(getColor(PntT.X,PntT.Y), 20);
+  pC.create(getColor(PntT.X,PntT.Y), 20);
   pC.findAllIn(toBox(PntT.X-15,PntT.Y-20,PntT.X+15,PntT.Y+25), tTPA);
 
   getColorsWrap(tTPA, pCols);
@@ -34,7 +34,7 @@ begin
   tTPA  := [];
   pCols := [];
 
-  pC := createCol(getColor(PntB.X,PntB.Y), 20);
+  pC.create(getColor(PntB.X,PntB.Y), 20);
   pC.findAllIn(toBox(PntB.X-15,PntB.Y-20,PntB.X+15,PntB.Y+25), tTPA);
   getColorsWrap(tTPA, pCols);
   clearSameIntegers(pCols);
@@ -51,8 +51,8 @@ Procedure TEntity.update();
 var
   pC        : TColEx;
   pPnt      : TPoint;
-  tTPA,bTPA,
-  fTPA      : TPointArray;
+  tTPA,
+  bTPA,fTPA : TPointArray;
   atpa      : T2DPointArray;
 begin
   while isPlayerWalking() do
@@ -61,10 +61,10 @@ begin
   self.FullTPA := [];
   pPnt := self.BasePnt;
 
-  pC := createColEx(self.tCol, self.tTol, self.tHMod, self.tSMod);
+  pC.create(self.tCol, self.tTol, self.tHMod, self.tSMod);
   pC.findAllIn(toBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), tTPA);
 
-  pC := createColEx(self.bCol, self.bTol, self.bHMod, self.bSMod);
+  pC.create(self.bCol, self.bTol, self.bHMod, self.bSMod);
   pC.findAllIn(toBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), bTPA);
 
   combineTPAWrap(tTPA, bTPA, fTPA);

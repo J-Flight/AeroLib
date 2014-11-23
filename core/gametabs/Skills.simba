@@ -283,9 +283,10 @@ Example:
 *)
 function getSkillInfo(Skill: Variant; Amount: Boolean): Integer;
 var
-  TP  : TPoint;
-  Box : TBox;
-  TPA : TPointArray;
+  Box  : TBox;
+  TP   : TPoint;
+  tCol : TColEx;
+  TPA  : TPointArray;
 begin
   if not gameTab(TAB_STATS) then
     Exit(-1);
@@ -294,7 +295,9 @@ begin
     Box := skillBoxHalf(TP.X,TP.Y,True)
   else
     Box := skillBoxHalf(TP.X,TP.Y,False);
-  if (not createCol(65535,0).findAllIn(Box, TPA)) then
+
+  tCol.create(65535, 0);
+  if (not tCol.findAllIn(Box, TPA)) then
     exit(-1);
 
   Box    := getTPABounds(TPA);
@@ -370,7 +373,7 @@ Example:
 *)
 function getTotalLevel(): Integer;
 begin
-  if (not FTab(TAB_STATS)) then
+  if not FTab(TAB_STATS) then
     Exit(-1);
 
   Wait(100 + Random(100));
@@ -398,19 +401,20 @@ Example:
 *)
 function getSkillXP(skill: variant): integer;
 var
-  MouseTB,b: TBox;
-  rc: TPoint;
-  tpa: TPointArray;
+  MouseTB,
+  b       : TBox;
+  rc      : TPoint;
+  tpa     : TPointArray;
 begin
   if(not gameTab(TAB_STATS)) then
     exit(-1);
 
-  rc := skillToPoint(skill);
+  rc      := skillToPoint(skill);
   MouseTB := skillBoxCoords(rc.x,rc.y);
   if (MouseTB.X1 < 1) then
     exit(-1);
 
-  brakeMMouse(Point(MouseTB.X1+3,MouseTB.Y1+3), 55, 25, True);
+  mouseBox(MouseTB, MOUSE_MOVE);
   wait(400 + random(200));
 
   if (waitFindColors(tpa, 10551295, 0, Area_Inv, 3000)) then
@@ -419,6 +423,38 @@ begin
     wait(450 + random(150));
     result := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15, b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
   end;
+end;
+
+{*******************************************************************************
+function ConvertXpToLvl(Xp: Integer): Integer;
+By: Brak, Flyboy
+Description: Returns skill level based on xp level
+*******************************************************************************}
+function convertXpToLvl(xp: Integer): Integer;
+var
+  level, exp: Integer;
+begin
+  for level := 1 to 99 do
+  begin
+    exp := exp + Trunc(level + 300 * Pow(2.0, level / 7.0));
+    if ((exp / 4) > xp) then
+      exit(level);
+  end;
+  Result := 99;
+end;
+
+{*******************************************************************************
+function ConvertLvlToXP(Xp: Integer): Integer;
+By: Ron
+Description: Returns exp based on level
+*******************************************************************************}
+function convertLvlToXP(Level: Integer): Integer;
+var
+  i, exp: Integer;
+begin
+  for i := 1 to Level do
+    exp := exp + Trunc(i + 300 * Pow(2.0, i / 7.0));
+  Result := exp div 4;
 end;
 
 (*
@@ -443,10 +479,10 @@ Example:
 *)
 function XPTillNextLevel(Skill: Variant): Integer;
 var
-  MouseTB,b: TBox;
+  MouseTB,b,b2: TBox;
   rc: TPoint;
   tpa: TPointArray;
-  CXP,XPNLA: Integer;
+  CXP,XPNLA,x,y: Integer;
 begin
   if(not gameTab(tab_Stats)) then
     exit(-1);
@@ -456,18 +492,15 @@ begin
   if (MouseTB.X1 < 1) then
     exit(-1);
 
-  brakeMMouse(Point(MouseTB.X1+3,MouseTB.Y1+3), 55, 25, True);
+  mouseBox(MouseTB, MOUSE_MOVE);
   wait(400 + random(200));
 
-  if (waitFindColors(tpa, 10551295, 0, Area_Inv, 3000)) then
+  if (waitFindColors(tpa, 10551295, 0, AREA_INV, 3000)) then
   begin
     b := getTPABounds(tpa);
-    wait(450 + random(150));
-    CXP    := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15,b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
-    XPNLA  := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15, b.y2-15,b.x2-2,b.y2-2), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
-    result := XPNLA-CXP;
-    if (result < 0) then
-      result := -1;
+    if not findText(x, y, 'Remaining', 'smallChars07', b) then Exit(-1);
+    b2 := toBox(x,y,b.X2,b.Y2);
+    result := strToIntDef(getNumbers(cs_getTextAtEx(b2, 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
   end;
 end;
 
@@ -499,7 +532,7 @@ begin
     for II := 0 to High(Me.Level) do
       Me.Level[II] := getSkillCurrentLevel(II);
   except
-    Writeln('Error grabbing player levels...');
+    warn('Error grabbing player levels...', WT_CORE);
   end;
 end;
 
@@ -530,8 +563,8 @@ begin
   Result := -1;
   if gameTab(TAB_STATS) then
   begin
-    CHP := getSkillCurrentLevel('hp');
-    CMHP := getSkillMaxLevel('hp');
+    CHP    := getSkillCurrentLevel('hp');
+    CMHP   := getSkillMaxLevel('hp');
     Result := Round((CHP*100/CMHP));
     gameTab(TAB_INV);
   end;

@@ -11,7 +11,7 @@ type TItem = record
     BMP       : integer;     // *
     BMP_TOL   : integer;     // *
     Wieldable : boolean;     // *
-  end;
+end;
 
 
 (*
@@ -171,6 +171,7 @@ function getItemAmount(Pnt: TPoint): Integer;
 var
   Box  : TBox;
   S    : String;
+  aCol : TColEx;
   i    : Integer;
   TPA  : TPointArray;
   ATPA : T2DPointArray;
@@ -179,10 +180,11 @@ begin
   Result := 0;
 
   Box := toBox(0,0,755,500);
-  if not PointInBox(Pnt, Box) then
+  if not pointInBox(Pnt, Box) then
     Exit;
   Box := toBox(Pnt.X-32,Pnt.Y-32,Pnt.X+32,Pnt.Y+32);
-  if not createCol(65536,0).findAllIn(Box, TPA) then
+  aCol.create(65536, 0);
+  if not aCol.findAllIn(Box, TPA) then
     Exit;
 
   Inc(Result);
@@ -199,9 +201,11 @@ begin
   ATPA := [];
 
   for i:=0 to High(Col) do
-    if createCol(Col[i],0).findAllIn(Box, TPA) then
+  begin
+    aCol.create(Col[i], 0);
+    if aCol.findAllIn(Box, TPA) then
     begin
-      S := cs_getTextAtEx(Box, 0, 1, 1, Col[i], 0, StatChars07, cs_CTS);
+      S := getTextAtEx(Box.X1, Box.Y1, Box.X2, Box.Y2, 0, 1, 1, Col[i], 0, 'StatChars07');
       Result := strToIntDef(GetNumbers(S), 1);
       Case I of
         2: Result := Result * 1000;
@@ -209,6 +213,7 @@ begin
       end;
       Exit;
    end;
+  end;
 end;
 
 function interactSlot(Slot: Integer; action: Variant): Boolean;

@@ -39,8 +39,9 @@ Example:
 *)
 function setChat(state: string; chat: Integer): Boolean;
 var
-  pnt : TPoint;
-  mx, Color: Integer;
+  pnt      : TPoint;
+  tmpCol   : TColEx;
+  mx,Color : Integer;
 begin
   result := false;
   mx := 166 + (chat * 65); // adjust for use w/o game (has no options in OSRS)
@@ -53,16 +54,17 @@ begin
 
   // No longer any 'all' or 'filter'
   case Lowercase(State) of
-    'on': Color := 65280;
-    'off': Color := 255;
-    'hide': Color := 16776960;
+    'on'      : Color := 65280;
+    'off'     : Color := 255;
+    'hide'    : Color := 16776960;
     'friends' : Color := 65535;
     else
       warn(state + ' does not exist.', WT_CORE);
   end;
 
   // slightly adjust new coordinates
-  if (not createCol(Color, 1).findIn(toBox(mx-10,490,mx+10,500), pnt)) then
+  tmpCol.create(Color, 1);
+  if (not tmpCol.findIn(toBox(mx-10,490,mx+10,500), pnt)) then
   begin
     mouse(point(mx,495), 5, 5, MOUSE_RIGHT);
     Wait(RandomRange(50, 150));
@@ -75,7 +77,8 @@ begin
       end;
 
       Wait(RandomRange(50, 150));
-      Result := createCol(Color, 1).findIn(toBox(mx-10,490,mx+10,500), pnt);
+      tmpCol.create(Color, 1);
+      Result := tmpCol.findIn(toBox(mx-10,490,mx+10,500), pnt);
     end else
       Result := waitOption(Capitalize(State), 300);
   end;
@@ -171,17 +174,21 @@ Example:
 *)
 function clickContinueEx(Click: Boolean): Boolean;
 var
-  pnt : TPoint;
-  bTxt, wTxt, SearchTPA, TextTPA, Matches : TPointArray;
-  Search2D : T2DPointArray;
-  b : TBox;
-  Height, i, x, y : Integer;
+  b                  : TBox;
+  pnt                : TPoint;
+  tmpCol             : TColEx;
+  Height,i,x,y       : Integer;
+  bTxt,wTxt,TextTPA,
+  SearchTPA,Matches  : TPointArray;
+  Search2D           : T2DPointArray;
 begin
   Result := false;
 
   // only 1 blue color in chat.
-  createCol(16711680, 10).findAllIn(AREA_CB, bTxt);
-  createCol(16777215, 30).findAllIn(AREA_CB, wTxt);
+  tmpCol.create(16711680, 10);
+  tmpCol.findAllIn(AREA_CB, bTxt);
+  tmpCol.create(16777215, 30);
+  tmpCol.findAllIn(AREA_CB, wTxt);
 
   SearchTPA := combineTPA(bTxt, wTxt);
   if length(SearchTPA) < 1 then
@@ -212,26 +219,33 @@ end;
 
 function waitChatChange(): Boolean;
 var
-  T : Timer;
-  C : Integer;
+  T    : Timer;
+  bCol : TColEx;
+  C    : Integer;
 begin
-  C := createCol(0,1).count(AREA_CB);
+  bCol.create(0,1);
+  C := bCol.count(AREA_CB);
   T.start();
   while T.timeElapsed() < 5000 do
-    if (createCol(0,1).count(AREA_CB) <> C) then
+    if (bCol.count(AREA_CB) <> C) then
       Exit(true);
 end;
 
 Function clickContinue(DoWait: Boolean): Boolean;
 var
-  TPA : TPointArray;
-  i   : integer;
-  T   : Timer;
-  B   : TBox;
-  pnt : TPoint;
+  B    : TBox;
+  T    : Timer;
+  pnt  : TPoint;
+  colA,
+  colB : TColEx;
+  i    : Integer;
+  TPA  : TPointArray;
 begin
-  if ((not createCol(16711680, 30).findAllIn(toBox(230,443,381,457), TPA)) and
-    (not createCol(16777215, 30).findAllIn(toBox(230,443,381,457), TPA)))  then
+  colA.create(16711680, 30);
+  colB.create(16777215, 30);
+
+  if ((not colA.findAllIn(toBox(230,443,381,457), TPA)) and
+    (not colB.findAllIn(toBox(230,443,381,457), TPA)))  then
     Exit(False);
   if length(TPA) < 1 then Exit(False);
 
@@ -328,13 +342,15 @@ Example:
 *)
 function getChatBoxText(Line, TextCol: Integer): string;
 var
-  P: TPoint;
-  cArr: TPointArray;
-  B: TBox;
+  B    : TBox;
+  P    : TPoint;
+  bCol : TColEx;
+  cArr : TPointArray;
 begin
   Result := '';
   P := getTextCoords(Line);
-  if createCol(TextCol, 0).findAllIn(toBox(MCX1,P.y,MCX2,P.y+13), cArr) then
+  bCol.create(TextCol, 0);
+  if bCol.findAllIn(toBox(MCX1,P.y,MCX2,P.y+13), cArr) then
   begin
     B := cArr.getBounds();
     result := Trim(getTextAtExWrap(b.x1-1,p.y,B.x2+1,p.y+13,0,5,2,TextCol,0,SmallChars07));
@@ -516,6 +532,15 @@ begin
   Result := (Pos(ChatMsg, getChatBoxText(8, clBlack)) > 0);
 end;
 
+function findBlackMessageMulti(ChatMsgs: TStringArray): Boolean;
+var
+  i : Integer;
+begin
+  result := false;
+  for i:=0 to high(ChatMsgs) do
+    if (Pos(ChatMsgs[i], getChatBoxText(8, clBlack)) > 0) then Exit(true);
+end;
+
 (*
 LastChatter
 ~~~~~~~~~~~
@@ -647,16 +672,21 @@ function getChatOptions(): Array of TChatOption;
 var
   B        : TBox;
   mPnt,pnt : TPoint;
+  tmpCol,
+  bCol     : TColEx;
   i,x,y    : Integer;
   bPnts,
   wPnts    : TPointArray;
   bAP,wAP  : T2DPointArray;
 begin
-  if not createCol(6383633, 30).findIn(toBox(410,365,417,372), pnt) then
+  tmpCol.create(6383633, 30);
+  if not tmpCol.findIn(toBox(410,365,417,372), pnt) then
     Exit;
 
-  createCol(0,1).findAllIn(toBox(MCX1,381,MCX2,MCY2), bPnts);
-  createCol(16777215,30).findAllIn(toBox(MCX1,381,MCX2,MCY2), wPnts);
+  bCol.create(0, 1);
+  tmpCol.create(16777215, 30);
+  bCol.findAllIn(toBox(MCX1,381,MCX2,MCY2), bPnts);
+  tmpCol.findAllIn(toBox(MCX1,381,MCX2,MCY2), wPnts);
 
   if ((length(bPnts) < 1) and (length(wPnts) < 1)) then Exit;
 
@@ -706,9 +736,7 @@ Example:
 *)
 function getNPCChatName(): string;
 begin
-  //ocr_SetClient(ClientATIA(260, 360, 355, 380));
-  //Result := ocr_ReadText(NPCFont);
-  result := getTextAtExWrap(116, 358, 498, 377, 0, 50, 60, 128, 15, CharsNPC07);  // 0, 50, 30
+  result := getTextAtExWrap(116, 358, 498, 377, 0, 50, 60, 128, 15, CharsNPC07);
 end;
 
 (*
@@ -743,8 +771,8 @@ var
   pnt       : TPoint;
   colO,colB : TColEx;
 begin
-  colO := createCol(125, 5);
-  colB := createCol(7238703, 25);
+  colO.create(125, 5);
+  colB.create(7238703, 25);
 
   if not colB.findIn(toBox(33,371,39,375), pnt) then
     Exit(False);
@@ -752,12 +780,13 @@ begin
   result := colO.findIn(toBox(90,363,430,377), pnt);
 end;
 
-function findNPCChatTextMulti(txt: TStringArray; Click,DoWait: Boolean): boolean;
+function findNPCChatTextMulti(txt: TStringArray; Click, DoWait: Boolean): boolean;
 var
-  T    : Timer;
-  pnt  : TPoint;
-  h,i  : Integer;
-  Opts : Array of TChatOption;
+  T      : Timer;
+  pnt    : TPoint;
+  tmpCol : TColEx;
+  h,i    : Integer;
+  Opts   : Array of TChatOption;
 begin
   if not isLoggedIn() then Exit;
   Opts := getChatOptions();
@@ -773,9 +802,10 @@ begin
         mouseBox(Opts[i].Bounds, MOUSE_LEFT);
         if DoWait then
         begin
+          tmpCol.create(6383633, 30);
           T.start();
           repeat
-            if not createCol(6383633,30).findIn(toBox(410,365,417,372), pnt) then
+            if not tmpCol.findIn(toBox(410,365,417,372), pnt) then
               break;
           until(T.timeElapsed() < 5000);
         end;
@@ -819,12 +849,11 @@ var
 begin
   while (t < 25) do
   begin
-    clickContinue(true);
     if length(resultText) > 0 then
     begin
       if ClickResult then
       begin
-        if findNPCChatTextMulti(resultText, True, True) then
+        if findNPCChatTextMulti(resultText, ClickResult, True) then
           Exit(true);
       end else
       begin
@@ -832,10 +861,10 @@ begin
           Exit(true);
       end;
     end;
+    if not clickContinue(true) then
+      exit;
     wait(100 + random(200));
     inc(t);
-    if not clickContinue(true) then
-      exit(true);
   end;
 end;
 

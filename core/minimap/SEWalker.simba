@@ -11,7 +11,7 @@ const
   SEW_Extension = '.png';
 
   SEW_MMCenter: TPoint = [648, 83];
-  SEW_MMRad: Int8 = 75;
+  SEW_MMRad: Int8 = 73;
   SEW_Outer: Int8 = 68;
   SEW_Inner: Int8 = 42;
 
@@ -41,8 +41,8 @@ begin
   Self.Custom := False;
   Self.TopLeft := Self.AssambleMaps( Self.GetArea(Area) );
   Self.Initalized := True;
-  Self.ETimeOut := 10000;
-  Self.SkipDist := 4;
+  Self.ETimeOut := 15000;
+  Self.SkipDist := 5;
 end;
 
 
@@ -51,7 +51,7 @@ begin
   Self.Custom := False;
   Self.TopLeft := Self.AssambleMaps(Maps);
   Self.Initalized := True;
-  Self.ETimeOut := 10000;
+  Self.ETimeOut := 15000;
   Self.SkipDist := 5;
 end;
 
@@ -62,7 +62,7 @@ begin
   Self.Map.Open(SEW_Path_Custom+MapName+SEW_Extension);
   Self.TopLeft := Point(0,0);
   Self.Initalized := True;
-  Self.ETimeOut := 10000;
+  Self.ETimeOut := 15000;
   Self.SkipDist := 5;
   SEW_Map_Size  := Size;
 end;
@@ -161,14 +161,14 @@ end;
 (*
   Dirty search for minimap flag (it's all that's needed)
 *)
-function SEWalker.FFlag(): Boolean;
+function SEWalker.FlagPresent(): Boolean;
 var
   TPA: TPointArray;
   ATPA: T2DPointArray;
   i: Integer;
 begin
   Result := False;
-  if FindColorsTolerance(TPA, 255, SEW_MMCenter.x-SEW_Outer, SEW_MMCenter.y-SEW_Outer,
+  if findColorsTolerance(TPA, 255, SEW_MMCenter.x-SEW_Outer, SEW_MMCenter.y-SEW_Outer,
                                    SEW_MMCenter.x+SEW_Outer, SEW_MMCenter.y+SEW_Outer, 1) then
   begin
     ATPA := SplitTPA(TPA,1);
@@ -261,7 +261,7 @@ end;
 
 
 (*
- Scans trough the whole global map for our current position.
+ Scans through the whole global map for our current position.
 *)
 function SEWalker.GetMyPos(): TPoint;
 const
@@ -303,7 +303,7 @@ end;
 
 
 (*
- Scans trough only a part of the global map for our current position.
+ Scans through only a part of the global map for our current position.
  The part which we scans trough is based on "AssumedPos", and the radius scanned
  trough is the parameter "Radius".
 *)
@@ -381,47 +381,70 @@ end;
 (*
  Walks to the given point on the global map.
 *)
-function SEWalker.WalkToPos(Goal: TPoint; sDist: Integer; Prev: TPoint=[-1,-1]): Boolean;
+function SEWalker.WalkToPos(Goal: TPoint; Prev: TPoint=[-1,-1]): Boolean;
 var
   i:Int32;
-  T2: Timer;
+  T: Timer;
   dist1: Extended;
   Failed:Boolean;
   Start,PT,Mark: TPoint;
   Dist2,PrevDist: Single;
-  T:Double;
 begin
-  Result := False;
   if not( Initalized ) then
-    RaiseException(erException, 'SEWalker: Not initalized');
+     RaiseException(erException, 'SEWalker: Not initalized');
 
-  T2.start();
   Dist2 := Self.__GetPos(Start,Goal);
-  if (Dist2 > SEW_MMRad) then Exit();
+  for i:=0 to 5 do
+    if (Dist2 > SEW_MMRad) then begin
+      Dist2 := Self.__GetPos(Start,Goal);
+      Failed := True;
+      Wait(50);
+    end else begin
+      Failed := False;
+      Break;
+    end;
+
+  if Failed then
+    if NoBlindWalk then
+      RaiseException(erException, 'SEWalker: Distance to `Goal` is exceeding boundaries: '+
+                                  '"'+ToStr(Start)+'", "'+ ToStr(Goal) +'"')
+    else
+    begin
+      while Self.FlagPresent() do
+        Wait(5);
+      {
+      if Prev.EQ([-1,-1]) then
+        RaiseException(erException, 'SEWalker: Distance to `Goal` is exceeding boundaries: '+
+                                    '"'+ToStr(Start)+'", "'+ ToStr(Goal) +'"');
+      }
+      Start := Prev;
+      Dist2 := Start.DistanceTo(Goal);
+    end;
 
   PT := Self.GetRelativePos(Start,Goal);
-  if PT.DistanceTo(Point(0,0)) > 65 then
+  if PT.DistanceTo(Point(0,0)) > SEW_MMRad then
     Exit();
   PT := RotatePoint(PT,-Self.CompassAngle()+PI/2,0,0);
   PT.Offset(SEW_MMCenter);
-
-  if not PT.inBox(AREA_MM) then Exit;
 
   mouse(PT, 0, 0, MOUSE_LEFT);
   waitFunc(@isPlayerWalking, 10, 1000);
   Result := true;
 
-  T := MarkTime();
-  while (Dist2 > sDist) and Self.FFlag() do
+  T.start();
+  while (Dist2 > SkipDist) and Self.FlagPresent() do
   begin
     case DeepScan of
       True:  Dist2 := Self.GetMyPos().DistanceTo(Goal);
       False: Dist2 := Self.GetMyPos(Goal).DistanceTo(Goal)
     end;
-    if (T - MarkTime()) > Self.ETimeOut then
-      RaiseException(erException, 'SEWalker: Timed out while walking');
+    if (T.timeElapsed() > Self.ETimeOut) then
+      RaiseException(erException, 'SEWalker: Timed out while walking to '+
+                                  '"'+ToStr(Goal)+'", from "'+ToStr(Start)+'"');
   end;
 
+  for i:=1 to 3 do
+    if (Dist2 > SkipDist) then Wait(100);
 end;
 
 
@@ -441,12 +464,53 @@ begin
   Result := True;
 end;
 
-Function SEW_WalkPath(SEW: SEWalker; Path: TPointArray): boolean;
+(*
+ Walks a path..
+*)
+procedure SEWalker.Walk(Path:TPointArray);
+var
+  i,j,ii,halfdist,hi:Int32;
+  Pos:TPoint;
+begin
+  if not( Initalized ) then
+     RaiseException(erException, 'SEWalker: Not initalized');
+
+  if not(Self.ValidatePath(Path)) then
+     RaiseException(erException, 'SEWalker: Invalid Path');
+
+  HalfDist := (SEW_Inner div 2);
+  i := 0;
+  hi := High(Path);
+  while i <= hi do
+  begin
+    for j:=0 to 2 do
+    begin
+      Pos := Self.GetMyPos(Path[i]);
+      if (i < hi) then
+        if Pos.DistanceTo(Path[i+1]) < Pos.DistanceTo(Path[i]) then
+          Inc(i);
+
+      if (Pos.DistanceTo(Path[i]) > HalfDist) or (j=0) then
+        Self.WalkToPos(Path[i], Pos)
+      else
+        Break;
+    end;
+
+    //Self.CallSafeProc();
+    Inc(i);
+  end;
+end;
+
+{
+      - Below are SPS-style methods of using SEWalker -
+}
+
+function SEWalker.walkPath(Path: TPointArray): boolean;
 var
   T   : Timer;
   i,H : integer;
 begin
-  H     := High(Path);
+  H := High(Path);
 
   T.start();
   while (T.timeElapsed < (10000 + random(2000))) do
@@ -459,59 +523,61 @@ begin
 
     for i := H downto 0 do
     begin
-      if SEW.WalkToPos(Path[i], 20) then
+      if not Self.pointOnMM(Path[i]) then continue;
+      if Self.WalkToPos(Path[i]) then
       begin
+        if (i = H) then Exit(true);
         T.start();
  	      Break;
       end;
-
-      {
-      if (i = H) then
-      begin
-        if SEW.WalkToPos(Path[i], 5) then
-        begin
-          result := true;
-          T.start();
- 	        Break;
-        end;
-      end else
-        if SEW.WalkToPos(Path[i], 15) then
-        begin
-          T.start();
- 	        Break;
-        end;
-      }
     end;
-
-    Result := (SEW.GetMyPos().DistanceTo(Path[h]) <= 20);
   end;
-  FFlag(5);
 end;
 
-function SEW_BlindWalk(SEW: SEWalker; P: TPoint): Boolean;
+function SEWalker.pointToMM(Pnt: TPoint): TPoint;
 var
-  M     : TPoint;
-  Tries : Integer;
+  MyPos,PT : TPoint;
+  Dist     : Single;
+begin
+  Result := Point(0,0);
+  Dist := Self.__GetPos(MyPos,Pnt);
+  if (Dist > SEW_MMRad) then Exit;
+
+  PT := Self.GetRelativePos(MyPos,Pnt);
+
+  if PT.DistanceTo(Point(0,0)) > SEW_MMRad then Exit;
+
+  PT := rotatePoint(PT,-Self.CompassAngle()+PI/2,0,0);
+  PT.Offset(SEW_MMCenter);
+  Result := PT;
+end;
+
+function SEWalker.pointOnMM(Pnt: TPoint): Boolean;
+var
+  PT : TPoint;
+begin
+  PT     := Self.pointToMM(Pnt);
+  result := not PT.EQ(point(0,0));
+end;
+
+function SEWalker.blindWalk(P: TPoint): Boolean;
+var
+  M,pnt : TPoint;
+  i     : Integer;
   pnts  : TPointArray;
 begin
-  repeat
-    if not isLoggedIn() then Exit(false);
+  if not isLoggedIn() then Exit(false);
 
-    M := SEW.GetMyPos();
+  M    := Self.GetMyPos();
+  pnts := TPABetweenPoints(M, P, 25 + Random(5), 5);
+  for i:=0 to high(pnts) do
+  begin
+    pnt := pnts[i];
+    if ((not inRange(pnt.X, 1, 9999)) or (not inRange(pnt.Y, 1, 9999))) then continue;
+  end;
 
-    if (M.X = -1) then
-      Continue;
-
-    if (Length(pnts) = 0) then
-    begin
-      pnts := TPABetweenPoints(M, P, 5 + Random(2), 2);
-      sortTPAFrom(pnts, M);
-    end;
-
-    Inc(Tries);
-    if (Tries > 20) then
-      Exit;
-
-    Result := SEW_walkPath(SEW, pnts);
-  until(Result);
+  sortTPAFrom(pnts, M);
+  if distance(pnts[high(pnts)].X,pnts[high(pnts)].Y,P.X,P.Y) > 11 then // Destination tile, force insert for accuracy
+    pnts.Insert(high(pnts), P);
+  Self.walkPath(pnts);
 end;

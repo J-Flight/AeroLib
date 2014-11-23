@@ -226,6 +226,26 @@ begin
     2: Result := Padz(IntToStr(Month), 2) + '/' + Padz(IntToStr(Day), 2) + '/' + Copy(IntToStr(Year), 3, 4);
     3: Result := Padz(IntToStr(Day), 2) + '-' + Padz(IntToStr(Month), 2) + '-' + Copy(IntToStr(Year), 3, 4);
   else
-    Writeln('TheDate', 'DateFormat can only be 1, 2, or 3!');
+    writeln('DateFormat can only be 1, 2, or 3!');
   end;
+end;
+
+procedure getLocalTime(var Hour, Minute: Integer);
+var
+  HH,MM,SS,MSS: Word;
+  S : String;
+begin
+  decodeTime(Now, HH, MM, SS, MSS);
+  Hour   := strToInt(toStr(HH));
+  Minute := strToInt(toStr(MM));
+end;
+
+procedure waitUntilTime(Hour, Minute: integer);
+var
+  H,M : Integer;
+begin
+  repeat
+    getLocalTime(H,M);
+    wait(5000);
+  until((H=Hour) and (M=Minute));
 end;

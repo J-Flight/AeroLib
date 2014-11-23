@@ -8,7 +8,7 @@ var
   x, y, i,BoxDTM : Integer;
 begin
   Result := False;
-  gameTab(TAB_INV);
+  FTab(TAB_INV);
   Wait(100 + Random(50));
   BoxDTM := DTMFromString('m6wAAAHic42ZgYNjHxMCwDYiPAPEJKD4DxSCxXUC8BYr3MaLiTUC8C4gPAfEJID4GxAeBeAcQT2hrYyjIyABjEJuBgREnlgOSyJgVD8ZtCiZGAgCQsRcF');
   if isLoggedIn() then
@@ -85,7 +85,6 @@ begin
       bmp.init(client.getMBitmaps());
       bmp.copyClientToBitmap(client.getIOManager, true, 140, 31, 375, 256);
       bmp.setSize(236, 226);
-      //bmp.setSize(300, 300);
       try
         ProcessPicture(bmp, shape, num, 3);
         if ((not (shape = '')) and (inRange(num, 0, 9))) then
@@ -98,7 +97,6 @@ begin
       end;
 
       bmp.Free;
-      //wait(randomRange(400,800));
     until((not (Ans = '')) or (T.timeElapsed() > randomRange(5000,6000)));
 
     if (not (Ans = '')) then

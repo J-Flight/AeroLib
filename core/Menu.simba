@@ -10,27 +10,31 @@ Type TOptions = Record
 end;
 
 function isLoggedIn(): Boolean; forward;
-function menuOpen(): Boolean;
-begin
-  if not isLoggedIn() then
-    Exit;
 
-  result := (createCol(4674653,0).count(toBox(0,0,757,502)) >= 100);
+function menuOpen(): Boolean;
+var
+  tmpCol : TColEx;
+begin
+  if not isLoggedIn() then Exit;
+  tmpCol.create(4674653,0);
+  result := (tmpCol.count(toBox(0,0,757,502)) >= 100);
 end;
 
 function getOptions(): Array of TOptions;
 var
-  i,w,h,bmp,target : Integer;
   B,BB,BigBox,Yoff,
   TextSearchBox    : TBox;
+  boxCol,txtCol    : TColEx;
+  i,w,h,bmp,target : Integer;
   TPA,TPA1         : TPointArray;
   ATPA,tempatpa    : T2DPointArray;
 begin
   target := getImageTarget();
   getClientDimensions(B.X2, B.Y2);
+  boxCol.create(4674653,0);
 
   B := toBox(0, 0, B.X2 - 1, B.Y2 - 1);
-  createCol(4674653,0).findAllIn(B, TPA);
+  boxCol.findAllIn(B, TPA);
   if (length(TPA) < 100) then
     Exit;
 
@@ -59,8 +63,9 @@ begin
   setTargetBitmap(bmp);
 
   SetLength(ATPA, h div 15);
+  txtCol.create(clRed,0);
   for i:=0 to High(ATPA) do
-    createCol(clRed,0).findAllIn(toBox(0,2+(i*15),w-1,15+(i*15)), ATPA[i]);
+    txtCol.findAllIn(toBox(0,2+(i*15),w-1,15+(i*15)), ATPA[i]);
 
   sortATPAFromFirstPointY(ATPA, Point(w div 2, 0));
   setArrayLength(Result, Length(ATPA));
@@ -119,11 +124,11 @@ end;
 
 function chooseOptionMulti(Texts: TStringArray): Boolean;
 var
-  B          : TBox;
-  T          : Timer;
+  B         : TBox;
+  T         : Timer;
   i,X,Y,ms,
-  R,x2,y2  : Integer;
-  Options    : array of TOptions;
+  R,x2,y2   : Integer;
+  Options   : Array of TOptions;
 begin
   Options := getOptions();
   if (Length(Options) < 1) then
@@ -137,7 +142,7 @@ begin
     begin
       B := Options[i].Bounds;
       getMousePos(x2, y2);
-      R:= Min(((B.X2 - B.X1) shr 1), 5);
+      R := Min(((B.X2 - B.X1) shr 1), 5);
       if not pointInBox(Point(x2,y2), B) then
         mouseBox(B.x1+R, B.Y1, B.x2-R, B.Y1+5, R, MOUSE_LEFT)
       else
