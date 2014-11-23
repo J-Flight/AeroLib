@@ -370,7 +370,7 @@ begin
   begin
     mouseBox(uBox, MOUSE_LEFT);
     TypeSend(Me.Name);
-    typeByte(VK_ENTER);
+    mouseBox(pBox, MOUSE_LEFT);
     TypeSend(Me.Pass);
   end else
   begin
