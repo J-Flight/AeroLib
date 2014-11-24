@@ -532,20 +532,21 @@ begin
 
     if (Amount = -1) then
     begin
-      waitOptionMulti(['Deposit-All', 'it-A'], 300);
+      waitOptionMulti(['Deposit-All','it-A','Deposit All','sit All'], 300);
       T.start();
       repeat
         if not itemInSlot(Slot) then break;
       until(T.timeElapsed >= 4000);
     end else
-      Result := waitOptionMulti(['Deposit-' + intToStr(Amount) + ' ', 'it-' + intToStr(Amount) + ' '], 300);
+      Result := waitOptionMulti(['Deposit-' + intToStr(Amount) + ' ','it-' + intToStr(Amount) + ' ',
+                                  'Deposit ' + intToStr(Amount) + ' ','sit ' + intToStr(Amount) + ' '], 300);
 
     if Result then
       Exit;
 
     if (Amount > 0) then
     begin
-      if waitOptionMulti(['Deposit-X', 'it-X'], 300) then
+      if waitOptionMulti(['Deposit-X','it-X','Deposit X','sit X'], 700) then
       begin
         bCol.create(0, 1);
         T.start();
