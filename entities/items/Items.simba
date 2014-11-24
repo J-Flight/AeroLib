@@ -91,6 +91,8 @@ Example:
 
 *)
 function gameTab(Tab: Integer): Boolean; forward;
+function isDepositBoxOpen(): Boolean; forward;
+function depositItemBox(Item: Integer): TBox; forward;
 function itemInSlot(I: Integer): Boolean;
 var
   X, Y: Integer;
@@ -99,7 +101,11 @@ begin
   if not inRange(I, 1, 28) then
     Exit;
   gameTab(TAB_INV);
-  TB := invBox(I);
+
+  if isDepositBoxOpen() then
+    TB := depositItemBox(I)
+  else
+    TB := invBox(I);
   result := findColor(x, y, clOutline_black, TB.x1, TB.y1, TB.x2, TB.y2);
 end;
 
