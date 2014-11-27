@@ -74,11 +74,12 @@ end;
 Var
   RandomEvents: array[0..(RANDOMS_COUNT - 1)] of TRandom;
   RandomsSet, DisableRandoms, RandomScreenShot: boolean;
-  DTM_RoyalFrogA: Integer;
+  DTM_RoyalFrogA,BMP_PModChat,BMP_JModChat: Integer;
   gtalksBox, YelSkipBoxs: array of TBox;
   gTalksCount,dismissedRandoms : Integer;
   NicknameSet : boolean;
   DISABLE_RANDOMS : Boolean = True;
+  AL_HANDLEMODS   : Boolean = True;
 
 {*******************************************************************************
 procedure setScreenName(ScreenName: String);
@@ -99,6 +100,8 @@ begin
   freeDTM(DTM_RoyalFrogA);
   freeBitmap(EC_ScreenText);
   freeBitmap(EX_ScreenText);
+  freeBitmap(BMP_PModChat);
+  freeBitmap(BMP_JModChat);
   if NicknameSet then
     freeBitmap(NickNameBMP);
 end;
@@ -297,8 +300,16 @@ begin
   EC_ScreenText  := BitmapFromText('lee', 'UpChars07');
   EX_ScreenText  := BitmapFromText('xam', 'UpChars07');
 
-  AddOnTerminate('rand_FreeGlobals');
+  BMP_PModChat := BitmapFromString(13, 11, 'meJybNm0aAyqYhk3kwYMHyOJA7q' +
+        'JFi9BESFIGF4ewIQBZhHhlaLKYAO4AIpXBVTIyMAARMgMtcODK0Ej' +
+        'ylE3DDSAKAE7XrXs=');
+
+  BMP_JModChat := BitmapFromString(13, 11, 'meJxTmXuBARWoYBNp//cfWRzI5f' +
+        '7/HU2EJGVwcQgbgpBFiFeGJouJ4A4gUhlcJSMDAxAhM9ACB64MjSR' +
+        'PGZCLC0EUAAAdQ6pl');
+
   setScreenName(Me.Nick);
+  addOnTerminate('rand_FreeGlobals');
 
   // disable all randoms if set to
   if (DisableRandoms) then
@@ -651,6 +662,21 @@ begin
   end;
 end;
 
+procedure findMod();
+var
+  X,Y : Integer;
+begin
+  if not isLoggedIn() then Exit;
+  if not AL_HANDLEMODS then Exit;
+  if ((not cs_FindBitmapToleranceIn(BMP_PModChat, X, Y, 20, toBox(MCX1,MCY1,MCX1+50,MCY2), cs_CTS)) and
+      (not cs_FindBitmapToleranceIn(BMP_JModChat, X, Y, 20, toBox(MCX1,MCY1,MCX1+50,MCY2), cs_CTS))) then Exit;
+
+  warn('PMod detected, logging out...', WT_RANDOM);
+
+  logoutPlayer();
+  Me.Active := False;
+end;
+
 function foundRandoms(): boolean;
 var
   i,x : integer;
@@ -697,7 +723,7 @@ begin
   end;
 
   //findDead();
-  //findMod();
+  findMod();
 end;
 
 {*******************************************************************************

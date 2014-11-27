@@ -858,7 +858,7 @@ begin
     if (isBankOpen() or isDepositBoxOpen() or
       Interfaces[PINSCREEN].isVisible()) then
         break;
-    clickToContinue();
+    clickContinue(True);
   until(T.timeElapsed() > 7000);
 
   if Interfaces[PINSCREEN].isVisible() then
