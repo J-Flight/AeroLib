@@ -35,6 +35,7 @@
 {$include AeroLib/entities/player/Login.simba}
 {$include AeroLib/entities/player/WorldHandler.simba}
 {$include AeroLib/core/Bank.simba}
+{$include AeroLib/misc/connection/OSRS.simba}
 
 {$include AeroLib/entities/object/Object.simba}
 {$include AeroLib/entities/items/GroundItems.simba}
