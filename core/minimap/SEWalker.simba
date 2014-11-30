@@ -11,12 +11,10 @@ const
   SEW_Extension = '.png';
 
   SEW_MMCenter: TPoint = [648, 83];
+  SEW_Map_Size: TSize2D = [250,250];
   SEW_MMRad: Int8 = 73;
   SEW_Outer: Int8 = 68;
   SEW_Inner: Int8 = 42;
-
-Var
-  SEW_Map_Size: TSize2D = [250,250];
 
 type
   SEW_SafeProc = Procedure();
@@ -56,7 +54,7 @@ begin
 end;
 
 
-procedure SEWalker.InitCustom(MapName:String; Size:TSize2D);
+procedure SEWalker.InitCustom(MapName:String);
 begin
   Self.Custom := True;
   Self.Map.Open(SEW_Path_Custom+MapName+SEW_Extension);
@@ -64,7 +62,6 @@ begin
   Self.Initalized := True;
   Self.ETimeOut := 15000;
   Self.SkipDist := 5;
-  SEW_Map_Size  := Size;
 end;
 
 
