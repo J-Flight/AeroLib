@@ -8,9 +8,11 @@ type TSmart = record
   __Width, __Height: Integer;
   __ForceNew: Boolean;
   __Graphics: TGraphics;
+  __UserAgent: String;
 end;
 
 var
+  SMART_UserAgent : String = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0';
   OS_SMART : TSmart;
 
 Procedure TSmart.Create;
@@ -20,10 +22,10 @@ End;
 
 Procedure TSmart.Create(Width, Height: Integer; Plugins: TStringArray = []); overload;
 Begin
-  Self.Create(Width, Height, 's', Plugins);
+  Self.Create(Width, Height, '', Plugins);
 End;
 
-Procedure TSmart.Create(Width, Height: Integer; InitSequence: String; Plugins: TStringArray = []); overload;
+Procedure TSmart.Create(Width, Height: Integer; UserAgent: String; Plugins: TStringArray = []); overload;
 var
   World: String;
 Begin
@@ -44,7 +46,7 @@ Begin
   end else
     Writeln('Best world found: '+World);
 
-  Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', '', '', '');
+  Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
   If (Self.__Target <> 0) Then
   begin
     try
@@ -162,6 +164,11 @@ End;
 Function TSmart.Target: Integer;
 Begin
   Result := Self.__Target;
+End;
+
+Function TSmart.UserAgent: String;
+Begin
+  Result := Self.__UserAgent;
 End;
 
 Procedure __TSmartFreeAll;

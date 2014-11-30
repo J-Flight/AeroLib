@@ -829,7 +829,7 @@ begin
       7..10: humanMMouse(BankPoint, 5, 5);
     end;
 
-  if waitUpTextMulti(['Bank Ba','Bank bo','booth','eposit','t box'], randomRange(150,300)) then
+  if waitUpTextMulti(['Bank Ba','Bank bo','booth','eposit','t box','Use Bank chest','ank chest'], randomRange(150,300)) then
   begin
     if LeftClick then
     begin
@@ -839,13 +839,13 @@ begin
     end else
     begin
       fastClick(MOUSE_RIGHT);
-      if not waitOptionMulti(['Open','k B','n De'], randomRange(150,300)) then
+      if not waitOptionMulti(['Open','k B','n De','Use Bank chest'], randomRange(150,300)) then
         exit(false);
     end;
   end else
   begin
     fastClick(MOUSE_RIGHT);
-    if not waitOptionMulti(['Open','k B','n De','nk F','nk Ar'], randomRange(150,300)) then
+    if not waitOptionMulti(['Open','k B','n De','nk F','nk Ar','Use Bank chest'], randomRange(150,300)) then
       exit(false);
   end;
 

@@ -59,7 +59,7 @@
 
 Const
   AL_VERSION_MAIN = '1.0';
-  AL_VERSION_SUB  = '0.4';
+  AL_VERSION_SUB  = '2';
 
 procedure AL_checkVersion();
 var
@@ -111,7 +111,7 @@ begin
   setupRandoms();
 
   {$IFDEF SMART}
-    OS_SMART.Create;
+    OS_SMART.Create(765, 503, SMART_UserAgent, ['']);
 
     if not RSReady() then
     begin

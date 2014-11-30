@@ -712,16 +712,17 @@ begin
   if (TheColor <> 0) then
   begin
     findDeformedBitmapToleranceIn(SymbolBitmap, x, y, MMX1, MMY1, MMX2, MMY2, 50, 0, True, acc);
-    if (acc > SymbolAccuracy) then
-      repeat
-        c := c + 5;
-        if findColorTolerance(x, y, TheColor, x, y, x + 15, y + 5, c) then
-        begin
-          Result := GetColor(x, y);
-          rx := x;
-          ry := y;
-        end;
-      until (Result > 0) or (c > 70);
+    if not pointInBox(point(x,y), toBox(568,125,594,152)) then
+      if (acc > SymbolAccuracy) then
+        repeat
+          c := c + 5;
+          if findColorTolerance(x, y, TheColor, x, y, x + 15, y + 5, c) then
+          begin
+            Result := GetColor(x, y);
+            rx := x;
+            ry := y;
+          end;
+        until (Result > 0) or (c > 70);
   end else
     warn(Name + ' is not a valid name.', WT_CORE);
   try
@@ -847,4 +848,11 @@ begin
       Result := True;
     aTPA := combineTPA(gTPA, aTPA);
   end;
+end;
+
+function foundSymbol(Name: string): Boolean;
+var
+  Pnt: TPoint;
+begin
+  Result := findSymbol(Pnt,Name);
 end;
