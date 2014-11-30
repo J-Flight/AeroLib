@@ -579,5 +579,5 @@ begin
   sortTPAFrom(pnts, M);
   if distance(pnts[high(pnts)].X,pnts[high(pnts)].Y,P.X,P.Y) > 11 then // Destination tile, force insert for accuracy
     pnts.Insert(high(pnts), P);
-  Self.walkPath(pnts);
+  Result := Self.walkPath(pnts);
 end;
