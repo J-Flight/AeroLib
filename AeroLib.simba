@@ -118,8 +118,6 @@ begin
       warn('Failed to initiate SMART, terminating script', WT_CORE);
       terminateScript();
     end;
-    if (not smartEnabled(OS_SMART.__Target)) then
-      SmartSetEnabled(OS_SMART.__Target, True);
   {$ENDIF}
   Me.ModelSet := False;
   warn('Startup complete!', WT_CORE);
