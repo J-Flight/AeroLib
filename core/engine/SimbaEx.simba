@@ -467,11 +467,6 @@ end;
 
 // Import Brandons Function.simba functions
 
-Procedure Pointer.Inc(Size: Int64);
-Begin
-  Self := Self + Size;
-End;
-
 Procedure delete(Ptr: Pointer; var Pointers: Array of Pointer); overload;
 var
   I, J: Integer = 0;
