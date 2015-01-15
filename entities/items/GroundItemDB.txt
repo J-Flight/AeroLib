@@ -1,5 +1,5 @@
 [GroundItemDB_Main]
-Count=2
+Count=3
 
 [GI_1]
 Name=Feather
@@ -30,3 +30,18 @@ MinCount=70
 Height=18
 Width=18
 SizeTol=5
+
+[GI_3]
+Name=Big bones
+PCol=13027021
+PTol=13
+hModP=0.22
+sModP=0.20
+SCol=-1
+STol=-1
+hModS=0
+sModS=0
+MinCount=75
+Height=22
+Width=22
+SizeTol=8

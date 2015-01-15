@@ -91,6 +91,12 @@ const
   DBCY = 153;
 
 const
+  DIR_NORTH = 1;
+  DIR_EAST  = 2;
+  DIR_SOUTH = 3;
+  DIR_WEST  = 4;
+
+const
   MaxInt = High(Integer);
 
 { input }
@@ -118,8 +124,8 @@ const
 
 var
   count_Login : Integer;
-  Area_MS,Area_Inv,Area_CB,
-  Area_MM,Area_BS,Area_DS : TBox;
+  AREA_MS,AREA_INV,AREA_CB,
+  AREA_MM,AREA_BS,AREA_DS   : TBox;
 
 
 { const AeroLib procedures Constants; }
@@ -145,6 +151,8 @@ var
   AL_CombatRandoms    : Boolean;
   AL_runDirection     : TStringArray;
 
+  MSCP,MMCP,MICP,MCCP : TPoint;
+
 (*
 AL_HasProc
 
@@ -169,7 +177,7 @@ begin
     Result := @AL_Procs[Index] <> nil;
 end;
 
-procedure AL_setBoxes;
+procedure AL_setBoxes();
 begin
   AREA_MS  := toBox(MSX1,MSY1,MSX2,MSY2);
   AREA_MM  := toBox(MMX1,MMY1,MMX2,MMY2);
@@ -177,4 +185,9 @@ begin
   AREA_CB  := toBox(MCX1,MCY1,MCX2,MCY2);
   AREA_BS  := toBox(MBX1,MBY1,MBX2,MBY2);
   AREA_DS  := toBox(DBX1,DBY1,DBX2,DBY2);
+
+  MMCP := point(MMCX,MMCY);
+  MSCP := point(MSCX,MSCY);
+  MICP := point(MICX,MICY);
+  MCCP := point(MCCX,MCCY);
 end;

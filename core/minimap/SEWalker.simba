@@ -139,7 +139,7 @@ var
   TPA:TPointArray;
   Filter:TBox = [554,13,568,27];
 begin
-  FindColorsSpiralTolerance(M.x,M.y,TPA, 920735, 543,3,578,38, 1);
+  if not FindColorsSpiralTolerance(M.x,M.y,TPA, 920735, 543,3,578,38, 1) then Exit;
   ATPA := TPA.Cluster(3,True);
   SetLength(TPA, 0);
   for i:=0 to High(ATPA) do
@@ -431,13 +431,18 @@ begin
   T.start();
   while (Dist2 > SkipDist) and Self.FlagPresent() do
   begin
+    if not isLoggedIn() then Exit(false);
     case DeepScan of
       True:  Dist2 := Self.GetMyPos().DistanceTo(Goal);
       False: Dist2 := Self.GetMyPos(Goal).DistanceTo(Goal)
     end;
+
+    if (T.timeElapsed() > Self.ETimeOut) then Exit;
+    {
     if (T.timeElapsed() > Self.ETimeOut) then
       RaiseException(erException, 'SEWalker: Timed out while walking to '+
                                   '"'+ToStr(Goal)+'", from "'+ToStr(Start)+'"');
+    }
   end;
 
   for i:=1 to 3 do

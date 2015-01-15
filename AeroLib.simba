@@ -2,64 +2,65 @@
 
 {$include SimbaExt/SimbaExt.simba}
 
-{$include AeroLib/core/engine/Boxes.simba}
-{$include AeroLib/core/Globals.simba}
-{$include AeroLib/core/engine/TPA.simba}
-{$include AeroLib/core/engine/Color.simba}
-{$include AeroLib/core/engine/DTM.simba}
-{$include AeroLib/core/engine/Time.simba}
-{$include AeroLib/core/engine/Math.simba}
-{$include AeroLib/core/engine/InputHandler.simba}
-{$include AeroLib/core/engine/SimbaEx.simba}
-{$include AeroLib/core/engine/ColorEx.simba}
+{$include_once core/engine/Boxes.simba}
+{$include_once core/Globals.simba}
+{$include_once core/engine/TPA.simba}
+{$include_once core/engine/Color.simba}
+{$include_once core/engine/DTM.simba}
+{$include_once core/engine/Time.simba}
+{$include_once core/engine/Math.simba}
+{$include_once core/engine/SimbaEx.simba}
+{$include_once core/engine/ColorEx.simba}
 
-{$include AeroLib/misc/Graphics.simba}
-{$include AeroLib/misc/Debugging.simba}
+{$include_once misc/Graphics.simba}
+{$include_once misc/Debugging.simba}
 
 {$IFDEF SMART}
-  {$include AeroLib/misc/connection/Smart.simba}
+  {$include_once misc/connection/Smart.simba}
 {$ENDIF}
 
-{$include AeroLib/core/Timing.simba}
-{$include AeroLib/core/Text.simba}
-{$include AeroLib/core/Menu.simba}
-{$include AeroLib/core/Interfaces.simba}
-{$include AeroLib/core/Animation.simba}
-{$include AeroLib/core/Chat.simba}
+{$include_once core/engine/InputHandler.simba}
 
-{$include AeroLib/entities/items/Items.simba}
-{$include AeroLib/misc/Combat.simba}
+{$include_once core/Timing.simba}
+{$include_once core/Text.simba}
+{$include_once core/Menu.simba}
+{$include_once core/Interfaces.simba}
+{$include_once core/Animation.simba}
+{$include_once core/Chat.simba}
 
-{$include AeroLib/entities/EntityHandler.simba}
-{$include AeroLib/entities/player/Player.simba}
-{$include AeroLib/entities/player/Login.simba}
-{$include AeroLib/entities/player/WorldHandler.simba}
-{$include AeroLib/core/Bank.simba}
-{$include AeroLib/misc/connection/OSRS.simba}
+{$include_once entities/items/Items.simba}
+{$include_once misc/Combat.simba}
 
-{$include AeroLib/entities/object/Object.simba}
-{$include AeroLib/entities/items/GroundItems.simba}
-{$include AeroLib/entities/npc/NPC.simba}
+{$include_once entities/EntityHandler.simba}
+{$include_once entities/player/Player.simba}
+{$include_once entities/player/Login.simba}
+{$include_once entities/player/WorldHandler.simba}
+{$include_once core/Bank.simba}
+{$include_once misc/connection/OSRS.simba}
 
-{$include AeroLib/core/minimap/Minimap.simba}
-{$include AeroLib/core/Breaking.simba}
-{$include AeroLib/core/gametabs/GameTab.simba}
-{$include AeroLib/core/Antiban.simba}
+{$include_once entities/object/Object.simba}
+{$include_once entities/items/GroundItems.simba}
+{$include_once entities/npc/NPC.simba}
 
-{$include AeroLib/misc/randomsolvers/Master.simba}
-{$include AeroLib/misc/Reports.simba}
+{$include_once core/minimap/Minimap.simba}
+{$include_once core/Breaking.simba}
+{$include_once core/gametabs/GameTab.simba}
+{$include_once core/Antiban.simba}
+
+{$include_once misc/randomsolvers/Master.simba}
+{$include_once misc/Reports.simba}
 
 {$IFDEF SPS}
-  {$i AeroLib/core/minimap/SPS.simba}
+  {$include_once core/minimap/SPS.simba}
 {$ENDIF}
 
 {$IFDEF SEWalker}
-  {$i AeroLib/core/minimap/SEWalker.simba}
+  {$include_once core/minimap/SEWalker.simba}
 {$ENDIF}
 
 Const
   AL_VERSION_MAIN = '1.0';
-  AL_VERSION_SUB  = '2';
+  AL_VERSION_SUB  = '3';
 
 procedure AL_checkVersion();
 var

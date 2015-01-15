@@ -62,10 +62,10 @@ begin
   pPnt := self.BasePnt;
 
   pC.create(self.tCol, self.tTol, self.tHMod, self.tSMod);
-  pC.findAllIn(toBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), tTPA);
+  pC.findAllIn(toBox(pPnt.X-20,pPnt.Y-40,pPnt.X+20,pPnt.Y+40), tTPA);
 
   pC.create(self.bCol, self.bTol, self.bHMod, self.bSMod);
-  pC.findAllIn(toBox(pPnt.X-15,pPnt.Y-20,pPnt.X+15,pPnt.Y+25), bTPA);
+  pC.findAllIn(toBox(pPnt.X-20,pPnt.Y-40,pPnt.X+20,pPnt.Y+40), bTPA);
 
   combineTPAWrap(tTPA, bTPA, fTPA);
   if (length(fTPA) < 1) then
@@ -74,7 +74,7 @@ begin
     Exit;
   end;
 
-  atpa := clusterTPA(fTPA, 15);
+  atpa := clusterTPA(fTPA, 7);
   sortATPAFromMidPoint(atpa, fTPA.midPnt());
   self.FullTPA := atpa[0];
   self.BasePnt := self.FullTPA.midPnt();

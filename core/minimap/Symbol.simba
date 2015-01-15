@@ -8,34 +8,32 @@ var
   SymbolBitmap   : Integer;
   SymbolAccuracy : Extended;
 
-// Comment fix by drizzt:
-// Updated list - 20/05/2012 - [J]ustin
 {*******************************************************************************
 Valid Arguments are:
-- agility                   - gem stall                         - rest, resting spot
-- altar                     - guide                             - sandpit
-- anvil                     - hair dresser                      - saw mill
-- apothecary                - herbalist                         - scimitar shop
-- archery shop              - house                             - shield
-- arrow                     - hunter store                      - shop, store
-- axe shop                  - hunter training                   - short cut
-- bar                       - jewelery                          - silk stall
-- bank                      - kebab shop                        - silver stall
-- candle shop               - lodestone                         - slayer master
-- churn                     - mace shop                         - spice stall
-- clothes shop              - magic shop                        - spinning wheel, spin
-- cookery shop              - makeover mage                     - staff shop
-- cookery, cook             - mill                              - summoning store
-- crafing shop              - minigame                          - summoning obelisk
-- dungeon                   - mining shop, mining site, mine    - sword shop
-- farming shop              - pet shop                          - tanner
-- farming spot              - platebody shop                    - training dummy
-- fishing shop, fish store  - plateskirt shop                   - underground
-- fishing spot, fish        - portal (to player owned houses)   - water source, water
-- food shop                 - pottery, pot                      - weave
-- fur trader                - quest                             - windmill
-- furnace                   - range
-                            - rare trees, tree
+- agility                   - gem stall                         - sandpit
+- altar                     - guide                             - saw mill
+- anvil                     - hair dresser                      - scimitar shop
+- apothecary                - herbalist                         - shield
+- archery shop              - house                             - shop, store
+- arrow                     - hunter store                      - short cut
+- axe shop                  - hunter training                   - silk stall
+- bar                       - jewelery                          - silver stall
+- bank                      - kebab shop                        - slayer master
+- candle shop               - mace shop                         - spice stall
+- churn                     - magic shop                        - spinning wheel, spin
+- clothes shop              - makeover mage                     - staff shop
+- cookery shop              - mill                              - sword shop
+- cookery, cook             - minigame                          - tanner
+- crafing shop              - mining shop, mining site, mine    - training dummy
+- dungeon                   - pet shop                          - underground
+- farming shop              - platebody shop                    - water source, water
+- farming spot              - plateskirt shop                   - weave
+- fishing shop, fish store  - portal (to player owned houses)   - windmill
+- fishing spot, fish        - pottery, pot
+- food shop                 - quest
+- fur trader                - range
+- furnace                   - rare trees, tree
+
 
 *******************************************************************************}
 
@@ -69,8 +67,6 @@ Const     //Symbol Constants, may be changed to integers in SRL6
   SYMBOL_FurTrader = 'fur trader';
   SYMBOL_RareTrees = 'rare trees';
   SYMBOL_Tree = SYMBOL_RareTrees;
-  SYMBOL_RestingSpot = 'resting spot';
-  SYMBOL_Rest = SYMBOL_RestingSpot;
   SYMBOL_Runecrafting = 'runecrafting';
   SYMBOL_Rcing = SYMBOL_Runecrafting;
   SYMBOL_Rc = SYMBOL_Runecrafting;
@@ -165,13 +161,11 @@ begin
         'HagCJ9lEoQL1A4UgbAhXGQRCBeC0LgQBAAGFlo9');
         Result := 5077645;
       end;
-    SYMBOL_Transportation:
+    SYMBOL_Transportation:  //done
       begin
-        SymbolBitmap := BitmapFromString(15, 5, 'z78DA33303534347074353' +
-          '4B73032219E34763173348592A62E666E66A6C8B20660330D904C' +
-          '86A841D6858BC454896C3EA6C9C498899FC465B291A3B193910B3' +
-          '124A69910715C269317CEC866229B0C00B3496273');
-        Result := 2650848;
+        SymbolBitmap := BitmapFromString(4, 5, 'meJxbunHp0o1LGSOOGnrLAUkIArLh' +
+        'yNbLBpnLIyMAQUA2AGXiD94=');
+        Result := 88261;
       end;
     SYMBOL_MagicShop:       //done
       begin
@@ -664,13 +658,6 @@ begin
        SymbolBitmap := BitmapFromString(6, 7, 'meJwTsy8UAyPl5DlA8uCxk8zsXMhI' +
         'UMcJIgVEfJZJggbB5IksXLYSaDiQhCMgFwCsFSbn');
         result:= 1458033;
-      end;
-    SYMBOL_RestingSpot, 'rest':
-      begin
-       SymbolBitmap := BitmapFromString(15, 5, 'beNptjUENwDAMAw2lU' +
-         'AylUAyljwEZtFryukVd7xHpYisBzF2wjnEdFfjKWCTdtJY9exfJpJ' +
-         'u6kKVhAxeNyj76f/ReM5IceVZ9yhPESE1p');
-        Result := 65536;
       end;
     SYMBOL_Runecrafting, 'rc', 'rcing':            //done
       begin

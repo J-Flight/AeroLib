@@ -7,15 +7,17 @@ InputHandler
 var
   MouseSpeed: Integer;
 
-function FindAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean; forward;
 procedure getRealMousePos(var X, Y : Integer);
 var
   KMTarget, ITarget: Integer;
 begin
   {$IFDEF SMART}
+    if not IsTargetValid() then Writeln('Target invalid');
     KMTarget := GetKeyMouseTarget;
     ITarget := GetImageTarget;
-    FindAndSetTarget('SMART', True);
+    if not findAndSetTarget('SMART', True) then
+      findAndSetTarget('Old', True);
+
     GetMousePos(X, Y);
     FreeTarget(GetImageTarget);
     SetKeyMouseTarget(KMTarget);
@@ -536,6 +538,9 @@ begin
   Y2 := RandomRange(Pnt.Y-(A*MP), Pnt.Y+(A*MP));
   shiftWindMouse(X, Y, X2, Y2, 11, 8, 10.0 / randSpeed, 12.0 / randSpeed, 10.0 * randSpeed, 10.0 * randSpeed);
   getMousePos(X, Y);
+  MouseSpeed := round(A*0.7);
+  if MouseSpeed < 7 then
+    MouseSpeed := 7;
   brakeMMouse(Pnt, ranX, ranY, True);
   MouseSpeed := A;
 end;
@@ -574,7 +579,7 @@ begin
   getMousePos(x, y);
   holdMouse(x, y, button);
 
-  Wait(RandomRange(150, 210));
+  Wait(RandomRange(90, 160));
 
   getMousePos(x, y);
   releaseMouse(x, y, button);

@@ -145,6 +145,11 @@ begin
   result := (getInvCount() > 27);
 end;
 
+function isInvEmpty(): Boolean;
+begin
+  result := (getInvCount() = 0);
+end;
+
 (*
 GetItemAmount
 ~~~~~~~~~~~~
@@ -228,7 +233,7 @@ var
 begin
   result := false;
   if (not itemInSlot(Slot)) then
-    if (not (action = MOUSE_MOVE)) then
+    if not variantIsInteger(action) then
       exit;
 
   mouseBox(invBox(Slot), MOUSE_MOVE);
@@ -317,6 +322,26 @@ begin
       result := cs_findBitmapToleranceIn(self.BMP, x, y, self.BMP_TOL, Area, cs_CTS);
 
   fPnt := point(x, y);
+end;
+
+function TItem.inEquipment(): Boolean;
+var
+  x,y : Integer;
+begin
+  result := False;
+  gameTab(TAB_EQUIP);
+  if DTMExists(self.DTM) then
+    result := cs_findDTM(self.DTM, x, y, AREA_INV, cs_CTS);
+  if not result then
+    if bitmapExists(self.BMP) then
+      result := cs_findBitmapToleranceIn(self.BMP, x, y, self.BMP_TOL, AREA_INV, cs_CTS);
+end;
+
+function TItem.inInventory(): Boolean;
+var
+  Pnt : TPoint;
+begin
+  result := Self.findIn(AREA_INV, Pnt);
 end;
 
 function isBankOpen(): Boolean; forward;
