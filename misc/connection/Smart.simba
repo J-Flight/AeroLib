@@ -46,7 +46,7 @@ Begin
   end else
     Writeln('Best world found: '+World);
 
-  Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + 'a.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+  Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
   If (Self.__Target <> 0) Then
   begin
     try
