@@ -35,6 +35,11 @@ const
   GBy1 = 301;
   GBx2 = 375;
   GBy2 = 341;
+// Cancel box
+  CBx1 = 392;
+  CBy1 = 301;
+  CBx2 = 530;
+  CBy2 = 341;
 // Click to play button
   WDx1 = 276;
   WDy1 = 298;
@@ -438,6 +443,7 @@ begin
        492: Actions := ['Error Connecting.',                 20000,    10,   'Retry'];
       1721: Actions := ['Too many incorrect logins.',    5 * 60000,    2,    'Retry'];
        906: Actions := ['This world is full.',                5000,    2,    'Switch'];
+      1227: Actions := ['Login limit exceeded.',              5000,    5,    'Switch'];
       1136: Actions := ['Runescape has been updated.',           0,    0,    'RSUpdate'];
        777: Actions := ['Login limit exceeded.',                 0,    0,    ''];
       1700: Actions := ['Members world',                         0,    0,    'Terminate'];
@@ -456,7 +462,6 @@ begin
         begin
           RetryLogin := True;
           Wait(2000 + Random(1000));
-          Break;
         end else
           terminateScript();
       end;
@@ -495,6 +500,7 @@ begin
           end;
       end;
     end;
+    wait(randomRange(90,130));
   until(Result);
 
   SplashScreen:
@@ -511,10 +517,12 @@ begin
 {Back to main screen if needed}
   if doSwitch then
   begin
-    RetryLogin := False;
-    Inc(Attempts);
-    TypeByte(vk_Escape);
+    mouseBox(toBox(CBx1,CBy1,CBx2,CBy2), MOUSE_LEFT);
     selectWorld(randomWorld(Me.Member));
+    mouseBox(toBox(EUx1,EUy1,EUx2,EUy2), MOUSE_LEFT);
+    RetryLogin := False;
+    DoSwitch := False;
+    Inc(Attempts);
     goto EnterName;
   end;
 

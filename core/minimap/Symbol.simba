@@ -163,9 +163,9 @@ begin
       end;
     SYMBOL_Transportation:  //done
       begin
-        SymbolBitmap := BitmapFromString(4, 5, 'meJxbunHp0o1LGSOOGnrLAUkIArLh' +
-        'yNbLBpnLIyMAQUA2AGXiD94=');
-        Result := 88261;
+        SymbolBitmap := BitmapFromString(5, 4, 'meJxLiHVNQELWeuZABOdqZb0BIrjU' +
+        'lsVrgFyIGiADAGjAFTg=');
+        Result := 2779884;
       end;
     SYMBOL_MagicShop:       //done
       begin
@@ -699,17 +699,26 @@ begin
   if (TheColor <> 0) then
   begin
     findDeformedBitmapToleranceIn(SymbolBitmap, x, y, MMX1, MMY1, MMX2, MMY2, 50, 0, True, acc);
-    if not pointInBox(point(x,y), toBox(568,125,594,152)) then
+    //if not pointInBox(point(x,y), toBox(568,125,594,152)) then
+    if not exp_InCircle(point(x,y), MMCP, 73) then
+    begin
       if (acc > SymbolAccuracy) then
         repeat
           c := c + 5;
-          if findColorTolerance(x, y, TheColor, x, y, x + 15, y + 5, c) then
+          //if findColorTolerance(x, y, TheColor, x, y, x + 15, y + 5, c) then
+          if findColorTolerance(x, y, TheColor, MMX1, MMY1, MMX2, MMY2, c) then
           begin
             Result := GetColor(x, y);
             rx := x;
             ry := y;
           end;
         until (Result > 0) or (c > 70);
+    end else
+    begin
+      rx := x;
+      ry := y;
+      result := TheColor;
+    end;
   end else
     warn(Name + ' is not a valid name.', WT_CORE);
   try

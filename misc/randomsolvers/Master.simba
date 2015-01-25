@@ -78,6 +78,7 @@ Var
   gtalksBox, YelSkipBoxs: array of TBox;
   gTalksCount,dismissedRandoms : Integer;
   NicknameSet : boolean;
+  rand_TxtCol : TColEx;
   DISABLE_RANDOMS : Boolean = True;
   AL_HANDLEMODS   : Boolean = True;
 
@@ -300,6 +301,8 @@ begin
   EC_ScreenText  := BitmapFromText('lee', 'UpChars07');
   EX_ScreenText  := BitmapFromText('xam', 'UpChars07');
 
+  rand_TxtCol.create(65535, 1);
+
   BMP_PModChat := BitmapFromString(13, 11, 'meJybNm0aAyqYhk3kwYMHyOJA7q' +
         'JFi9BESFIGF4ewIQBZhHhlaLKYAO4AIpXBVTIyMAARMgMtcODK0Ej' +
         'ylE3DDSAKAE7XrXs=');
@@ -521,7 +524,6 @@ Description: Searches screen for NickName and handles ALL Talking Randoms
 *******************************************************************************}
 function findTalk(): Boolean;
 var
-  txtCol : TColEx;
   Pnt    : TPoint;
   ax,ay,yCount,zCount,Count2,x1,y1,x2,y2,
   X,Y,Count1,bmpScreen: Integer;
@@ -531,8 +533,7 @@ begin
   Result := False;
   if not NicknameSet then Exit;
 
-  txtCol.create(65535, 1);
-  if txtCol.findIn(AREA_MS, Pnt) then
+  if rand_TxtCol.findIn(AREA_MS, Pnt) then
   begin
     SetArrayLength(gtalksBox, 0);
     SetArrayLength(YelSkipBoxs, 0);
@@ -544,7 +545,7 @@ begin
     zCount := 0;
 
     repeat
-      if txtCol.findIn(toBox(x2,y1+2,x2+3,y2+3), Pnt) then
+      if rand_TxtCol.findIn(toBox(x2,y1+2,x2+3,y2+3), Pnt) then
         zCount := 0
       else
         zCount := zCount + 1;
@@ -738,6 +739,6 @@ begin
   T.start();
   repeat
     if foundRandoms() then Exit(true);
-    Wait(randomRange(1,15));
+    Wait(randomRange(90,130));
   until (T.timeElapsed > WaitTime);
 end;

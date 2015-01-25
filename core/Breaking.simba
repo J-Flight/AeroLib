@@ -48,7 +48,7 @@ begin
   until(T.timeElapsed > (break_For+break_For_Ran));
 
   warn('Logging in...', WT_CORE);
-  loginPlayer(true);
+  loginPlayer(false);
   wait(4000);
   Result := isLoggedIn();
   setAngle(ANGLE_HIGH);

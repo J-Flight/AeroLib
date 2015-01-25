@@ -408,12 +408,7 @@ begin
     else
     begin
       while Self.FlagPresent() do
-        Wait(5);
-      {
-      if Prev.EQ([-1,-1]) then
-        RaiseException(erException, 'SEWalker: Distance to `Goal` is exceeding boundaries: '+
-                                    '"'+ToStr(Start)+'", "'+ ToStr(Goal) +'"');
-      }
+        wait(randomRange(90,130));
       Start := Prev;
       Dist2 := Start.DistanceTo(Goal);
     end;
@@ -425,28 +420,19 @@ begin
   PT.Offset(SEW_MMCenter);
 
   mouse(PT, 0, 0, MOUSE_LEFT);
-  waitFunc(@isPlayerWalking, 10, 1000);
+  waitFunc(@isPlayerWalking, 60, 1000);
   Result := true;
 
   T.start();
-  while (Dist2 > SkipDist) and Self.FlagPresent() do
+  while (flagDistance() > SkipDist) and Self.FlagPresent() do
   begin
     if not isLoggedIn() then Exit(false);
-    case DeepScan of
-      True:  Dist2 := Self.GetMyPos().DistanceTo(Goal);
-      False: Dist2 := Self.GetMyPos(Goal).DistanceTo(Goal)
-    end;
-
     if (T.timeElapsed() > Self.ETimeOut) then Exit;
-    {
-    if (T.timeElapsed() > Self.ETimeOut) then
-      RaiseException(erException, 'SEWalker: Timed out while walking to '+
-                                  '"'+ToStr(Goal)+'", from "'+ToStr(Start)+'"');
-    }
+    wait(randomRange(90,130));
   end;
 
   for i:=1 to 3 do
-    if (Dist2 > SkipDist) then Wait(100);
+    if (flagDistance() > SkipDist) then Wait(100);
 end;
 
 
@@ -582,4 +568,14 @@ begin
   if distance(pnts[high(pnts)].X,pnts[high(pnts)].Y,P.X,P.Y) > 11 then // Destination tile, force insert for accuracy
     pnts.Insert(high(pnts), P);
   Result := Self.walkPath(pnts);
+end;
+
+function mapFileExists(MapName: String): Boolean;
+begin
+  result := fileExists(SEW_Path+MapName+SEW_Extension)
+end;
+
+function mapFileExists_Custom(MapName: String): Boolean;
+begin
+  result := fileExists(SEW_Path_Custom+MapName+SEW_Extension)
 end;
