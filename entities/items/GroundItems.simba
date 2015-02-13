@@ -171,7 +171,7 @@ begin
     begin
       if length(atpaP[i]) > Self.MinCount then
       begin
-        b := atpaP[i].Bounds();
+        b := atpaP[i].getBounds();
         if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
             inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
         begin
@@ -195,7 +195,7 @@ begin
         if length(tmp) > 0 then
           if length(tmp) > Self.MinCount then
           begin
-            b := tmp.Bounds();
+            b := tmp.getBounds();
             if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
                 inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
             begin
@@ -245,12 +245,12 @@ begin
     begin
       if length(atpaP[i]) > Self.MinCount then
       begin
-        b := atpaP[i].Bounds();
+        b := atpaP[i].getBounds();
         if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
             inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
         begin
           setArrayLength(result, Length(result)+1);
-          result[High(result)] := atpaP[i].Bounds();
+          result[High(result)] := atpaP[i].getBounds();
         end;
       end;
     end;
@@ -269,12 +269,12 @@ begin
         if length(tmp) > 0 then
           if length(tmp) > Self.MinCount then
           begin
-            b := tmp.Bounds();
+            b := tmp.getBounds();
             if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
                 inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
             begin
               setArrayLength(result, Length(result)+1);
-              result[High(result)] := atpaP[i].Bounds();
+              result[High(result)] := atpaP[i].getBounds();
             end;
           end;
       end;

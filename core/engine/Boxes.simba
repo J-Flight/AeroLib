@@ -4,9 +4,24 @@ Boxes
 =====
 }
 
+Function toBox(Xs, Ys, Xe, Ye: Integer): TBox;
+begin
+  Result := intToBox(Xs, Ys, Xe, Ye);
+end;
+
 Function pointToBox(Point: TPoint; Size: Integer): TBox; overload;
 begin
   Result := intToBox(Point.X-Size, Point.Y-Size, Point.X+Size, Point.Y+Size);
+end;
+
+function TBox.Width(): Integer;
+begin
+  Result := (Self.X2 - Self.X1 + 1);
+end;
+
+function TBox.Height(): Integer;
+begin
+  Result := (Self.Y2 - Self.Y1 + 1);
 end;
 
 Function TBox.MidPoint: TPoint;

@@ -612,6 +612,13 @@ begin
       end;
     end;
     Wait(200 + Random(300));
+  end else if isDepositBoxOpen() then
+  begin
+    case lowercase(Which) of
+      'inventory','inv'         : mouseBox(toBox(183,246,210,275), MOUSE_LEFT);
+      'equipment','worn','equip': mouseBox(toBox(246,246,274,275), MOUSE_LEFT);
+      'loot','loot bag'         : mouseBox(toBox(310,246,338,275), MOUSE_LEFT);
+    end;
   end;
 end;
 

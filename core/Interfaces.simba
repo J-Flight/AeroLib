@@ -65,7 +65,7 @@ begin
     FontColor := 2070783;
     ColorTol  := 5;
     Text      := 'Box';
-    TxtBounds := toBox(365, 33, 393, 48);
+    TxtBounds := toBox(356, 47, 383, 60);
   end;
   with Interfaces[SHOPSCREEN] do
   begin
@@ -186,7 +186,7 @@ begin
         if ((Pa.x2 - Pa.x1) > 50) or ((Pa.y2 - Pa.y1) > 50) then
           Continue;
 
-        if humanMMouseTxt(Pa.MidPoint(), round(Pa.Width()/2), round(Pa.Height()/2), ['lose','ack','Cl','se']) then
+        if humanMMouseTxt(Pa.midPoint(), round(Pa.Width()/2), round(Pa.Height()/2), ['lose','ack','Cl','se']) then
         begin
           fastClick(MOUSE_LEFT);
           Exit(True);

@@ -1,7 +1,3 @@
-//{$DEFINE AeroLib}
-
-{$include SimbaExt/SimbaExt.simba}
-
 {$include_once core/engine/Boxes.simba}
 {$include_once core/Globals.simba}
 {$include_once core/engine/TPA.simba}
@@ -50,17 +46,13 @@
 {$include_once misc/randomsolvers/Master.simba}
 {$include_once misc/Reports.simba}
 
-{$IFDEF SPS}
-  {$include_once core/minimap/SPS.simba}
-{$ENDIF}
-
-{$IFDEF SEWalker}
-  {$include_once core/minimap/SEWalker.simba}
+{$IFDEF WALKER}
+  {$include_once core/minimap/Walker/Walker.simba}
 {$ENDIF}
 
 Const
-  AL_VERSION_MAIN = '1.0';
-  AL_VERSION_SUB  = '4';
+  AL_VERSION_MAIN = '1.1';
+  AL_VERSION_SUB  = '0';
 
 procedure AL_checkVersion();
 var

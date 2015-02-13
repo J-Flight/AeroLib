@@ -5,23 +5,24 @@
 //TODO: Fix Self implicit this vs. parameter confusion. <-- Glitch.
 
 const
-  clBlack = 0;
-  clWhite = 16777215;
-  clRed = 255;
-  clGreen = 32768;
-  clBlue = 16711680;
-  clYellow = 65535;
-  clOrange = 26367;
-  clAqua = 16776960;
-  clPurple = 8388736;
-  clTeal = 8421376;
-  clGray = 8421504;
-  clLime = 65280;
-  clSilver = 12632256;
-  clPink = 11772650;
-  clFuchsia = 16711935;
-  clNavy = 8388608;
-  clMaroon = 128;
+  clBlack         = 0;
+  clWhite         = 16777215;
+  clRed           = 255;
+  clGreen         = 32768;
+  clBlue          = 16711680;
+  clYellow        = 65535;
+  clOrange        = 26367;
+  clAqua          = 16776960;
+  clPurple        = 8388736;
+  clTrade         = 8323199;
+  clTeal          = 8421376;
+  clGray          = 8421504;
+  clLime          = 65280;
+  clSilver        = 12632256;
+  clPink          = 11772650;
+  clFuchsia       = 16711935;
+  clNavy          = 8388608;
+  clMaroon        = 128;
   clOutline_black = 65536;
   clOutline_white = 16777215;
 

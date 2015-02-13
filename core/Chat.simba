@@ -673,42 +673,52 @@ var
   B        : TBox;
   mPnt,pnt : TPoint;
   tmpCol,
-  bCol     : TColEx;
+  bCol,wCol: TColEx;
   i,x,y    : Integer;
   bPnts,
   wPnts    : TPointArray;
-  bAP,wAP  : T2DPointArray;
+  bAP,wAP,
+  tmpatpa  : T2DPointArray;
 begin
   tmpCol.create(6383633, 30);
   if not tmpCol.findIn(toBox(410,365,417,372), pnt) then
     Exit;
 
   bCol.create(0, 1);
-  tmpCol.create(16777215, 30);
-  bCol.findAllIn(toBox(MCX1,381,MCX2,MCY2), bPnts);
-  tmpCol.findAllIn(toBox(MCX1,381,MCX2,MCY2), wPnts);
+  wCol.create(16777215, 15);
+  bCol.findAllIn(toBox(MCX1,381,MCX2,470), bPnts);
+  wCol.findAllIn(toBox(MCX1,381,MCX2,470), wPnts);
 
   if ((length(bPnts) < 1) and (length(wPnts) < 1)) then Exit;
 
   bAP := clusterTPAEx(bPnts, 20, 2);
+  setArrayLength(Result, Length(bAP));
   wAP := clusterTPAEx(wPnts, 20, 2);
-  setArrayLength(Result, (Length(bAP)+Length(wAP)));
+  bPnts := [];
+  wPnts := [];
 
+  sortATPAFromFirstPointX(bAP, Point(0,0));
   for i:=0 to high(bAP) do
   begin
     B := bAP[i].getBounds();
-    sortATPAFromFirstPointX(bAP, Point(B.X1,B.CY));
-    Result[i].Bounds := B;
-    Result[i].Str    := getTextAtEx(B.x1, B.y1, B.x2, B.y2, 0, 5, 2, 0, 1, 'CharsNPC07');
+    bCol.findAllIn(B, bPnts);
+    tmpatpa := clusterTPAEx(bPnts, 1, 10);
+    sortATPAFromFirstPointX(tmpatpa, Point(0,0));
+    result[i].Bounds := B;
+    result[i].Str    := getTextATPA(tmpatpa, 5, 'CharsNPC07');
   end;
 
   if length(wAP) < 1 then Exit;
+  setArrayLength(Result, (Length(result)+Length(wAP)));
+  sortATPAFromFirstPointX(wAP, Point(0,0));
   for i:=0 to high(wAP) do
   begin
     B := wAP[i].getBounds();
-    sortATPAFromFirstPointX(wAP, Point(B.X1,B.CY));
-    Result[i].Bounds := B;
-    Result[i].Str    := getTextAtEx(B.x1, B.y1, B.x2, B.y2, 0, 5, 2, 16777215, 30, 'CharsNPC07');
+    wCol.findAllIn(B, wPnts);
+    tmpatpa := clusterTPAEx(wPnts, 1, 10);
+    sortATPAFromFirstPointX(tmpatpa, Point(0,0));
+    result[High(result)].Bounds := B;
+    result[High(result)].Str    := getTextATPA(tmpatpa, 5, 'CharsNPC07');
   end;
 end;
 

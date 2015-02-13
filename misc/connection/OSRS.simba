@@ -4,4 +4,73 @@ OSRS
 ====
 }
 
+const
+  HISCORE_RANK = 0;
+  HISCORE_LEVEL = 1;
+  HISCORE_XP = 2;
 
+
+function getHiscoreInfo(Username: String): T2DIntegerArray;
+var
+  I, II, N: Integer;
+  S, tS: String;
+  sArr, skillArr: TStringArray;
+begin
+  S := GetPage('http://services.runescape.com/m=hiscore_oldschool/hiscorepersonal.ws?user1=' + Username);
+  skillArr := ['Attack', 'Defence', 'Strength', 'Hitpoints', 'Ranged', 'Prayer', 'Magic', 'Cooking', 'Woodcutting', 'Fletching', 'Fishing', 'Firemaking', 'Crafting', 'Smithing', 'Mining', 'Herblore', 'Agility', 'Thieving', 'Slayer', 'Farming', 'Runecraft', 'Hunter', 'Construction'];
+
+  SetLength(Result, 3);
+  For I:=0 to 2 do
+    SetLength(Result[I], 23);
+
+  For I:=SKILL_ATTACK to SKILL_CONSTRUCTION do
+  begin
+    If I = SKILL_CONSTRUCTION then
+      tS := Between(skillArr[I], '</table>', S)
+    else
+      tS := Between(skillArr[I], '<img class', S);
+
+    sArr := MultiBetween(tS, '="right">', '</td>');
+    if length(sArr) < 3 then
+    begin
+      warn(toStr(Username)+' not found on the highscores!', WT_CORE);
+      result := [];
+      Exit;
+    end;
+    For II:=0 to 2 do
+      Result[II][I] := StrToIntDef(GetNumbers(sArr[II]), -1);
+  end;
+end;
+
+function getPlayerRank(Name: String; Skill: Integer): Integer;
+var
+  CharInfo : T2DIntegerArray;
+begin
+  CharInfo := getHiscoreInfo(Name);
+  if length(CharInfo) < 3 then
+    exit;
+
+  result := CharInfo[0][Skill];
+end;
+
+function getPlayerLevel(Name: String; Skill: Integer): Integer;
+var
+  CharInfo : T2DIntegerArray;
+begin
+  CharInfo := getHiscoreInfo(Name);
+  if length(CharInfo) < 3 then
+    exit;
+
+  result := CharInfo[1][Skill];
+end;
+
+function getPlayerXP(Name: String; Skill: Integer): Integer;
+var
+  CharInfo : T2DIntegerArray;
+begin
+  CharInfo := getHiscoreInfo(Name);
+  if length(CharInfo) < 3 then
+    exit;
+
+  result := CharInfo[2][Skill];
+end;

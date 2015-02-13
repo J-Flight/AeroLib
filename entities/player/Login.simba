@@ -245,7 +245,7 @@ var
   c,w,typtmp,uL,
   uH,pL,pH,uLen,
   pLen,i,j,
-  Attempts       : integer;
+  Attempts,rw    : integer;
   foundLogin,
   retryLogin,
   doSwitch       : boolean;
@@ -294,6 +294,7 @@ begin
     selectWorld(randomWorld(Me.Member));
   end;
 
+  EnterName:
   warn('Logging player in...', WT_CORE);
 
   if isLoggedIn() then
@@ -330,7 +331,6 @@ begin
   uBox := toBox(UBX1, 247, UBX2, 257);
   pBox := toBox(UBX1, 262, UBX2, 275);
 
-  EnterName:
   for W:=0 to 1 do
   begin
     if W = 0 then
@@ -444,6 +444,7 @@ begin
       1721: Actions := ['Too many incorrect logins.',    5 * 60000,    2,    'Retry'];
        906: Actions := ['This world is full.',                5000,    2,    'Switch'];
       1227: Actions := ['Login limit exceeded.',              5000,    5,    'Switch'];
+      1231: Actions := ['No reply from login server',         5000,    2,    'Switch'];
       1136: Actions := ['Runescape has been updated.',           0,    0,    'RSUpdate'];
        777: Actions := ['Login limit exceeded.',                 0,    0,    ''];
       1700: Actions := ['Members world',                         0,    0,    'Terminate'];
@@ -518,8 +519,12 @@ begin
   if doSwitch then
   begin
     mouseBox(toBox(CBx1,CBy1,CBx2,CBy2), MOUSE_LEFT);
-    selectWorld(randomWorld(Me.Member));
-    mouseBox(toBox(EUx1,EUy1,EUx2,EUy2), MOUSE_LEFT);
+    warn('Changing worlds; current world:'+toStr(getCurrentWorldLS()), WT_CORE);
+    repeat
+      rw := randomWorld(Me.Member);
+    until(not (rw = getCurrentWorldLS()));
+    selectWorld(rw);
+    warn('W'+toStr(rw)+' selected', WT_CORE);
     RetryLogin := False;
     DoSwitch := False;
     Inc(Attempts);
