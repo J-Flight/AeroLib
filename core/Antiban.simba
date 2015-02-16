@@ -248,7 +248,6 @@ begin
 
  if (Random(2) = I) then
  begin
-   activateClient();
    Deg := getCompassAngle();
    Wait(100 + random(50));
    KeyDown(Keys[I]);
@@ -677,7 +676,7 @@ begin
     end;
 
     Result := True;
-    WriteLn(getDisplayName() + ' leveled up!');
+    warn(getDisplayName() + ' leveled up!', WT_CORE);
   end;
 end;
 

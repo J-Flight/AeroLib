@@ -846,17 +846,17 @@ begin
     end else
     begin
       fastClick(MOUSE_RIGHT);
-      if not waitOptionMulti(['Open','k B','n De','Use Bank chest'], randomRange(150,300)) then
+      if not waitOptionMulti(['Open','k B','n De','it Ban','Use Bank chest'], randomRange(150,300)) then
         exit(false);
     end;
   end else
   begin
     fastClick(MOUSE_RIGHT);
-    if not waitOptionMulti(['Open','k B','n De','nk F','nk Ar','Use Bank chest'], randomRange(150,300)) then
+    if not waitOptionMulti(['Open','k B','n De','nk F','nk Ar','it Ban','Use Bank chest'], randomRange(150,300)) then
       exit(false);
   end;
 
-  if waitFunc(@isPlayerWalking, 10, 400) then
+  if waitFunc(@isPlayerWalking, 60, 400) then
     While isPlayerWalking() do
       Wait(1);
 
@@ -865,7 +865,7 @@ begin
     if (isBankOpen() or isDepositBoxOpen() or
       Interfaces[PINSCREEN].isVisible()) then
         break;
-    clickContinue(True);
+    wait(randomRange(60,90));
   until(T.timeElapsed() > 7000);
 
   if Interfaces[PINSCREEN].isVisible() then

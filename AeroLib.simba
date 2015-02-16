@@ -52,7 +52,7 @@
 
 Const
   AL_VERSION_MAIN = '1.1';
-  AL_VERSION_SUB  = '0';
+  AL_VERSION_SUB  = '1';
 
 procedure AL_checkVersion();
 var
@@ -98,8 +98,8 @@ begin
   ocr_LoadFont(AppPath + 'Fonts\UpChars07_s\', UpFont);
   addOnTerminate('freeSFonts');
 
-  setLength(IgnoreWorlds, 5);
-  IgnoreWorlds := [308, 316, 325, 337, 365];
+  setLength(IgnoreWorlds, 3);
+  IgnoreWorlds := [325, 337, 365];
   setupInterfaces();
   setupRandoms();
 
