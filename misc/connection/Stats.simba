@@ -3,3 +3,159 @@
 Stats
 =====
 }
+
+Const
+  stats_Path = AppPath+'Stats\';
+  stats_File = 'Info.txt';
+
+type
+  TStats_Vars = record
+    Name: string;
+    Value: integer;
+  end;
+
+var
+  stats_Timer : integer;
+  stats_ID,stats_Pass,
+  stats_ScriptID : string;
+  stats_Vars  : Array of TStats_Vars;
+
+
+procedure stats_Setup(_ScriptID : String);
+var
+  id,pass : String;
+begin
+  if (not directoryExists(stats_Path)) then
+  begin
+    forceDirectories(stats_Path);
+    writeINI('General', 'Stats_ID', '', stats_Path+stats_File);
+    writeINI('General', 'Stats_Pass', '', stats_Path+stats_File);
+  end;
+
+  id   := readINI('General', 'Stats_ID', stats_Path+stats_File);
+  pass := readINI('General', 'Stats_Pass', stats_Path+stats_File);
+
+  if id = '' then
+  begin
+    case MessageBox('No Stats ID found, would you like to register?','Stats',1) of
+      1: openWebPage('http://stats.grats.pw/reg.php');
+    end;
+  end;
+
+  stats_ID       := id;
+  stats_Pass     := pass;
+  stats_ScriptID := _ScriptID;
+  stats_Timer    := getSystemTime();
+end
+
+procedure stats_InitVariable(VarName: String; InitValue: Integer);
+var
+  len: Integer;
+begin
+  len := Length(stats_Vars);
+  SetArrayLength(stats_Vars, len + 1);
+  stats_Vars[len].Name := LowerCase(VarName);
+  stats_Vars[len].Value := InitValue;
+end;
+
+procedure stats_SetVariable(VarName: string; NewValue: Integer);
+var
+  i, h: Integer;
+begin
+  h := High(stats_Vars);
+  VarName := LowerCase(VarName);
+
+  if (h >= 0) then
+    for i := h downto 0 do
+      if (VarName = stats_Vars[i].Name) then
+      begin
+        stats_Vars[i].Value := NewValue;
+        Exit;
+      end;
+
+  stats_InitVariable(VarName, NewValue);
+end;
+
+procedure stats_IncVariable(VarName: string; Value: integer);
+var
+  i, h: Integer;
+begin
+  h := High(stats_Vars);
+  VarName := LowerCase(VarName);
+
+  if (h >= 0) then
+    for i := h downto 0 do
+      if (VarName = stats_Vars[i].Name) then
+      begin
+        stats_Vars[i].Value := stats_Vars[i].Value + Value;
+        Exit;
+      end;
+
+  stats_InitVariable(VarName, Value);
+end;
+
+function stats_Commit(): Boolean;
+var
+  S : String;
+  Client,i,Worked,
+  ExtraTime : integer;
+begin
+  ExtraTime := getSystemTime() - stats_Timer;
+  Worked    :=  ExtraTime div 60000;
+
+  if Worked < 5 then Exit;
+  ExtraTime := ExtraTime - (Worked*60000);
+
+  stats_Timer := GetSystemTime - ExtraTime;
+
+  Client := InitializeHTTPClient(False);
+  ClearPostData(Client);
+
+  if (stats_ID = '') then
+  begin
+    stats_ID   := '5';
+    stats_Pass := 'anon1337';
+  end;
+
+  AddPostVariable(Client, 'user_id', STATS_ID);
+  AddPostVariable(Client, 'password', STATS_PASS);
+  AddPostVariable(Client, 'script_id', STATS_SCRIPTID);
+  AddPostVariable(Client, 'timeamount', toStr(Worked));
+
+  if (Length(stats_Vars) > 0) then
+   for i := high(stats_Vars) downto 0 do
+    with stats_Vars[i] do
+    begin
+      if (Value <= 0) then
+        Continue;
+
+      AddPostVariable(Client, Name, toStr(Min(Value, 30000))); //Capped at 30000
+    end;
+
+  // Get & translate the return code
+  S := PostHTTPPageEx(Client, 'http://stats.grats.pw/POST.php');
+  FreeHTTPClient(Client);
+
+  case StrToIntDef(ExtractFromStr(S, Numbers), -1) of
+    42  : Result := True;
+//  666 : writeln('Stats: User ID/Password not setup.');  // Disabled because of the default name ID & pass given above
+    9001: writeln('Stats: Invalid user ID/Password.');
+    1337: writeln('Stats: Invalid Script ID.');
+    255,
+    496 : writeln('Stats: Committing too fast; shame on you!');
+    else
+          writeln('Stats: No POST return');
+  end;
+
+  if Result then
+  begin
+    if (Length(stats_Vars) > 0) then
+      for i := high(stats_Vars) downto 0 do
+        with stats_Vars[i] do
+        begin
+          if (Value <= 0) then
+            Continue;
+          Value := 0; //Clear for next commit
+        end;
+  end;
+end;

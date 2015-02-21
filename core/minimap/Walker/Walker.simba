@@ -1,3 +1,7 @@
+{=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=]
+ Copyright (c) 2013, Jarl K. <Slacky> Holta || http://github.com/WarPie
+ All rights reserved.
+[=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=}
 {$I Base.pas}
 
 const
@@ -16,6 +20,7 @@ type
     skipClose: Int32;
     anyAngle: Boolean;
     minRunEnergy: Int32;
+    minMatch: Single;
     
     finder: TRSPosFinder;
     localMap: T2DIntArray;
@@ -25,6 +30,7 @@ type
     onWalkEvent: TOnWalkEvent;
     onMoveEvent: TWhileWalkingEvent;
   end;
+
 
 // MapType: 'surface' / 'custom'
 procedure TRSWalker.Init(MapType, MapName:String; PID:Int32);
@@ -36,10 +42,12 @@ begin
   begin
     finder.Init(PID);
     finder.scanRatio := 8;
+
     onClickEvent := nil;
     onWalkEvent := nil;
     onMoveEvent := nil;
 
+    minMatch := -1;
     skipClose := 10;
     minRunEnergy := 20;
     path := (RSW_Path+lowercase(MapType)+'\'+MapName+RSW_Extension);
@@ -148,19 +156,24 @@ begin
 
   Result.x += ((WMM_INNER.x2-WMM_INNER.x1+1) div 2) + WMM_OFFSET.x;
   Result.y += ((WMM_INNER.y2-WMM_INNER.y1+1) div 2) + WMM_OFFSET.y;
+  finder.topMatch := best.value;
   finder.mmOffset := best.angle;
 end;
 
 
 (*
- Returns our current position.
+ Returns our current position. If `ignoreMatchValue` is False it will return -1,-1 if
+ it was a bad match.
 *)
-function TRSWalker.GetMyPos(): TPoint;
+function TRSWalker.GetMyPos(ignoreMatchValue:Boolean = True): TPoint;
 begin
   if finder.process > 0 then
     Result := self._getPos()
   else
     Result := self._getPosCustom();
+  
+  if not(ignoreMatchValue) and (self.minMatch > self.finder.topMatch) then
+    Exit(Point(-1,-1));
 end;
 
 
@@ -198,6 +211,7 @@ var
   t:Timer;
   r:UInt32;
   box:TBox;
+  pos:TPoint;
 begin
   if self.anyAngle then
     mmPt := RotatePoint(mmpt, w_GetCompassAngle(False), WMM_CX,WMM_CY);
@@ -212,18 +226,20 @@ begin
       mouseBox(box, MOUSE_LEFT);
   end else
     mouseBox(box, MOUSE_LEFT);
-
+    
   t.start();
   repeat
-    w_QuickEnableRun(self.minRunEnergy);
-
-    if flagDistance() < self.skipClose then
+    if (getRunEnergy() >= self.minRunEnergy) then
+      toggleRunning(true);
+    
+    pos := self.GetMyPos();
+    if w_Distance(pos, worldPt) < self.skipClose then
       Break;
 
     if Assigned(@self.onMoveEvent) then
-      self.onMoveEvent(@self, self.GetMyPos);
+      self.onMoveEvent(@self, pos);
 
-    waitEx(randomRange(90,130));
+    waitEx(randomRange(50,80));
   until not(w_FlagPresent()) or (t.timeElapsed > 20000);
 end;
 
@@ -238,7 +254,7 @@ var
 begin
   if not Self.PointToMM(self.GetMyPos(), worldPos, mmPt) then
     Exit();
-  
+
   if self.anyAngle then
     mmPt := RotatePoint(mmpt, w_GetCompassAngle(False), WMM_CX,WMM_CY);
 
@@ -249,7 +265,7 @@ begin
     t.start();
     repeat
       w_QuickEnableRun(self.minRunEnergy);
-      waitEx(randomRange(90,130));
+      waitEx(randomRange(40,70));
     until not(w_FlagPresent()) or (t.timeElapsed > 20000);
   end;
 end;
@@ -370,4 +386,9 @@ begin
 
   sortTPAFrom(pnts, M);
   Result := Self.walkPath(pnts);
+end;
+
+function mapFileExists(MapName: String): Boolean;
+begin
+  result := fileExists(RSW_Path+'custom\'+MapName+RSW_Extension);
 end;

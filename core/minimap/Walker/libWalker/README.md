@@ -1,1 +1,0 @@
-A library that contains the core tools used by RSWalker

@@ -1,3 +1,7 @@
+{=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=]
+ Copyright (c) 2013, Jarl K. <Slacky> Holta || http://github.com/WarPie
+ All rights reserved.
+[=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=}
 {$loadlib ../Includes/AeroLib/core/minimap/Walker/libWalker.dll}
 {$I matchTempl.pas}
 {$I MemScan.pas}
@@ -28,8 +32,12 @@ type
     matchAlgo: Byte;
     scanRatio: Byte;
     numSamples:Int32;
+    
+    //from last correlation
     mmOffset: Int32;
-
+    topMatch: Single;
+    
+    //mem-stuff
     process:Int32;
     scan:TMemScan;
     addr:PtrUInt;
@@ -48,7 +56,11 @@ end;
 
 procedure w_clickMouse(box:TBox; btn:Int32);
 begin
-  mousebox(box, btn);
+  {$IFDEF SRL_MOUSE}
+    mouse.click(box, btn);
+  {$ELSE}
+    RaiseException('Not implmented yet');
+  {$ENDIF}
 end;
 
 
@@ -133,7 +145,7 @@ begin
     scanRatio := 8;
     numSamples := 100;
     process := PID;
-
+    
     if PID >= 0 then scan.Init(process);
     addr := 0;
     bufferW := 512;
@@ -244,7 +256,25 @@ begin
 end;
 
 procedure TRSPosFinder.UpdateAddr();
+var
+  matches:TPtrIntArray;
+  tmp:PtrUInt;
+  size,i,k:Int32;
 begin
+  size := self.bufferW*self.bufferH;
+  matches := self.scan.FindByteArray([0,2,0,0,0,2,0,0,0,0,0,0,0,2,0,0,0,2,0,0], 4); //meh..
+  for i:=0 to High(Matches) do
+  begin
+    tmp := BytesToInt( self.scan.CopyMem(matches[i]+20,4) );
+    k := BytesToInt( self.scan.CopyMem(tmp+8,4) );
+    if ( k = size ) then
+    begin
+      self.addr := tmp+12;
+      Exit;
+    end;
+  end;
+  
+  //now why da fuq did the above fail? Reverting to old method:
   self.addr := FindMemBufferImage(self.scan, self.bufferW, self.bufferH);
 end;
 
@@ -292,6 +322,8 @@ begin
 
   Result.x += ((WMM_INNER.x2-WMM_INNER.x1+1) div 2) + WMM_OFFSET.x;
   Result.y += ((WMM_INNER.y2-WMM_INNER.y1+1) div 2) + WMM_OFFSET.y;
+  
+  Self.topMatch := best.value;
   Self.mmOffset := best.angle;
 end;
 

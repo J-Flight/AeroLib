@@ -13,6 +13,7 @@ end;
 
 var
   SMART_UserAgent : String = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0';
+  SMART_World : Integer;
   OS_SMART : TSmart;
 
 Procedure TSmart.Create;
@@ -112,7 +113,11 @@ Begin
 End;
 
 Function TSmart.GetWorld: String;
+var
+  worlds : TIntegerArray;
 Begin
+  if SMART_World > 0 then
+    exit(toStr(SMART_World));
   Result := Between('a href="http://oldschool', '.runescape.com/j1', GetPage('http://oldschool.runescape.com/slu'));
   //check if the result is a vaild world
   if (length(result) > 0) then
@@ -122,7 +127,11 @@ Begin
       exit;
     end;
   // else something failed, let's pick a random world
-  result := intToStr(randomRange(1, 78));
+  worlds := [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19, 20, 21, 22, 25, 26,
+             27, 28, 29, 30, 33, 34, 35, 36, 37, 38, 41, 42, 43, 44, 45, 46, 49, 50, 51, 52,
+             53, 54, 57, 58, 59, 60, 61, 62, 65, 66, 67, 68, 69, 70, 73, 74, 75, 76, 77, 78,
+             81, 82, 83, 84, 93, 94];
+  result := intToStr(worlds[random(high(worlds))]);
 End;
 
 Function TSmart.GetPIDs(Paired: Boolean): TIntegerArray;

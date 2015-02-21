@@ -656,3 +656,16 @@ Begin
         Inc(J);
   end;
 end;
+
+function getFileSize(path: String): Integer;
+var
+  s : Integer;
+begin
+  try
+    s := openFile(path, True);
+  except
+    writeln('Failed to load file');
+  end;
+  result := fileSize(s);
+  CloseFile(s);
+end;

@@ -296,7 +296,6 @@ begin
     disabled  := true;
   end;
 
-  //DTM_RoyalFrogA := DTMFromString('mbQAAAHicY2VgYLgDxLeB+CYQ34OyeRgZGDgZIbQAEPMD8cpOYYbfZ1QZDs4RYziuKcbw+5wxgxxQLTpmxoLBAAB7VQzf');
   DTM_RoyalFrogA := DTMFromString('mggAAAHicY2NgYFjPyMCwAYg3AfFqIF4DxU+Bco+A+AkDhP0ciF8B8eH5kgxfjssx/D6rwfDCUI7h1X45Bs4sPgY5oBw2zIQDQwAASOcTBQ==');
   EC_ScreenText  := BitmapFromText('lee', 'UpChars07');
   EX_ScreenText  := BitmapFromText('xam', 'UpChars07');
@@ -693,29 +692,11 @@ begin
   if (not RandomsSet) then
     setupRandoms();
 
-(*  Combat random events  *)
-  {
-  if SRL_CombatRandoms then
-    if SRL_infight then
-    begin
-      runaway(RandomDirection, False, 1, RandomRange(2000,4000));
-      result := true;
-      exit;
-    end;
-  }
-
-(*  StrangePlant handler  *)
-
-(*  Evil chicken handler  *)
-
   if findTalk() then
     Exit(True);
 
   for i:=0 to high(RandomEvents) do
   begin
-    //if ((SRL_Randoms[i].isInvRandom) and (not checkInv)) then
-      //continue;
-
     result := _SolveRandom(i)
 
     // don't want to keep looking for randoms if one was already detected, but failed

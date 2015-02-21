@@ -1,6 +1,6 @@
 function Leo_Detect(): boolean;
 begin
-  result := (getNPCChatName() = 'l8o');
+  Result := false;
 end;
 
 function Leo_Solve(): boolean;

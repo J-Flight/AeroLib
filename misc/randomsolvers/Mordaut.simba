@@ -4,7 +4,8 @@
  *)
 function MD_Detect(): boolean;
 begin
-  result := (getNPCChatName() = 'Mr.Mordaut') and (not tabExists(TAB_MAGIC));
+  if (not tabExists(TAB_MAGIC)) then
+    result := (getNPCChatName() = 'Mr.Mordaut');
   if not result then
     if not tabexists(TAB_MAGIC) then
       result:= ((countMMDots('npc') = 7) and (inrange(countcolor(243,MMX1,MMY1,MMX2,MMY2),10,20)));

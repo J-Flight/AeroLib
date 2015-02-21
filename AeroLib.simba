@@ -33,6 +33,7 @@
 {$include_once entities/player/WorldHandler.simba}
 {$include_once core/Bank.simba}
 {$include_once misc/connection/OSRS.simba}
+{$include_once misc/connection/Stats.simba}
 
 {$include_once entities/object/Object.simba}
 {$include_once entities/items/GroundItems.simba}
@@ -52,7 +53,7 @@
 
 Const
   AL_VERSION_MAIN = '1.1';
-  AL_VERSION_SUB  = '1';
+  AL_VERSION_SUB  = '2';
 
 procedure AL_checkVersion();
 var
