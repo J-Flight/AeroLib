@@ -485,16 +485,17 @@ DepositItem
 
 .. code-block:: pascal
 
-    function depositItem(Slot, Amount: Integer)): Boolean;
+    function depositItem(Slot, Amount: Integer; wait: Boolean)): Boolean;
 
-Deposits item at slot "Slot".  Accepts any amount, -1 for all.
+Deposits item at slot "Slot".  Accepts any amount, -1 for all.  If 'wait'
+is set to true then it will wait until there is no item in the given slot.
 
 .. note::
 
     Author: Flight
     Last Modified: 18/2/2014 by Flight
 *)
-function depositItem(Slot, Amount: Integer): Boolean;
+function depositItem(Slot, Amount: Integer; DoWait: Boolean=True): Boolean;
 var
   B    : TBox;
   T    : Timer;
@@ -533,10 +534,13 @@ begin
     if (Amount = -1) then
     begin
       waitOptionMulti(['Deposit-All','it-A','Deposit All','sit All'], 300);
-      T.start();
-      repeat
-        if not itemInSlot(Slot) then break;
-      until(T.timeElapsed >= 4000);
+      if DoWait then
+      begin
+        T.start();
+        repeat
+          if not itemInSlot(Slot) then break;
+        until(T.timeElapsed >= 4000);
+      end;
     end else
       Result := waitOptionMulti(['Deposit-' + intToStr(Amount) + ' ','it-' + intToStr(Amount) + ' ',
                                   'Deposit ' + intToStr(Amount) + ' ','sit ' + intToStr(Amount) + ' '], 300);
@@ -560,9 +564,9 @@ begin
   end;
 end;
 
-function depositItem(Pnt: TPoint; Amount: Integer): Boolean; overload;
+function depositItem(Pnt: TPoint; Amount: Integer; DoWait: Boolean=True): Boolean; overload;
 begin
-  result := depositItem(pntToItem(Pnt), Amount);
+  result := depositItem(pntToItem(Pnt), Amount, DoWait);
 end;
 
 (*
@@ -622,20 +626,20 @@ begin
   end;
 end;
 
-procedure depositAllFrom(Slot: Integer);
+procedure depositAllFrom(Slot: Integer; DoWait: Boolean=True);
 var
   i : Integer;
 begin
   for i:=Slot to 28 do
-    depositItem(i, -1);
+    depositItem(i, -1, DoWait);
 end;
 
-procedure depositSlots(Slots: TIntegerArray);
+procedure depositSlots(Slots: TIntegerArray; DoWait: Boolean=True);
 var
   i : Integer;
 begin
   for i:=0 to high(Slots) do
-    depositItem(slots[i], -1);
+    depositItem(slots[i], -1, DoWait);
 end;
 
 (*

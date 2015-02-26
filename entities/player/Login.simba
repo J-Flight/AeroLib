@@ -250,6 +250,8 @@ var
   retryLogin,
   doSwitch       : boolean;
   TPA            : TPointArray;
+  MemWorlds,
+  FreeWorlds     : TIntegerArray;
   Actions        : TVariantArray;
 label
   EnterName,EnterGame,SplashScreen;
@@ -288,11 +290,41 @@ begin
     Wait(RandomRange(1000,2000));
   until (RSReady);
 
+  MemWorlds :=
+  [301,320,343,366,+
+   302,321,344,367,+
+   303,322,345,368,+
+   304,325,346,369,+
+   305,326,349,370,+
+   306,327,350,373,+
+   328,351,374,+
+   309,329,352,375,+
+   310,330,353,376,+
+   311,333,354,377,+
+   312,334,357,378,+
+   313,335,358,+
+   314,336,359,+
+   337,360,+
+   317,338,361,+
+   318,341,362,+
+   319,342,365];
+
+   FreeWorlds :=
+  [308,316,381,382,
+   383,384,393,394];
+
   if inIntArray(IgnoreWorlds, getCurrentWorldLS()) then
   begin
     warn('Ignore world detected, choosing another world', WT_CORE);
     selectWorld(randomWorld(Me.Member));
   end;
+
+  if not Me.Member then
+    if inIntArray(MemWorlds, getCurrentWorldLS()) then
+    begin
+      warn('Switching to a F2P world', WT_CORE);
+      selectWorld(randomWorld(Me.Member));
+    end;
 
   EnterName:
   warn('Logging player in...', WT_CORE);
@@ -447,7 +479,7 @@ begin
       1231: Actions := ['No reply from login server',         5000,    2,    'Switch'];
       1136: Actions := ['Runescape has been updated.',           0,    0,    'RSUpdate'];
        777: Actions := ['Login limit exceeded.',                 0,    0,    ''];
-      1700: Actions := ['Members world',                         0,    0,    'Terminate'];
+      1700: Actions := ['Members world',                         0,    2,    'Switch'];
     end;
                              {Respond}
 

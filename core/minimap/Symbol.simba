@@ -699,14 +699,16 @@ begin
   if (TheColor <> 0) then
   begin
     findDeformedBitmapToleranceIn(SymbolBitmap, x, y, MMX1, MMY1, MMX2, MMY2, 50, 0, True, acc);
-    //if not exp_InCircle(point(x,y), MMCP, 73) then
-    if not pointInBox(point(x,y), toBox(568,125,594,152)) then
+    //if not pointInBox(point(x,y), toBox(568,125,594,152)) then
+    if distance(x, y, MMCX, MMCY) > 65 then
     begin
       if (acc > SymbolAccuracy) then
         repeat
           c := c + 5;
           if findColorTolerance(x, y, TheColor, MMX1, MMY1, MMX2, MMY2, c) then
           begin
+            if distance(x, y, MMCX, MMCY) > 65 then
+              continue;
             Result := GetColor(x, y);
             rx := x;
             ry := y;
@@ -802,10 +804,11 @@ begin
     else
       findDeformedBitmapToleranceIn(SymbolBitmap, x, y, Pt.x-15, Pt.y-5, Pt.x+15, Pt.y+5, 70, 0, True, acc);
     if (acc > SymbolAccuracy) then
-    begin
-      AnsTPA[L] := Pt;
-      Inc(L);
-    end;
+      if distance(Pt.X, Pt.Y, MMCX, MMCY) < 63 then
+      begin
+        AnsTPA[L] := Pt;
+        Inc(L);
+      end;
   end;
   Result := L > 0;
   SetLength(AnsTPA, L);

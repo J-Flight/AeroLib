@@ -388,3 +388,22 @@ begin
         result[High(result)] := i;
       end;
 end;
+
+function TItem.getSlot(): Integer;
+var
+  slots : TIntegerArray;
+begin
+  result := 0;
+  slots  := Self.getSlots();
+  if length(slots) < 1 then Exit;
+  result := slots[0];
+end;
+
+function TItem.Interact(action: Variant): Boolean;
+var
+  slot : Integer;
+begin
+  slot := Self.getSlot();
+  if slot < 1 then Exit(false);
+  interactSlot(slot, action);
+end;

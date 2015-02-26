@@ -13,7 +13,7 @@ type TInterface = record
 end;
 
 var
-  Interfaces: Array [0..9] of TInterface;
+  Interfaces: Array [0..12] of TInterface;
 
 {
 ~To-add~
@@ -32,6 +32,9 @@ const
   DUELSCREEN      = 7;
   DUELCSCREEN     = 8;
   TELEOTHERSCREEN = 9;
+  GEMAINSCREEN    = 10;
+  GEOFFERSCREEN   = 11;
+  GECOLLECTSCREEN = 12;
 
 procedure setupInterfaces();
 begin
@@ -74,6 +77,30 @@ begin
     ColorTol  := 5;
     Text      := 'shop';
     TxtBounds := toBox(145, 295, 175, 314);
+  end;
+  with Interfaces[GEMAINSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'Grand';
+    TxtBounds := toBox(205, 28, 247, 45);
+  end;
+  with Interfaces[GEOFFERSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'offer';
+    TxtBounds := toBox(319, 30, 358, 46);
+  end;
+  with Interfaces[GECOLLECTSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'Collection';
+    TxtBounds := toBox(210, 73, 278, 89);
   end;
 end;
 
