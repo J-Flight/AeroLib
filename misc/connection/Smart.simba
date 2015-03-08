@@ -28,7 +28,7 @@ End;
 
 Procedure TSmart.Create(Width, Height: Integer; UserAgent: String; Plugins: TStringArray = []); overload;
 var
-  World: String;
+  World, path: String;
 Begin
   Self.__Width := Width;
   Self.__Height := Height;
@@ -46,8 +46,9 @@ Begin
     Exit;
   end else
     Writeln('Best world found: '+World);
-
-  Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+    
+  path := getJavaPath(True); //parm should be changed to have a global for showing the console
+  Self.__Target := SmartSpawnClient(path, replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
   If (Self.__Target <> 0) Then
   begin
     try
