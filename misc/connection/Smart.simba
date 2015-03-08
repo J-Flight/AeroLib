@@ -7,6 +7,7 @@ type TSmart = record
   __Target, __PID: Integer;
   __Width, __Height: Integer;
   __ForceNew: Boolean;
+  __ShowConsole: Boolean;
   __Graphics: TGraphics;
   __UserAgent: String;
 end;
@@ -14,6 +15,7 @@ end;
 var
   SMART_UserAgent : String = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0';
   SMART_World : Integer;
+  SMART_ShowConsole : Boolean = True;
   OS_SMART : TSmart;
 
 Procedure TSmart.Create;
@@ -28,17 +30,18 @@ End;
 
 Procedure TSmart.Create(Width, Height: Integer; UserAgent: String; Plugins: TStringArray = []); overload;
 var
-  World: String;
+  World,path: String;
 Begin
   Self.__Width := Width;
   Self.__Height := Height;
   AddOnTerminate('__TSmartFreeAll');
 
-  If (Not Self.__ForceNew And Self.Pair()) then
+  if (Not Self.__ForceNew And Self.Pair()) then
     Exit;
 
+  path := getJavaPath(SMART_ShowConsole);
   World := self.GetWorld();
-  If (World = '') then
+  if (World = '') then
   begin
     Writeln('** Failed to grab world **');
     Writeln('** Please check your internet connection/firewall **');
@@ -47,8 +50,14 @@ Begin
   end else
     Writeln('Best world found: '+World);
 
-  Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
-  If (Self.__Target <> 0) Then
+  Self.__Target := SmartSpawnClient(path, replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+  if (Self.__Target = 0) Then
+  begin
+    writeln('Error while finding Java, using default path');
+    Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+  end;
+
+  if (Self.__Target <> 0) Then
   begin
     try
       Self.__PID := SmartGetClientPID(Self.__Target);
@@ -63,11 +72,11 @@ Begin
       TerminateScript;
     end;
   end else
-    begin
-      Writeln('** Smart Cannot Spawn Clients **');
-      TerminateScript;
-    end;
-End;
+  begin
+    Writeln('** Smart Cannot Spawn Clients **');
+    TerminateScript;
+  end;
+end;
 
 Function TSmart.Pair: Boolean;
 var
@@ -178,6 +187,11 @@ End;
 Function TSmart.UserAgent: String;
 Begin
   Result := Self.__UserAgent;
+End;
+
+Function TSmart.ShowConsole: Boolean;
+Begin
+  Result := Self.__ShowConsole;
 End;
 
 Procedure __TSmartFreeAll;

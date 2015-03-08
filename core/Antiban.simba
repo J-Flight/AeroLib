@@ -475,7 +475,7 @@ begin
 
   T := getCurrentTab();
   // every tab
-  AllTabs := RandomRange(21, 37);
+  AllTabs := RandomRange(21, 34);
   // more commanly used tabs
   TIA := [23, 25, 26, 30, 28];
 

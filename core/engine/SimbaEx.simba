@@ -657,15 +657,16 @@ Begin
   end;
 end;
 
-function getFileSize(path: String): Integer;
+function getFileSize(path: string): Integer;
 var
-  s : Integer;
+  s: Integer;
 begin
   try
-    s := openFile(path, True);
+    s := OpenFile(path, True);
+    Result := FileSize(s);
+    CloseFile(s);
   except
-    writeln('Failed to load file');
+    writeLn('Failed to load file');
+    Result := -1;
   end;
-  result := fileSize(s);
-  CloseFile(s);
 end;
