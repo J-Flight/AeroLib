@@ -8,8 +8,9 @@ Var
   timer_Break : Timer;
   break_In,break_For,break_In_Ran,
   break_For_Ran,break_RealTime,
-  break_Count : Integer;
+  break_Count,break_TotalTime : Integer;
   A,B,C,D : Integer;
+  break_DoSwitch : Boolean;
 
 procedure setupBreak(BreakIn, BreakFor, RanBreakIn, RanBreakFor: Integer);
 begin
@@ -24,7 +25,7 @@ begin
   timer_Break.Start();
 end;
 
-Function breakHandler(): Boolean;
+Function breakHandler(DoSwitch: Boolean = False): Boolean;
 Var
   T      : Timer;
   h,m,s  : integer;
@@ -48,14 +49,19 @@ begin
   until(T.timeElapsed > (break_For+break_For_Ran));
 
   warn('Logging in...', WT_CORE);
-  loginPlayer(false);
-  wait(4000);
-  Result := isLoggedIn();
+  if DoSwitch then
+    switchRandomWorld()
+  else
+    loginPlayer(false);
+
   setAngle(ANGLE_HIGH);
+  wait(randomRange(1500,3000));
+  Result := isLoggedIn();
   setCompass(tmpAng);
 
   timer_Break.Start();
   inc(break_Count);
+  incEx(break_TotalTime, break_For+break_For_Ran);
 
   break_In     := (A * 60000);
   break_For    := (B * 60000);

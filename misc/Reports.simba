@@ -186,7 +186,10 @@ begin
   writeln('[====================================]');
 end;
 
-function getPerHour(Variable: Integer): Integer;
+function getPerHour(Variable: Integer; IncludeBreakTime: Boolean=True): Integer;
 begin
-  result := Round((Variable*60) / maxE(1, (getTimeRunning()/60000)));
+  case IncludeBreakTime of
+    True : result := Round((Variable*60) / maxE(1, (getTimeRunning()/60000)));
+    False: result := Round((Variable*60) / maxE(1, ((getTimeRunning()-break_TotalTime)/60000)));
+  end;
 end;

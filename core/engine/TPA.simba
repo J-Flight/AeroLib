@@ -69,3 +69,8 @@ begin
     if pointInBox(self[i], Box) then
       exit(true);
 end;
+
+function pointsInDist(Pt1, Pt2: TPoint; Dist: Integer): Boolean;
+begin
+  result := (distance(Pt1.X, Pt1.Y, Pt2.X, Pt2.Y) <= Dist);
+end;

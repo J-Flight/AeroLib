@@ -6,11 +6,11 @@ Items
 
 
 type TItem = record
-    Name      : string;      // *
-    DTM       : integer;     // *
-    BMP       : integer;     // *
-    BMP_TOL   : integer;     // *
-    Wieldable : boolean;     // *
+    Name      : string;
+    DTM       : integer;
+    BMP       : integer;
+    BMP_TOL   : integer;
+    Wieldable : boolean;
 end;
 
 
@@ -405,5 +405,5 @@ var
 begin
   slot := Self.getSlot();
   if slot < 1 then Exit(false);
-  interactSlot(slot, action);
+  result := interactSlot(slot, action);
 end;

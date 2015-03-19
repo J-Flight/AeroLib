@@ -33,7 +33,7 @@ type
 
 
 // MapType: 'surface' / 'custom'
-procedure TRSWalker.Init(MapType, MapName:String; PID:Int32);
+procedure TRSWalker.Init(MapType, MapName:String; PID:UInt32);
 var
   BMP:Integer;
   path:String;
@@ -64,6 +64,26 @@ begin
   end;
 end;
 
+procedure TRSWalker.Init(MapType, MapName:String; UseMemScan: Boolean = True); overload;
+var
+  Pid: Int32 = -1;
+begin
+  if (UseMemScan) then
+  begin
+    {$IFDEF SMART}
+      Pid := OS_SMART.ID;
+    {$ELSE}
+      Pid := w_GetClientPID();
+    {$ENDIF}
+
+    if (Pid = -1) then
+     RaiseException(erCustomError, 'TRSWalker.Init: Failed to initialize, unknown include ' +
+                                   'use non overloaded TRSWalker.Init');
+
+    Self.Init(MapType, MapName, Pid);
+  end else
+    Self.Init(MapType, MapName, -1);
+end;
 
 procedure TRSWalker.Free();
 begin

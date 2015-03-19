@@ -515,3 +515,16 @@ begin
     //Me.WorldList[0]:=W;
   loginPlayer(Safe);
 end;
+
+procedure switchRandomWorld();
+var
+  W : Integer;
+begin
+  if isLoggedIn() then
+    logoutPlayer();
+  W := randomWorld(Me.Member);
+  warn('World '+toStr(W)+' chosen.', WT_SCRIPT);
+  changeWorld(W, false);
+  if not isLoggedIn() then
+    loginPlayer(false);
+end;

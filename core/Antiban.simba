@@ -655,9 +655,8 @@ var
 begin
   if findBlackChatMessage('just adva') then
   begin
-    clickContinue(True);
+    continueChat(RBool);
     Wait(RandomRange(125, 250));
-    clickContinue(True);
 
     if ClickSkill then
     begin

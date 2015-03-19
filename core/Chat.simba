@@ -232,26 +232,8 @@ begin
 end;
 
 Function clickContinue(DoWait: Boolean): Boolean;
-var
-  B    : TBox;
-  T    : Timer;
-  pnt  : TPoint;
-  colA,
-  colB : TColEx;
-  i    : Integer;
-  TPA  : TPointArray;
 begin
-  colA.create(16711680, 30);
-  colB.create(16777215, 30);
-
-  if ((not colA.findAllIn(toBox(230,443,381,457), TPA)) and
-    (not colB.findAllIn(toBox(230,443,381,457), TPA)))  then
-    Exit(False);
-  if length(TPA) < 1 then Exit(False);
-
-  B := TPA.getBounds();
-  mouseBox(B, MOUSE_LEFT);
-  Result := True;
+  clickContinueEx(True);
 
   if DoWait then
     waitChatChange();
@@ -280,6 +262,44 @@ Example:
 function clickToContinue(): Boolean;
 begin
   Result := clickContinue(False);
+end;
+
+// Continue chat via the space bar
+function continueChat(Wait: Boolean = True): Boolean;
+var
+  b                  : TBox;
+  pnt                : TPoint;
+  tmpCol             : TColEx;
+  Height,i,x,y       : Integer;
+  bTxt,wTxt,TextTPA,
+  SearchTPA,Matches  : TPointArray;
+  Search2D           : T2DPointArray;
+begin
+  Result := false;
+
+  // only 1 blue color in chat.
+  tmpCol.create(16711680, 10);
+  tmpCol.findAllIn(AREA_CB, bTxt);
+  tmpCol.create(16777215, 30);
+  tmpCol.findAllIn(AREA_CB, wTxt);
+
+  SearchTPA := combineTPA(bTxt, wTxt);
+  if length(SearchTPA) < 1 then
+    Exit(false);
+
+  Search2D := clusterTPAEx(SearchTPA, 20, 2);
+
+  // TO DO: figure out proper Text name (CharsNPC07).. then call will work.
+  TextTPA := loadTextTPA('here to conti', CharsNPC07, Height);
+
+  for i := 0 to High(Search2D) do
+    if findTextTPAinTPA(Height, TextTPA, Search2D[i], Matches) then
+    begin
+      TypeByte(vk_Space);
+      if Wait then
+        waitChatChange();
+      Break;
+    end;
 end;
 
 (*
@@ -871,7 +891,7 @@ begin
           Exit(true);
       end;
     end;
-    if not clickContinue(true) then
+    if not continueChat() then
       exit;
     wait(100 + random(200));
     inc(t);
@@ -886,7 +906,7 @@ begin
   T.start();
   repeat
     findNPCChatTextMulti(resultText, True, True);
-    clickContinue(true);
+    continueChat();
     if not areTalking() then
       break;
   until(T.timeElapsed() > 8000);
