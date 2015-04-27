@@ -462,6 +462,16 @@ begin
   Result := isChatBoxTextBetween(Text, TextCol, 1, 8);
 end;
 
+function isChatBoxTextAnyLineEx(Text: TStringArray; TextCol: Integer): Boolean;
+var
+  i : Integer;
+begin
+  result := false;
+  for i:=0 to high(Text) do
+    if isChatBoxTextBetween(Text[i], TextCol, 1, 8) then
+      Exit(true);
+end;
+
 (*
 ChatBoxTextArray
 ~~~~~~~~~~~~~~~~

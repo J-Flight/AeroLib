@@ -32,11 +32,11 @@
 {$include_once entities/player/Login.simba}
 {$include_once entities/player/WorldHandler.simba}
 {$include_once core/Bank.simba}
-{$include_once misc/connection/OSRS.simba}
+{$include_once misc/connection/Highscores.simba}
+{$include_once misc/connection/ItemInfo.simba}
 {$include_once misc/connection/Stats.simba}
 
 {$include_once entities/object/Object.simba}
-{$include_once entities/items/GroundItems.simba}
 {$include_once entities/npc/NPC.simba}
 
 {$include_once core/minimap/Minimap.simba}
@@ -53,7 +53,7 @@
 
 Const
   AL_VERSION_MAIN = '1.1';
-  AL_VERSION_SUB  = '5';
+  AL_VERSION_SUB  = '6';
 
 procedure AL_checkVersion();
 var
@@ -93,7 +93,6 @@ begin
   setupGauss();
   AL_setBoxes();
   loadObjDB();
-  loadGIDB();
 
   MouseSpeed := 20;
   ocr_LoadFont(AppPath + 'Fonts\UpChars07_s\', UpFont);

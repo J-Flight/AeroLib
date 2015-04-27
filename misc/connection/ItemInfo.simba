@@ -1,0 +1,85 @@
+{
+========
+ItemInfo
+========
+}
+
+{author: Hoodz}
+
+type TItemInfo = record
+  buy, sell, med: Integer;
+end;
+
+function stringToID(StringName: string): Integer;
+var
+  I: Integer;
+  S, Ls, Cs: string;
+  SArray: TStringArray;
+  Noted: Boolean;
+begin
+  Noted := false;
+  if (StringMatch('*', StringName) > 0) then
+  begin
+    Noted := true;
+    StringName := Replace(StringName, '*', '', [rfReplaceAll])
+  end;
+  LS := Replace(StringName, ' ', '+', [rfReplaceAll]);
+  S  := GetPage('http://www.itemdb.biz/index.php?search=' + LS);
+  Cs := Between('<div id="content">', '</font></', S);
+  Cs := Between('<font color=''', '''>', Cs);
+  if (Cs = 'red') then
+  begin
+    warn(StringName + ' not be found', WT_CORE);
+    Result := - 1;
+    Exit;
+  end;
+  S := Between('<td><center><b>', StringName + '<', S);
+  SArray := Explode('<b>', S);
+  S := SArray[High(SArray)];
+  SArray := Explode('</b>', S);
+  S := SArray[0];
+  if (S = '') then
+  begin
+    warn(StringName + ' not be found', WT_CORE);
+    Result := - 1;
+    Exit;
+  end;
+  I := StrToInt(S);
+  if (Noted) then
+    inc(I);
+
+  Result := I;
+end;
+
+function namesToIDs(StringArray: array of string): array of Integer;
+var
+  I, IntReturn: Integer;
+  IntArray: array of Integer;
+begin
+  for I := 0 to High(StringArray) do
+  begin
+    IntReturn := StringToID(StringArray[I]);
+    if (IntReturn = - 1) then
+      continue;
+    SetLength(IntArray, Length(IntArray) + 1);
+    IntArray[High(IntArray)] := intReturn;
+  end;
+  Result := IntArray;
+end;
+
+function getPrice(itemName: String): TItemInfo;
+var
+  itemID: Integer;
+  webSource, buySource, sellSource, medSource: String;
+begin
+  itemID := stringToID(itemName);
+  if (itemID = -1) then
+    exit;
+  webSource := getPage('http://api.rsbuddy.com/grandExchange?a=guidePrice&i=' + toStr(itemID));
+  buySource := between('"buying":', ',', webSource);
+  sellSource := between('"selling":', ',', webSource);
+  medSource := between('"overall":', ',', webSource);
+  result.buy := strToInt(buySource);
+  result.sell := strToInt(sellSource);
+  result.med := strToInt(medSource);
+end;

@@ -709,7 +709,7 @@ begin
   getMousePos(pt.x,pt.y);
   PT := randomPointBoxEx(pt,inttobox(x1,y1,x2,y2),Dist);
   brakeMMouse(PT, 0, 0, True);
-  wait(randomRange(50,150));
+  wait(randomRange(100,150));
   fastClick(ClickType);
 end;
 
@@ -719,7 +719,7 @@ var
 begin
   gaussBox(Pnt.x, Pnt.y, B.X1, B.Y1, B.X2, B.Y2);
   brakeMMouse(Pnt, 0, 0, True);
-  wait(randomRange(50,150));
+  wait(randomRange(100,150));
   fastClick(ClickType);
 end;
 

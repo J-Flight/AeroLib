@@ -643,14 +643,14 @@ begin
 end;
 
 (*
-WithdrawPointEx
+WithdrawPoint
 ~~~~~~~~~~
 
 .. code-block:: pascal
 
-    function withdrawPointEx(Pnt: TPoint; Amount: Integer; Uptexts: TStringArray): Boolean;
+    function withdrawPoint(Pnt: TPoint; Amount: Integer; Uptexts: TStringArray): Boolean;
 
-Withdraws Amount at Column/Row.
+Withdraws Amount at a TPoint.
 
 .. note::
 
@@ -660,9 +660,9 @@ Example:
 
 .. code-block:: pascal
 
-    withdrawEx(Point(250,375), 10, ['ron ore','ore','on or']);
+    withdrawPoint(Point(250,375), 10, ['ron ore','ore','on or']);
 *)
-function withdrawPointEx(Pnt: TPoint; Amount: Integer; Uptexts: TStringArray): Boolean;
+function withdrawPoint(Pnt: TPoint; Amount: Integer; Uptexts: TStringArray): Boolean;
 var
   Box  : TBox;
   T    : Timer;
@@ -684,9 +684,8 @@ begin
   end else
     humanMMouse(Pnt, 7, 7);
 
-  if (Length(Uptexts) > 0) then
-    if not waitUptextMulti(Uptexts, 300) then
-      Exit(false);
+  if not waitUptextMulti(Uptexts, 300) then
+    Exit(false);
 
   if (Amount = 1) then
     fastClick(MOUSE_LEFT)
@@ -725,10 +724,79 @@ begin
   end;
 end;
 
-// Excludes Uptext array
-function withdrawPoint(Pnt: TPoint; Amount: Integer): Boolean;
+function withdrawPoint(Pnt: TPoint; Amount: Integer): Boolean; overload;
+var
+  Box  : TBox;
+  T    : Timer;
+  bCol : TColEx;
+  TPA  : TPointArray;
+  ATPA : T2DPointArray;
 begin
-  Result := withdrawPointEx(Pnt, Amount,[]);
+  Result := False;
+  if not isBankOpen() then
+    exit(False);
+
+  bCol.create(clOutline_black, 1);
+  if bCol.findAllIn(toBox(Pnt.X-20,Pnt.Y-20,Pnt.X+20,Pnt.Y+20), TPA) then
+  begin
+    ATPA := clusterTPA(TPA, 5);
+    sortATPAFromMidPoint(ATPA, Pnt);
+    Box := ATPA[0].getBounds();
+    mouseBox(Box, MOUSE_MOVE);
+  end else
+    humanMMouse(Pnt, 7, 7);
+
+  if (Amount = 1) then
+    fastClick(MOUSE_LEFT)
+  else
+    fastClick(MOUSE_RIGHT);
+
+  if (Amount = 1) then
+  begin
+    Wait(RandomRange(250, 550));
+    Exit(True);
+  end;
+
+  if (Amount = -1) then
+    Result := waitOptionMulti(['Withdraw-All-but', 'l-b'], 300)
+  else
+  begin
+    if (Amount = 0) then
+      Result := waitOptionMulti(['Withdraw-All', 'w-A'], 300)
+    else
+    begin
+      if waitOptionExistsMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 200) then
+        if waitOptionMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 200) then
+          Exit(true);
+
+      if waitOptionMulti(['Withdraw-X', 'w-X', 'X'], 500) then
+      begin
+        bCol.create(0, 1);
+        T.start();
+        while (T.timeElapsed < 10000) and (not inRange(bCol.count(toBox(211,394,308,411)), 200, 300)) do
+          Wait(50);
+        Wait(RandomRange(75, 400));
+        typeSend(intToStr(Amount), True);
+        Result := True;
+      end;
+    end;
+  end;
+end;
+
+function withdrawItem(Item: TItem; Amount: Integer; Uptexts: TStringArray): Boolean;
+var
+  P : TPoint;
+begin
+  if not Item.findIn(AREA_MS, P) then exit(false);
+  Result := withdrawPoint(P, Amount, Uptexts);
+end;
+
+function withdrawItem(Item: TItem; Amount: Integer): Boolean; overload;
+var
+  P : TPoint;
+begin
+  if not Item.findIn(AREA_MS, P) then exit(false);
+  Result := withdrawPoint(P, Amount);
 end;
 
 procedure searchBank(Item: string);
@@ -745,9 +813,9 @@ begin
     if (inRange(bCol.count(toBox(211,394,308,411)), 200, 300)) then
     begin
       if getBankMode() = 'Standard' then
-        humanMMouse(Point(399,307), 16, 16)
+        humanMMouse(Point(399,307), 12, 12)
       else if getBankMode() = 'Tabbed' then
-        humanMMouse(Point(399,314), 16, 16);
+        humanMMouse(Point(399,314), 12, 12);
       fastClick(MOUSE_LEFT);
       T.start();
       while (isBankOpen() and (T.timeElapsed < 5000)) do
@@ -757,13 +825,16 @@ begin
 
   for i:=0 to 2 do
   begin
-    humanMMouse(Point(399,307), 16, 16);
+    if getBankMode() = 'Standard' then
+      humanMMouse(Point(399,307), 12, 12)
+    else if getBankMode() = 'Tabbed' then
+      humanMMouse(Point(399,314), 12, 12);
     fastClick(MOUSE_LEFT);
     T.start();
     while (isBankOpen() and (T.timeElapsed < 5000)) do
     begin
       Wait(250 + Random(350));
-      if (inRange(bCol.count(toBox(211,394,308,411)), 200, 300)) then
+      if (inRange(bCol.count(toBox(87,392,432,412)), 950, 1100)) then
       begin
         TypeSend(Item);
         Exit;

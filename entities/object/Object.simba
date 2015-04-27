@@ -5,10 +5,14 @@ Object
 }
 
 type TMSObject = record
-  Name       : String;
-  UpText     : TStringArray;
-  InnerCols  : Array of TColEx;
-  OuterCols  : Array of TColEx;
+  Name      : String;
+  UpText    : TStringArray;
+  InnerCols : Array of TColEx;
+  OuterCols : Array of TColEx;
+  MinCount  : Integer;
+  Height    : Integer;
+  Width     : Integer;
+  SizeTol   : Integer;
 end;
 
 Const
@@ -18,21 +22,77 @@ Var
   LoadedObjList : Array of TMSObject;
 
 {==============================================================================]
-  TMSObject.create (function)
-  * Explanation : Creates a TMSObject type
-  * Parameters  :
+                      TMSObject.create (procedure)
+* Explanation  : Creates a TMSObject type
+* Parameters   :
     _Name      : Name to assign to the TMSObject
     _UpText    : Array of UpText to check while searching for object
     _InnerCols : Array of TColEx to search for (most unique colors of the Obj)
     _OuterCols : Array of TColEx near with the InnerCols
+    _MinCount  : Minimum color count (Inner color)
+    _Height    : Size of object (Y axis)
+    _Width     : Size of object (X axis)
+    _SizeTol   : Size tolerance for height and width
 [==============================================================================}
 
-procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols, _OuterCols: Array of TColEx);
+procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols, _OuterCols: Array of TColEx; _MinCount, _Height, _Width, _SizeTol: Integer);
 begin
   Self.Name      := _Name;
   Self.UpText    := _Uptext;
   Self.InnerCols := _InnerCols;
   Self.OuterCols := _OuterCols;
+  Self.MinCount  := _MinCount;
+  Self.Height    := _Height;
+  Self.Width     := _Width;
+  Self.SizeTol   := _SizeTol;
+end;
+
+procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols: Array of TColEx; _MinCount, _Height, _Width, _SizeTol: Integer); overload;
+begin
+  Self.Name      := _Name;
+  Self.UpText    := _Uptext;
+  Self.InnerCols := _InnerCols;
+  Self.OuterCols := [];
+  Self.MinCount  := _MinCount;
+  Self.Height    := _Height;
+  Self.Width     := _Width;
+  Self.SizeTol   := _SizeTol;
+end;
+
+procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols: Array of TColEx; _Height, _Width, _SizeTol: Integer); overload;
+begin
+  Self.Name      := _Name;
+  Self.UpText    := _Uptext;
+  Self.InnerCols := _InnerCols;
+  Self.OuterCols := [];
+  Self.MinCount  := 0;
+  Self.Height    := _Height;
+  Self.Width     := _Width;
+  Self.SizeTol   := _SizeTol;
+end;
+
+procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols, _OuterCols: Array of TColEx); overload;
+begin
+  Self.Name      := _Name;
+  Self.UpText    := _Uptext;
+  Self.InnerCols := _InnerCols;
+  Self.OuterCols := _OuterCols;
+  Self.MinCount  := 0;
+  Self.Height    := 0;
+  Self.Width     := 0;
+  Self.SizeTol   := 0;
+end;
+
+procedure TMSObject.create(_Name: string; _UpText: TStringArray; _InnerCols: Array of TColEx); overload;
+begin
+  Self.Name      := _Name;
+  Self.UpText    := _Uptext;
+  Self.InnerCols := _InnerCols;
+  Self.OuterCols := [];
+  Self.MinCount  := 0;
+  Self.Height    := 0;
+  Self.Width     := 0;
+  Self.SizeTol   := 0;
 end;
 
 function TMSObject.doesExist(): Boolean;
@@ -82,6 +142,15 @@ begin
   writeINI('MSObj_'+sIndex, 'TolO', toStr(tmpO.Tol), PATH_OBJDB);
   writeINI('MSObj_'+sIndex, 'hModO', toStr(tmpO.hMod), PATH_OBJDB);
   writeINI('MSObj_'+sIndex, 'sModO', toStr(tmpO.sMod), PATH_OBJDB);
+// MSObj sizes
+  if (Self.MinCount > 0) then
+    writeINI('MSObj_'+sIndex, 'MinCount', toStr(Self.MinCount), PATH_OBJDB);
+  if (Self.Height > 0) then
+    writeINI('MSObj_'+sIndex, 'Height', toStr(Self.Height), PATH_OBJDB);
+  if (Self.Width > 0) then
+    writeINI('MSObj_'+sIndex, 'Width', toStr(Self.Width), PATH_OBJDB);
+  if (Self.SizeTol > 0) then
+    writeINI('MSObj_'+sIndex, 'SizeTol', toStr(Self.SizeTol), PATH_OBJDB);
 end;
 
 procedure TMSObject.saveToDB(); overload;
@@ -121,6 +190,14 @@ begin
       OuterCols[0].Tol  := strToInt(readINI('MSObj_'+toStr(i), 'TolO', PATH_OBJDB));
       OuterCols[0].hMod := strToFloat(readINI('MSObj_'+toStr(i), 'hModO', PATH_OBJDB));
       OuterCols[0].sMod := strToFloat(readINI('MSObj_'+toStr(i), 'sModO', PATH_OBJDB));
+
+      try
+        MinCount:= strToInt(readINI('MSObj_'+toStr(i), 'MinCount', PATH_OBJDB));
+        Height  := strToInt(readINI('MSObj_'+toStr(i), 'Height', PATH_OBJDB));
+        Width   := strToInt(readINI('MSObj_'+toStr(i), 'Width', PATH_OBJDB));
+        SizeTol := strToInt(readINI('MSObj_'+toStr(i), 'SizeTol', PATH_OBJDB));
+      except
+      end;
     end;
 
     LoadedObjList[High(LoadedObjList)] := tmpObj;
@@ -143,6 +220,7 @@ end;
 
 function TMSObject.findAll(DistMod: Integer; SortFrom: TPoint; var Pnts: TPointArray): Boolean;
 var
+  b       : TBox;
   i,h     : Integer;
   tpa,tmp : TPointArray;
   atpaI,
@@ -162,8 +240,23 @@ begin
   begin
     for i:=0 to high(atpaI) do
     begin
-      setArrayLength(tpa, Length(tpa)+1);
-      tpa[High(tpa)] := atpaI[i].midPnt();
+      if (Self.MinCount > 0) and (length(atpaI[i]) < Self.MinCount) then
+        continue;
+
+      if (Self.Height > 0) and (Self.Width > 0) then
+      begin
+        b := atpaI[i].getBounds();
+        if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
+            inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
+        begin
+          setArrayLength(tpa, Length(tpa)+1);
+          tpa[High(tpa)] := atpaI[i].midPnt();
+        end;
+      end else
+      begin
+        setArrayLength(tpa, Length(tpa)+1);
+        tpa[High(tpa)] := atpaI[i].midPnt();
+      end;
     end;
   end else
   begin
@@ -181,8 +274,22 @@ begin
         FilterTPADistTPA(tmp, 0, DistMod, atpaO[h]);
         if length(tmp) > 0 then
         begin
-          setArrayLength(tpa, Length(tpa)+1);
-          tpa[High(tpa)] := tmp.midPnt();
+          if (Self.MinCount > 0) and (length(tmp) < Self.MinCount) then
+            continue;
+          if (Self.Height > 0) and (Self.Width > 0) then
+          begin
+            b := atpaO[h].getBounds();
+            if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
+                inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
+            begin
+              setArrayLength(tpa, Length(tpa)+1);
+              tpa[High(tpa)] := tmp.midPnt();
+            end;
+          end else
+          begin
+            setArrayLength(tpa, Length(tpa)+1);
+            tpa[High(tpa)] := tmp.midPnt();
+          end;
         end;
       end;
   end;

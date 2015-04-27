@@ -94,7 +94,10 @@ begin
     setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
   end;
   checkAreaBounds(Area);
-  Result := findColorsTolerance(Points, Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  try
+    Result := findColorsTolerance(Points, Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  except
+  end;
   setColorToleranceSpeed(tmpCTS);
 end;
 
