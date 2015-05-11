@@ -345,17 +345,17 @@ begin
   tCol.create(1777019, 15);
   if Enable then
   begin
-    if (tCol.count(toBox(567,420,602,458)) > 50) then
+    if (tCol.count(toBox(554,428,591,462)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(567,420,602,458), MOUSE_LEFT);
+      mouseBox(toBox(554,428,591,462), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
-    if (tCol.count(toBox(567,420,602,458)) > 50) then
+    if (tCol.count(toBox(554,428,591,462)) > 50) then
     begin
-      mouseBox(toBox(567,420,602,458), MOUSE_LEFT);
+      mouseBox(toBox(554,428,591,462), MOUSE_LEFT);
       Result := True;
     end;
 end;

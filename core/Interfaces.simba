@@ -13,7 +13,7 @@ type TInterface = record
 end;
 
 var
-  Interfaces: Array [0..12] of TInterface;
+  Interfaces: Array [0..15] of TInterface;
 
 {
 ~To-add~
@@ -35,6 +35,9 @@ const
   GEMAINSCREEN    = 10;
   GEOFFERSCREEN   = 11;
   GECOLLECTSCREEN = 12;
+  JEWELLERYSCREEN = 13;
+  TARGETSCREEN    = 14;
+  TANNINGSCREEN   = 15;
 
 procedure setupInterfaces();
 begin
@@ -102,6 +105,30 @@ begin
     Text      := 'Collection';
     TxtBounds := toBox(210, 73, 278, 89);
   end;
+  with Interfaces[JEWELLERYSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 39423;
+    ColorTol  := 5;
+    Text      := 'Rings';
+    TxtBounds := toBox(40, 28, 150, 110);
+  end;
+  with Interfaces[TARGETSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 4500223;
+    ColorTol  := 5;
+    Text      := 'arget';
+    TxtBounds := toBox(225, 30, 310, 50);
+  end;
+  with Interfaces[TANNINGSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'hides';
+    TxtBounds := toBox(140, 30, 375, 50);
+  end;
 end;
 
 function TInterface.isVisible(): boolean;
@@ -113,7 +140,7 @@ function isInterfaceOpen(): Boolean;
 var
   i : Integer;
 begin
-  for i:=BANKSCREEN to TELEOTHERSCREEN do
+  for i:=BANKSCREEN to TARGETSCREEN do
     if Interfaces[i].isVisible() then
       Exit(true);
   result := false;

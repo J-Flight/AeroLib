@@ -298,6 +298,8 @@ var
   fX,fY,mX,mY: Integer;
   B: TBox;
 begin
+  if findDTM(DTM, X, Y, MSx1, MSy1, MSx2, MSy2) then
+    Exit(True);
   Result := False;
   MSP    := MouseSpeed;
   sqrt2  := sqrt(2);

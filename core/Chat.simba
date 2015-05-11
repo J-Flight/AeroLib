@@ -298,6 +298,7 @@ begin
       TypeByte(vk_Space);
       if Wait then
         waitChatChange();
+      result := True;
       Break;
     end;
 end;

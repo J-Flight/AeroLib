@@ -42,7 +42,7 @@ begin
     'Tabbed':
       begin
         MBX1 := 60;
-        MBY1 := 81;
+        MBY1 := 80;
         MBX2 := 446;
         MBY2 := 296;
       end;
@@ -254,7 +254,7 @@ begin
 
   end;
 
-  Result := isBankOpen();
+  Result := waitFunc(@isBankOpen, 50, 3000);
 end;
 
 (*
@@ -355,7 +355,7 @@ begin
     Exit;
 
   T.start();
-  while (T.timeElapsed() >= TimeToWait) do
+  while (T.timeElapsed() < TimeToWait) do
     if getCurrentBankTab() = Tab then
       Exit(True);
 end;
@@ -436,47 +436,51 @@ end;
 
 Function scrollToItem(Item: TItem; var Pnt: TPoint): Boolean;
 var
+  T     : Timer;
   mPnt  : TPoint;
   X,Y,A : integer;
   rS    : extended;
 begin
   if not isBankOpen() then Exit(false);
+  waitFunc(@itemsInBank, 60, 4000); // Anti-lag
 
-  waitFunc(@itemsInBank, 10, 3000); // Anti-lag
-  if Item.findIn(AREA_BS, Pnt) then
-    Exit(true);
+  T.start();
+  while T.timeElapsed() <= randomRange(400,900) do
+    if Item.findIn(AREA_BS, Pnt) then
+      Exit(true);
 
   fixBank();
   wait(randomRange(400,900));
 
-  if Item.findIn(AREA_BS, Pnt) then
-    Exit(true);
+  while T.timeElapsed() <= randomRange(400,900) do
+    if Item.findIn(AREA_BS, Pnt) then
+      Exit(true);
 
   A := MouseSpeed;
   if getBankMode() = 'Standard' then
-    brakeMMouse(Point(489,85), 3, 5, True)
+    brakeMMouse(Point(490,81), 5, 3, True)
   else if getBankMode() = 'Tabbed' then
-    brakeMMouse(Point(489,106), 3, 5, True);
+    brakeMMouse(Point(490,104), 5, 3, True);
 
   getMousePos(X, Y);
   holdMouse(X, Y, MOUSE_LEFT);
 
-  MouseSpeed := 30;
+  mouseSpeed := 30;
   rS  := (random(30) / 30) / 10.0;
   if rS = 0.0 then
     rS := 0.1;
 
   if getBankMode() = 'Standard' then
-    result := windMouseDTM(X, Y, 489+RandomRange(-3,3), 265+RandomRange(-5,5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM)
+    result := windMouseDTM(X, Y, 490+randomRange(-5,5), 265+randomRange(-3,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM)
   else if getBankMode() = 'Tabbed' then
-    result := windMouseDTM(X, Y, 489+RandomRange(-3,3), 275+RandomRange(-5,5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM);
+    result := windMouseDTM(X, Y, 490+randomRange(-5,5), 275+randomRange(-5,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM);
 
   wait(randomRange(400,800));
-  mPnt := getMousePnt();
-  releaseMouse(mPnt.X, mPnt.Y, MOUSE_LEFT);
-  Wait(RandomRange(200,400));
-  Result := Item.findIn(AREA_BS, Pnt);
-  MouseSpeed := A;
+  getMousePos(X, Y);
+  releaseMouse(X, Y, MOUSE_LEFT);
+  wait(randomRange(200,400));
+  result := Item.findIn(AREA_BS, Pnt);
+  mouseSpeed := A;
 end;
 
 (*
@@ -673,6 +677,7 @@ begin
   Result := False;
   if not isBankOpen() then
     exit(False);
+  waitFunc(@itemsInBank, 60, 4000); // Anti-lag
 
   bCol.create(clOutline_black, 1);
   if bCol.findAllIn(toBox(Pnt.X-20,Pnt.Y-20,Pnt.X+20,Pnt.Y+20), TPA) then
@@ -684,7 +689,7 @@ begin
   end else
     humanMMouse(Pnt, 7, 7);
 
-  if not waitUptextMulti(Uptexts, 300) then
+  if not waitUptextMulti(Uptexts, 500) then
     Exit(false);
 
   if (Amount = 1) then
@@ -699,18 +704,18 @@ begin
   end;
 
   if (Amount = -1) then
-    Result := waitOptionMulti(['Withdraw-All-but', 'l-b'], 300)
+    Result := waitOptionMulti(['Withdraw-All-but', 'l-b'], 700)
   else
   begin
     if (Amount = 0) then
-      Result := waitOptionMulti(['Withdraw-All', 'w-A'], 300)
+      Result := waitOptionMulti(['Withdraw-All', 'w-A'], 700)
     else
     begin
-      if waitOptionExistsMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 200) then
-        if waitOptionMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 200) then
+      if waitOptionExistsMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 600) then
+        if waitOptionMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 600) then
           Exit(true);
 
-      if waitOptionMulti(['Withdraw-X', 'w-X', 'X'], 500) then
+      if waitOptionMulti(['Withdraw-X', 'w-X', 'X'], 700) then
       begin
         bCol.create(0, 1);
         T.start();
@@ -735,6 +740,7 @@ begin
   Result := False;
   if not isBankOpen() then
     exit(False);
+  waitFunc(@itemsInBank, 60, 4000); // Anti-lag
 
   bCol.create(clOutline_black, 1);
   if bCol.findAllIn(toBox(Pnt.X-20,Pnt.Y-20,Pnt.X+20,Pnt.Y+20), TPA) then
@@ -758,18 +764,18 @@ begin
   end;
 
   if (Amount = -1) then
-    Result := waitOptionMulti(['Withdraw-All-but', 'l-b'], 300)
+    Result := waitOptionMulti(['Withdraw-All-but', 'l-b'], 700)
   else
   begin
     if (Amount = 0) then
-      Result := waitOptionMulti(['Withdraw-All', 'w-A'], 300)
+      Result := waitOptionMulti(['Withdraw-All', 'w-A'], 700)
     else
     begin
-      if waitOptionExistsMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 200) then
-        if waitOptionMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 200) then
+      if waitOptionExistsMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 600) then
+        if waitOptionMulti(['Withdraw-' + intToStr(Amount) + ' ', 'w-' + intToStr(Amount) + ' '], 600) then
           Exit(true);
 
-      if waitOptionMulti(['Withdraw-X', 'w-X', 'X'], 500) then
+      if waitOptionMulti(['Withdraw-X', 'w-X', 'X'], 700) then
       begin
         bCol.create(0, 1);
         T.start();
@@ -787,6 +793,7 @@ function withdrawItem(Item: TItem; Amount: Integer; Uptexts: TStringArray): Bool
 var
   P : TPoint;
 begin
+  waitFunc(@itemsInBank, 60, 4000); // Anti-lag
   if not Item.findIn(AREA_MS, P) then exit(false);
   Result := withdrawPoint(P, Amount, Uptexts);
 end;
@@ -795,6 +802,7 @@ function withdrawItem(Item: TItem; Amount: Integer): Boolean; overload;
 var
   P : TPoint;
 begin
+  waitFunc(@itemsInBank, 60, 4000); // Anti-lag
   if not Item.findIn(AREA_MS, P) then exit(false);
   Result := withdrawPoint(P, Amount);
 end;
@@ -921,19 +929,19 @@ begin
     end else
     begin
       fastClick(MOUSE_RIGHT);
-      if not waitOptionMulti(['Open','k B','n De','it Ban','Use Bank chest'], randomRange(150,300)) then
+      if not waitOptionMulti(['Open','k B','n De','it Ban','Use Bank chest'], randomRange(450,600)) then
         exit(false);
     end;
   end else
   begin
     fastClick(MOUSE_RIGHT);
-    if not waitOptionMulti(['Open','k B','n De','nk F','nk Ar','it Ban','Use Bank chest'], randomRange(150,300)) then
+    if not waitOptionMulti(['Open','k B','n De','nk F','nk Ar','it Ban','Use Bank chest'], randomRange(450,600)) then
       exit(false);
   end;
 
-  if waitFunc(@isPlayerWalking, 60, 400) then
-    While isPlayerWalking() do
-      Wait(1);
+  if waitFunc(@isPlayerWalking, 60, randomRange(800,1200)) then
+    while isPlayerWalking() do
+      wait(60);
 
   T.start();
   repeat

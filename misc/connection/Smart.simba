@@ -15,7 +15,7 @@ end;
 var
   SMART_UserAgent : String = 'Mozilla/5.0 (Windows NT 6.1; WOW64; rv:33.0) Gecko/20100101 Firefox/33.0';
   SMART_World : Integer;
-  SMART_ShowConsole : Boolean = True;
+  SMART_ShowConsole : Boolean = False;
   OS_SMART : TSmart;
 
 Procedure TSmart.Create;
