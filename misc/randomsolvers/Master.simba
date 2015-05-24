@@ -7,7 +7,6 @@ Master
 
 // Working
 {$include_once Misc.simba}
-{$include_once Rewards.simba}
 {$include_once Box.simba}
 {$include_once FrogCave.simba}
 {$include_once SandwichLady.simba}
@@ -31,7 +30,7 @@ Master
 {$include_once PrisonPete.simba}
 
 Const
-  RANDOMS_COUNT     = 30;
+  RANDOMS_COUNT     = 29;
   RAND_DEMON        = 0;
   RAND_MAZE         = 1;
   RAND_EVILBOB      = 2;
@@ -51,17 +50,16 @@ Const
   RAND_BEEKEEPER    = 16;
   RAND_MOLLY        = 17;
   RAND_STRANGEBOX   = 18;
-  RAND_REWARDS      = 19;
-  RAND_COMBAT       = 20;
-  RAND_SWARM        = 21;
-  RAND_STRANGEPLANT = 22;
-  RAND_EVILCHICKEN  = 23;
-  RAND_BIGFISH      = 24;
-  RAND_WHIRLPOOL    = 25;
-  RAND_BROKENAXE    = 26;
-  RAND_ENT          = 27;
-  RAND_BROKENPICK   = 28;
-  RAND_GASROCK      = 29;
+  RAND_COMBAT       = 19;
+  RAND_SWARM        = 20;
+  RAND_STRANGEPLANT = 21;
+  RAND_EVILCHICKEN  = 22;
+  RAND_BIGFISH      = 23;
+  RAND_WHIRLPOOL    = 24;
+  RAND_BROKENAXE    = 25;
+  RAND_ENT          = 26;
+  RAND_BROKENPICK   = 27;
+  RAND_GASROCK      = 28;
 
 
 type TRandom = record
@@ -131,15 +129,6 @@ begin
   RandomEvents[RAND_Ent].name          := 'Ent';
   RandomEvents[RAND_BROKENPICK].name   := 'Broken Pickaxe';
   RandomEvents[RAND_GASROCK].name      := 'Gas Rock';
-
-  with RandomEvents[RAND_REWARDS] do
-  begin
-    name      := 'Rewards';
-    solve     := @RD_Solve;
-    detect    := @RD_Detect;
-    usesInv   := true;
-    hasReward := true;
-  end;
 
   with RandomEvents[RAND_FROG] do
   begin
@@ -505,11 +494,6 @@ begin
           logoutPlayer();
           Exit(False);
         end;
-      end;
-    'Genie':
-      begin
-        inc(RandomEvents[RAND_REWARDS].solved);
-        Exit(True);
       end;
     else
       //Writeln('Incorrect random?');

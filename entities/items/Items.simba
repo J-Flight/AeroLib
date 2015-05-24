@@ -344,6 +344,13 @@ begin
   result := Self.findIn(AREA_INV, Pnt);
 end;
 
+function TItem.onMS(): Boolean;
+var
+  Pnt : TPoint;
+begin
+  result := Self.findIn(AREA_MS, Pnt);
+end;
+
 function isBankOpen(): Boolean; forward;
 function TItem.getAmount(ExcludeBank: Boolean): Integer;
 var
@@ -399,7 +406,7 @@ begin
   result := slots[0];
 end;
 
-function TItem.Interact(action: Variant): Boolean;
+function TItem.interact(action: Variant): Boolean;
 var
   slot : Integer;
 begin

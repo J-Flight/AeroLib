@@ -46,10 +46,10 @@ const
   WDx2 = 499;
   WDy2 = 381;
 // Logout box
-  LOx1 = 596;
-  LOy1 = 367;
-  LOx2 = 689;
-  LOy2 = 386;
+  LOx1 = 573;
+  LOy1 = 349;
+  LOx2 = 707;
+  LOy2 = 375;
 
   WHITE_TEXT    = 16777215; // white text color
   MESSAGE_BOX   = 11452366; // The "helpful message" box color
@@ -122,14 +122,10 @@ end;
 
 function connectionLost(): Boolean;
 var
-  Pnt   : TPoint;
-  c1,c2 : TColEx;
   X,Y   : Integer;
 begin
-  c1.create(0, 0);
-  c2.create(16777215, 10)
-  if (c1.findIn(toBox(0,0,230,35), Pnt) and c2.findIn(toBox(0,0,230,35), Pnt)) then
-    result := findText(X, Y, 'attem', 'SmallChars07', toBox(0,0,230,35));
+  result := (findText(X, Y, 'attem', 'SmallChars07', toBox(0,0,230,35)) or
+             findText(X, Y, 'lease', 'SmallChars07', toBox(0,0,230,35)));
 end;
 
 function isLoggedIn(): Boolean;
@@ -204,6 +200,7 @@ begin
   terminateScript();
 end;
 
+function WS_toggle(Open: Boolean = True): Boolean; forward;
 function logoutPlayer(): Boolean;
 var
   T : Timer;
@@ -214,6 +211,7 @@ begin
   if not gametab(TAB_LOGOUT) then
     exit(false);
 
+  WS_toggle(False);
   T.start();
   while (Me.inCombat() and (T.timeElapsed() < 5000)) do
     wait(1);
@@ -309,10 +307,11 @@ begin
    318,341,362,+
    319,342,365];
 
-   FreeWorlds :=
+  FreeWorlds :=
   [301,308,316,335,381,
    382,383,384,393,394];
 
+  EnterName:
   if inIntArray(IgnoreWorlds, getCurrentWorldLS()) then
   begin
     warn('Ignore world detected, choosing another world', WT_CORE);
@@ -320,13 +319,12 @@ begin
   end;
 
   if not Me.Member then
-    if inIntArray(MemWorlds, getCurrentWorldLS()) then
-    begin
-      warn('Switching to a F2P world', WT_CORE);
-      selectWorld(randomWorld(Me.Member));
-    end;
+  if inIntArray(MemWorlds, getCurrentWorldLS()) then
+  begin
+    warn('Switching to a F2P world', WT_CORE);
+    selectWorld(randomWorld(Me.Member));
+  end;
 
-  EnterName:
   warn('Logging player in...', WT_CORE);
 
   if isLoggedIn() then

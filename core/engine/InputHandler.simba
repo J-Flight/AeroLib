@@ -284,13 +284,13 @@ begin
 end;
 
 {*******************************************************************************
-Procedure windMouseDTM(xs, ys, xe, ye, gravity, wind, minWait, maxWait,
-          targetArea: extended; DTM: Integer)
+Function windMouseFunc(xs, ys, xe, ye, gravity, wind, minWait, maxWait,
+          targetArea: extended; Func: function: Boolean);
 By: Flight
-Description: "Slowly" moves the mouse while searching for a DTM
-              on the main-screen.
+Description: "Slowly" moves the mouse until either the target coordinate is
+             reached or the condition 'Func' is met.
 *******************************************************************************}
-Function windMouseDTM(xs, ys, xe, ye, gravity, wind, minWait, maxWait, targetArea: extended; DTM: Integer): Boolean;
+Function windMouseFunc(xs, ys, xe, ye, gravity, wind, minWait, maxWait, targetArea: extended; Func: function: Boolean): Boolean;
 var
   veloX,veloY,windX,windY,veloMag,dist,randomDist,lastDist,step: extended;
   lastX,lastY,MSP,W,maxStep,X,Y: integer;
@@ -298,8 +298,7 @@ var
   fX,fY,mX,mY: Integer;
   B: TBox;
 begin
-  if findDTM(DTM, X, Y, MSx1, MSy1, MSx2, MSy2) then
-    Exit(True);
+  if (Func()) then Exit(True);
   Result := False;
   MSP    := MouseSpeed;
   sqrt2  := sqrt(2);
@@ -342,20 +341,12 @@ begin
     if (lastX <> Round(xs)) or (lastY <> Round(ys)) then
       MoveMouse(Round(xs), Round(ys));
 
-    getMousePos(mX, mY);
-    B := toBox(mX-5, mY-5, mX+5, mY+5);
+    if (Func()) then Exit(True);
 
-// Search for the scroll bar near the mouse
-    if not cs_findColorTolerance(fX, fY, 3359309, 30, B, cs_CTS1) then
-      Exit(False);
-
-    if findDTM(DTM, X, Y, MSx1, MSy1, MSx2, MSy2) then
-      Exit(True);
-
-    case Random(50) of
-      1..25: W := (MSP + (Random(Round(MSP/4))));
-      26..50: W := (MSP - (RandomRange(Round(MSP/2), MSP-1)));
-    end;
+    if RBool then
+      W := (MSP + (Random(Round(MSP/4))))
+    else
+      W := (MSP - (RandomRange(Round(MSP/2), MSP-1)));
 
     if (W < 1) then
       W := 1;

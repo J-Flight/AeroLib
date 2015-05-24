@@ -1,0 +1,109 @@
+{
+=============
+WorldSwitcher
+=============
+}
+
+Const
+  WS_BoxMain  : TBox = [575,406,706,431];
+  WS_BoxClose : TBox = [717,208,733,224];
+  WS_WorldBox : TBox = [566,240,585,431];
+
+Var
+  WS_World : Integer;
+
+
+function WS_enabled(): Boolean;
+begin
+  result := findTextTPA(2070783, 15, toBox(575,208,630,223), 'Current', 'UpChars07', -1);
+end;
+
+function WS_toggle(Open: Boolean = True): Boolean;
+var
+  T : Timer;
+begin
+  if not isLoggedIn() then Exit;
+  gameTab(TAB_LOGOUT);
+  wait(randomRange(150,300));
+  case Open of
+    True :
+    begin
+      if WS_enabled() then exit(true);
+      mouseBox(WS_BoxMain, MOUSE_LEFT);
+      result := waitFunc(@WS_enabled, 50, 2000);
+    end;
+    False:
+    begin
+      if not WS_enabled then exit(true);
+      mouseBox(WS_BoxClose, MOUSE_LEFT);
+      T.start();
+      while (T.timeElapsed() < 2000) do
+        if not WS_enabled() then
+          exit(true);
+    end;
+  end;
+end;
+
+function WS_findWorld(): Boolean;
+begin
+  result := (findTextTPA(61680, 15, WS_WorldBox, toStr(WS_World), 'SmallChars07', -1) or
+             findTextTPA(14737632, 15, WS_WorldBox, toStr(WS_World), 'SmallChars07', -1));
+end;
+
+function WS_switchWorlds(World: Integer): Boolean;
+var
+  T : Timer;
+  ms,x,y : Integer;
+  rS : Extended;
+begin
+  if not isLoggedIn() then Exit;
+
+  WS_toggle();
+  WS_World := World;
+  if not WS_findWorld() then
+  begin
+    ms := MouseSpeed;
+    mouseBox(toBox(725,250,733,260), MOUSE_MOVE);
+    getMousePos(x, y);
+    holdMouse(x, y, MOUSE_LEFT);
+
+    mouseSpeed := 35;
+    rS  := (random(30) / 30) / 10.0;
+    if rS = 0.0 then
+      rS := 0.1;
+
+    windMouseFunc(X, Y, 725+random(8), 414+random(5), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @WS_findWorld);
+    wait(randomRange(200,400));
+    getMousePos(X, Y);
+    releaseMouse(X, Y, MOUSE_LEFT);
+  end;
+
+  if not findText(X, Y, toStr(World), 'SmallChars07', WS_WorldBox) then
+  begin
+    warn('Failed to find world '+toStr(World)+' in the world list', WT_CORE);
+    exit;
+  end;
+
+  warn('Found world '+toStr(World)+', switching worlds.', WT_CORE);
+  T.start();
+  while (Me.inCombat() and (T.timeElapsed() < 5000)) do
+    wait(30);
+
+  mouseBox(toBox(X,Y,X+15,Y+4), MOUSE_LEFT);
+  fastClick(MOUSE_LEFT);
+  T.start();
+  while (T.timeElapsed() < 2000) do
+    if findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
+      break;
+  if not findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
+    exit;
+
+  mouseBox(toBox(X,Y,X+10,Y+6), MOUSE_LEFT);
+  T.start();
+  while (T.timeElapsed() < 4000) do
+    if findText(X, Y, 'lease', 'SmallChars07', toBox(0,0,230,35)) then
+      break;
+  while findText(X, Y, 'lease', 'SmallChars07', toBox(0,0,230,35)) do
+    wait(30);
+  result := true;
+end;

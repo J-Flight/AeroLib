@@ -69,6 +69,7 @@ var
   MBY1 : Integer = 60;
   MBX2 : Integer = 446;
   MBY2 : Integer = 288;
+  AREA_BS : TBox = [60,60,446,288];
 
 { const MBCX, MBCY;
   Description: Bank Screen Centre Points. }
@@ -89,6 +90,17 @@ const
 const
   DBCX = 266;
   DBCY = 153;
+
+  AREA_MS  : TBox = [MSX1,MSY1,MSX2,MSY2];
+  AREA_MM  : TBox = [MMX1,MMY1,MMX2,MMY2];
+  AREA_INV : TBox = [MIX1,MIY1,MIX2,MIY2];
+  AREA_CB  : TBox = [MCX1,MCY1,MCX2,MCY2];
+  AREA_DS  : TBox = [DBX1,DBY1,DBX2,DBY2];
+
+  MMCP     : TPoint = [MMCX,MMCY];
+  MSCP     : TPoint = [MSCX,MSCY];
+  MICP     : TPoint = [MICX,MICY];
+  MCCP     : TPoint = [MCCX,MCCY];
 
 const
   DIR_NORTH = 1;
@@ -124,9 +136,6 @@ const
 
 var
   count_Login : Integer;
-  AREA_MS,AREA_INV,AREA_CB,
-  AREA_MM,AREA_BS,AREA_DS   : TBox;
-
 
 { const AeroLib procedures Constants; }
 const
@@ -151,8 +160,6 @@ var
   AL_CombatRandoms    : Boolean;
   AL_runDirection     : TStringArray;
 
-  MSCP,MMCP,MICP,MCCP : TPoint;
-
 (*
 AL_HasProc
 
@@ -175,19 +182,4 @@ function AL_HasProc(Index: Integer): Boolean;
 begin
   if (Index >= Low(AL_Procs)) and (Index <= High(AL_Procs)) then
     Result := @AL_Procs[Index] <> nil;
-end;
-
-procedure AL_setBoxes();
-begin
-  AREA_MS  := toBox(MSX1,MSY1,MSX2,MSY2);
-  AREA_MM  := toBox(MMX1,MMY1,MMX2,MMY2);
-  AREA_INV := toBox(MIX1,MIY1,MIX2,MIY2);
-  AREA_CB  := toBox(MCX1,MCY1,MCX2,MCY2);
-  AREA_BS  := toBox(MBX1,MBY1,MBX2,MBY2);
-  AREA_DS  := toBox(DBX1,DBY1,DBX2,DBY2);
-
-  MMCP := point(MMCX,MMCY);
-  MSCP := point(MSCX,MSCY);
-  MICP := point(MICX,MICY);
-  MCCP := point(MCCX,MCCY);
 end;

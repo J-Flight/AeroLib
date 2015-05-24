@@ -43,6 +43,7 @@
 {$include_once core/Breaking.simba}
 {$include_once core/gametabs/GameTab.simba}
 {$include_once core/Antiban.simba}
+{$include_once core/gametabs/WorldSwitcher.simba}
 
 {$include_once misc/randomsolvers/Master.simba}
 {$include_once misc/Reports.simba}
@@ -53,7 +54,7 @@
 
 Const
   AL_VERSION_MAIN = '1.1';
-  AL_VERSION_SUB  = '7';
+  AL_VERSION_SUB  = '8';
 
 procedure AL_checkVersion();
 var
@@ -91,7 +92,6 @@ begin
   warn('Initiating AeroLib...', WT_CORE);
   AL_checkVersion();
   setupGauss();
-  AL_setBoxes();
   loadObjDB();
 
   MouseSpeed := 20;

@@ -4,6 +4,9 @@ Bank
 ====
 }
 
+Var
+  searchItem : TItem;
+
 function isBankOpen(): Boolean;
 begin
   result := Interfaces[BANKSCREEN].isVisible();
@@ -434,7 +437,15 @@ begin
   result := col_Black.findIn(AREA_BS);
 end;
 
-Function scrollToItem(Item: TItem; var Pnt: TPoint): Boolean;
+function searchItemInBank(): Boolean;
+var
+  Pt : TPoint;
+begin
+  if not isBankOpen() then Exit(false);
+  result := searchItem.findIn(AREA_MS, Pt);
+end;
+
+function scrollToItem(Item: TItem; var Pnt: TPoint): Boolean;
 var
   T     : Timer;
   mPnt  : TPoint;
@@ -444,16 +455,17 @@ begin
   if not isBankOpen() then Exit(false);
   waitFunc(@itemsInBank, 60, 4000); // Anti-lag
 
+  searchItem := Item;
   T.start();
   while T.timeElapsed() <= randomRange(400,900) do
-    if Item.findIn(AREA_BS, Pnt) then
+    if searchItemInBank() then
       Exit(true);
 
   fixBank();
   wait(randomRange(400,900));
 
   while T.timeElapsed() <= randomRange(400,900) do
-    if Item.findIn(AREA_BS, Pnt) then
+    if searchItemInBank() then
       Exit(true);
 
   A := MouseSpeed;
@@ -465,21 +477,21 @@ begin
   getMousePos(X, Y);
   holdMouse(X, Y, MOUSE_LEFT);
 
-  mouseSpeed := 30;
+  mouseSpeed := 1;
   rS  := (random(30) / 30) / 10.0;
   if rS = 0.0 then
     rS := 0.1;
 
   if getBankMode() = 'Standard' then
-    result := windMouseDTM(X, Y, 490+randomRange(-5,5), 265+randomRange(-3,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM)
+    result := windMouseFunc(X, Y, 490+randomRange(-5,5), 265+randomRange(-3,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank)
   else if getBankMode() = 'Tabbed' then
-    result := windMouseDTM(X, Y, 490+randomRange(-5,5), 275+randomRange(-5,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, Item.DTM);
+    result := windMouseFunc(X, Y, 490+randomRange(-5,5), 275+randomRange(-5,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank);
 
   wait(randomRange(400,800));
   getMousePos(X, Y);
   releaseMouse(X, Y, MOUSE_LEFT);
   wait(randomRange(200,400));
-  result := Item.findIn(AREA_BS, Pnt);
+  result := searchItemInBank();
   mouseSpeed := A;
 end;
 

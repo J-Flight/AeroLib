@@ -136,11 +136,20 @@ begin
   result := findTextTPA(Self.FontColor, Self.ColorTol, Self.TxtBounds,Self.Text, Self.FontType, -1);
 end;
 
+function TInterface.waitVisible(WaitTime: Integer): boolean;
+var
+  T : Timer;
+begin
+  T.start();
+  while T.timeElapsed < WaitTime do
+    if Self.isVisible() then exit(true);
+end;
+
 function isInterfaceOpen(): Boolean;
 var
   i : Integer;
 begin
-  for i:=BANKSCREEN to TARGETSCREEN do
+  for i:=0 to high(Interfaces) do
     if Interfaces[i].isVisible() then
       Exit(true);
   result := false;
@@ -166,8 +175,6 @@ var
 begin
   if menuOpen() then
   begin
-    ms := mouseSpeed;
-    mouseSpeed := 25;
     T.start();
     while (T.timeElapsed() < 3000) do
     begin
@@ -176,14 +183,13 @@ begin
       if not menuOpen() then
         break;
     end;
-    mouseSpeed := ms;
   end;
 
 // handles the advanced skill guide window
   tmpCol.create(2994428,20);
   if tmpCol.findIn(toBox(728,8,753,30), pnt) then
   begin
-    BrakeMMouse(pnt, 3, 3, False);
+    brakeMMouse(pnt, 3, 3, False);
     fastClick(MOUSE_LEFT);
     Exit(True);
   end;
