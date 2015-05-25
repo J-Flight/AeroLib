@@ -300,7 +300,7 @@ begin
   Pnts := tpa;
 end;
 
-function TMSObject.Find(DistMod: Integer; SortFrom: TPoint; var Pnt: TPoint): Boolean;
+function TMSObject.find(DistMod: Integer; SortFrom: TPoint; var Pnt: TPoint): Boolean;
 var
   i,h     : Integer;
   tpa,tmp : TPointArray;
@@ -329,9 +329,16 @@ begin
   end;
 end;
 
-function TMSObject.Find(var Pnt: TPoint): Boolean; overload;
+function TMSObject.find(var Pnt: TPoint): Boolean; overload;
 begin
   result := Self.Find(10, point(MSCX,MSCY), Pnt);
+end;
+
+function TMSObject.find(): Boolean; overload;
+var
+  P : TPoint;
+begin
+  result := Self.Find(10, point(MSCX,MSCY), P);
 end;
 
 function findMSObjectSimple(Cols: TIntegerArray; UpTextArray: TStringArray): Boolean;

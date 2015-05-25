@@ -134,7 +134,6 @@ var
 begin
   if connectionLost() then
   begin
-    warn('Connection lost, please wait..', WT_CORE);
     T.start();
     while (connectionLost() and (T.timeElapsed() < 60000)) do
       wait(1);

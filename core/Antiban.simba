@@ -213,6 +213,27 @@ begin
   until (Abs(GetTickCount - T) >= Time);
 end;
 
+{*******************************************************************************
+procedure humanRandomMouse;
+By: Flight
+Description: Slowly moves the mouse a short distance in a random direction.
+*******************************************************************************}
+Procedure humanRandomMouse();
+var
+  randSpeed : extended;
+  x,y,MS    : integer;
+begin
+  MS := mouseSpeed;
+
+  mouseSpeed := RandomRange(5, 10);
+  randSpeed  := (random(MouseSpeed) / 2.0 + MouseSpeed) / 10.0;
+  getMousePos(x, y);
+  humanWindMouse(x, y, RandomRange(x - 75, x + 75), RandomRange(y - 75, y + 75),
+          30, 55, 10.0 / randSpeed, 12.0 / randSpeed, 10.0 * randSpeed);
+
+  mouseSpeed := MS;
+end;
+
 (*
 randomMovement
 ~~~~~~~~~~~~~~

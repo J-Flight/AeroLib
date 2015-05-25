@@ -458,14 +458,14 @@ begin
   searchItem := Item;
   T.start();
   while T.timeElapsed() <= randomRange(400,900) do
-    if searchItemInBank() then
+    if Item.findIn(AREA_MS, Pnt) then
       Exit(true);
 
   fixBank();
   wait(randomRange(400,900));
 
   while T.timeElapsed() <= randomRange(400,900) do
-    if searchItemInBank() then
+    if Item.findIn(AREA_MS, Pnt) then
       Exit(true);
 
   A := MouseSpeed;
@@ -491,7 +491,7 @@ begin
   getMousePos(X, Y);
   releaseMouse(X, Y, MOUSE_LEFT);
   wait(randomRange(200,400));
-  result := searchItemInBank();
+  result := Item.findIn(AREA_MS, Pnt);
   mouseSpeed := A;
 end;
 

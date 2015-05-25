@@ -196,13 +196,13 @@ end;
 
 procedure checkAreaBounds(var Area: TBox);
 begin
-  if Area.X1 < 0 then Area.X1 := 0;
-  if Area.Y1 < 0 then Area.Y1 := 0;
-  if Area.X2 > 764 then Area.X2 := 764;
-  if Area.Y2 > 502 then Area.Y2 := 502;
-
   Area.X1 := Min(Area.X1, Area.X2);
   Area.X2 := Max(Area.X1, Area.X2);
   Area.Y1 := Min(Area.Y1, Area.Y2);
   Area.Y2 := Max(Area.Y1, Area.Y2);
+
+  if Area.X1 < 0 then Area.X1 := 0;
+  if Area.Y1 < 0 then Area.Y1 := 0;
+  if Area.X2 > 764 then Area.X2 := 764;
+  if Area.Y2 > 502 then Area.Y2 := 502;
 end;
