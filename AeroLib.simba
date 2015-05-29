@@ -54,7 +54,7 @@
 
 Const
   AL_VERSION_MAIN = '1.1';
-  AL_VERSION_SUB  = '9';
+  AL_VERSION_SUB  = '10';
 
 procedure AL_checkVersion();
 var

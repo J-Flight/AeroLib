@@ -548,19 +548,18 @@ begin
       mouseBox(B, MOUSE_RIGHT);
 
     if (Amount = -1) then
-    begin
-      waitOptionMulti(['Deposit-All','it-A','Deposit All','sit All'], 300);
-      if DoWait then
-      begin
-        T.start();
-        repeat
-          if not itemInSlot(Slot) then break;
-        until(T.timeElapsed >= 4000);
-      end;
-    end else
+      result := waitOptionMulti(['Deposit-All','it-A','Deposit All','sit All'], 300)
+    else
       Result := waitOptionMulti(['Deposit-' + intToStr(Amount) + ' ','it-' + intToStr(Amount) + ' ',
                                   'Deposit ' + intToStr(Amount) + ' ','sit ' + intToStr(Amount) + ' '], 300);
 
+    if DoWait then
+    begin
+      T.start();
+      repeat
+        if not itemInSlot(Slot) then break;
+      until(T.timeElapsed >= 4000);
+    end;
     if Result then
       Exit;
 
@@ -925,13 +924,13 @@ begin
   if isBankOpen() or isDepositBoxOpen() then
     exit(true);
 
-  if not isUpTextMulti(['Bank','booth','eposit','t box']) then
+  if not isUpTextMulti(['Bank','booth','eposit','t box','Bank Chest']) then
     case random(10) of
       0..6:  missMouse(BankPoint, 5, 5);
       7..10: humanMMouse(BankPoint, 5, 5);
     end;
 
-  if waitUpTextMulti(['Bank Ba','Bank bo','booth','eposit','t box','Use Bank chest','ank chest'], randomRange(150,300)) then
+  if waitUpTextMulti(['Bank Ba','Bank bo','booth','eposit','t box','Use Bank chest','ank chest','k Chest'], randomRange(150,300)) then
   begin
     if LeftClick then
     begin
@@ -941,7 +940,7 @@ begin
     end else
     begin
       fastClick(MOUSE_RIGHT);
-      if not waitOptionMulti(['Open','k B','n De','it Ban','Use Bank chest'], randomRange(450,600)) then
+      if not waitOptionMulti(['Open','k B','n De','it Ban','Use Bank chest','Use Bank'], randomRange(450,600)) then
         exit(false);
     end;
   end else

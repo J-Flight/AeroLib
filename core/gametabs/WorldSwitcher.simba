@@ -5,7 +5,7 @@ WorldSwitcher
 }
 
 Const
-  WS_BoxMain  : TBox = [575,406,706,431];
+  WS_BoxMain  : TBox = [575,349,706,374];
   WS_BoxClose : TBox = [717,208,733,224];
   WS_WorldBox : TBox = [566,240,585,431];
 
@@ -76,6 +76,7 @@ begin
     wait(randomRange(200,400));
     getMousePos(X, Y);
     releaseMouse(X, Y, MOUSE_LEFT);
+    wait(randomRange(700,1200));
   end;
 
   if not findText(X, Y, toStr(World), 'SmallChars07', WS_WorldBox) then
@@ -92,13 +93,16 @@ begin
   mouseBox(toBox(X,Y,X+15,Y+4), MOUSE_LEFT);
   fastClick(MOUSE_LEFT);
   T.start();
-  while (T.timeElapsed() < 2000) do
+  while (T.timeElapsed() < 4000) do
+  begin
+    if findText(X, Y, 'lease', 'SmallChars07', toBox(0,0,230,35)) then
+      break;
     if findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
       break;
-  if not findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
-    exit;
+  end;
 
-  mouseBox(toBox(X,Y,X+10,Y+6), MOUSE_LEFT);
+  if findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
+    mouseBox(toBox(X,Y,X+10,Y+6), MOUSE_LEFT);
   T.start();
   while (T.timeElapsed() < 4000) do
     if findText(X, Y, 'lease', 'SmallChars07', toBox(0,0,230,35)) then

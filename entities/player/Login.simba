@@ -47,9 +47,9 @@ const
   WDy2 = 381;
 // Logout box
   LOx1 = 573;
-  LOy1 = 349;
+  LOy1 = 406;
   LOx2 = 707;
-  LOy2 = 375;
+  LOy2 = 433;
 
   WHITE_TEXT    = 16777215; // white text color
   MESSAGE_BOX   = 11452366; // The "helpful message" box color
