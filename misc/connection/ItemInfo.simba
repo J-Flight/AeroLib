@@ -75,7 +75,12 @@ begin
   itemID := stringToID(itemName);
   if (itemID = -1) then
     exit;
-  webSource := getPage('http://api.rsbuddy.com/grandExchange?a=guidePrice&i=' + toStr(itemID));
+  try
+    webSource := getPage('http://api.rsbuddy.com/grandExchange?a=guidePrice&i=' + toStr(itemID));
+  except
+    warn('Failed to connect to RSBuddy database', WT_CORE);
+    exit;
+  end;
   buySource := between('"buying":', ',', webSource);
   sellSource := between('"selling":', ',', webSource);
   medSource := between('"overall":', ',', webSource);
