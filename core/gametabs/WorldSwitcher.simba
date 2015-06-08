@@ -99,6 +99,15 @@ begin
       break;
     if findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
       break;
+    if isSplashScreen() then
+      break;
+  end;
+
+  if isSplashScreen() then
+  begin
+    mouseBox(toBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
+    while not isLoggedIn() do
+      wait(60);
   end;
 
   if findText(X, Y, 'Yes', 'CharsNPC07', AREA_CB) then
@@ -109,5 +118,12 @@ begin
       break;
   while findText(X, Y, 'lease', 'SmallChars07', toBox(0,0,230,35)) do
     wait(30);
+
+  if isSplashScreen() then
+  begin
+    mouseBox(toBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
+    while not isLoggedIn() do
+      wait(60);
+  end;
   result := true;
 end;

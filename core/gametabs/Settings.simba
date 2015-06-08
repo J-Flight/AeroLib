@@ -61,7 +61,7 @@ begin
     exit(false);
   end else
   begin
-    PntArr := [Point(614, 287),Point(645, 287),Point(676, 287),Point(710, 287)];
+    PntArr := [Point(600, 277),Point(631, 277),Point(661, 277),Point(694, 277)];
     Pnt    := PntArr[(Brightness - 1)];
     if (not (getColor(Pnt.X, Pnt.Y) = 16777215)) then
     begin
@@ -69,6 +69,24 @@ begin
       exit(true);
     end else
       result := true;
+  end;
+end;
+
+function setFixedClient(): Boolean;
+var
+  tCol : TColEx;
+begin
+  Result := False;
+  if not openSettingsTab(1) then
+    Exit;
+
+  tCol.create(1777019, 15);
+  if (tCol.count(toBox(568,306,628,358)) > 50) then
+    exit(true)
+  else
+  begin
+    mouseBox(toBox(568,306,628,358), MOUSE_LEFT);
+    exit(true);
   end;
 end;
 
@@ -80,20 +98,21 @@ begin
   if not openSettingsTab(1) then
     Exit;
 
+  mouseBox(toBox(715,376,726,399), MOUSE_LEFT);
   tCol.create(1777019, 15);
   if Enable then
   begin
-    if (tCol.count(toBox(569,328,602,361)) > 50) then
+    if (tCol.count(toBox(567,379,601,415)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(569,328,602,361), MOUSE_LEFT);
+      mouseBox(toBox(567,379,601,415), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
-    if (tCol.count(toBox(569,328,602,361)) > 50) then
+    if (tCol.count(toBox(567,379,601,415)) > 50) then
     begin
-      mouseBox(toBox(569,328,602,361), MOUSE_LEFT);
+      mouseBox(toBox(567,379,601,415), MOUSE_LEFT);
       Result := True;
     end;
 end;
@@ -106,20 +125,21 @@ begin
   if not openSettingsTab(1) then
     Exit;
 
+  mouseBox(toBox(715,376,726,399), MOUSE_LEFT);
   tCol.create(1777019, 15);
   if Enable then
   begin
-    if (tCol.count(toBox(624,328,659,361)) > 50) then
+    if (tCol.count(toBox(664,379,701,415)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(624,328,659,361), MOUSE_LEFT);
+      mouseBox(toBox(664,379,701,415), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
-    if (tCol.count(toBox(624,328,659,361)) > 50) then
+    if (tCol.count(toBox(664,379,701,415)) > 50) then
     begin
-      mouseBox(toBox(624,328,659,361), MOUSE_LEFT);
+      mouseBox(toBox(664,379,701,415), MOUSE_LEFT);
       Result := True;
     end;
 end;
@@ -132,20 +152,21 @@ begin
   if not openSettingsTab(1) then
     Exit;
 
+  mouseBox(toBox(715,376,726,399), MOUSE_LEFT);
   tCol.create(1777019, 15);
   if Enable then
   begin
-    if (tCol.count(toBox(682,328,717,361)) > 50) then
+    if (tCol.count(toBox(615,379,651,415)) > 50) then
       exit(true)
     else
     begin
-      mouseBox(toBox(682,328,717,361), MOUSE_LEFT);
+      mouseBox(toBox(615,379,651,415), MOUSE_LEFT);
       exit(true);
     end;
   end else if not Enable then
-    if (tCol.count(toBox(682,328,717,361)) > 50) then
+    if (tCol.count(toBox(615,379,651,415)) > 50) then
     begin
-      mouseBox(toBox(682,328,717,361), MOUSE_LEFT);
+      mouseBox(toBox(615,379,651,415), MOUSE_LEFT);
       Result := True;
     end;
 end;
@@ -383,6 +404,7 @@ Example:
 procedure fixGraphics();
 begin
   if setBrightness(4) then Wait(90 + Random(200));
+  setFixedClient();
   toggleDataOrbs(true);
   toggleRoofRemoval(true);
   setAudioLevels(1, 1, 1);

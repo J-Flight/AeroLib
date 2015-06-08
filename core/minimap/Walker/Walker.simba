@@ -382,6 +382,7 @@ begin
       end;
   end;
 
+  {
   if Result then
   begin
     Wait(random(200,600));
@@ -389,6 +390,7 @@ begin
     if w_Distance(Point(WMM_CX,WMM_CY), mmPt) > 10 then
       self.WalkToPos(mmPt, path[h]);
   end;
+  }
   
   self.minRunEnergy := tmp;
 end;

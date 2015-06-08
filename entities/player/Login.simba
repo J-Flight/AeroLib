@@ -111,7 +111,8 @@ Var
 
 function getLoginState(): Integer;
 begin
-  if (getColor(427,489) = 16777215) then
+  if ((getColor(427,489) = 16777215) or
+      (getColor(31,488) = 16777215)) then
     Exit(LS_LOGGEDIN);
   if (getColor(400,335) = 16777215) then
     Exit(LS_SPLASHSCREEN);
@@ -203,10 +204,13 @@ function WS_toggle(Open: Boolean = True): Boolean; forward;
 function logoutPlayer(): Boolean;
 var
   T : Timer;
+label
+  start;
 begin
   if not isLoggedIn() then
     exit(true);
 
+  start:
   if not gametab(TAB_LOGOUT) then
     exit(false);
 
@@ -222,6 +226,14 @@ begin
     if (not isLoggedIn()) then
       exit(true);
   until(T.timeElapsed > 11000);
+
+  if isSplashScreen() then
+  begin
+    mouseBox(toBox(WDx1,WDy1,WDx2,WDy2), MOUSE_LEFT);
+    while not isLoggedIn() do
+      wait(60);
+    GoTo start;
+  end;
 end;
 
 var

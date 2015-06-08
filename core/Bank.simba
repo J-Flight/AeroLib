@@ -959,6 +959,7 @@ begin
     if (isBankOpen() or isDepositBoxOpen() or
       Interfaces[PINSCREEN].isVisible()) then
         break;
+    if areTalking() then exit(false);
     wait(randomRange(60,90));
   until(T.timeElapsed() > 7000);
 
