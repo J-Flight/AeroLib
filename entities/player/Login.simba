@@ -112,7 +112,7 @@ Var
 function getLoginState(): Integer;
 begin
   if ((getColor(427,489) = 16777215) or
-      (getColor(31,488) = 16777215)) then
+      (getColor(369,487) = 16777215)) then
     Exit(LS_LOGGEDIN);
   if (getColor(400,335) = 16777215) then
     Exit(LS_SPLASHSCREEN);
