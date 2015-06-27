@@ -31,7 +31,7 @@ begin
         'uW6VkVsFkOfz92c96I83hhxVwiZDVQLYOC8gNwZUiiKAZvp6AGpjE' +
         '9AT6jAGEMk8A/uM9nkJiJ2IDJwrcgoAYC+Ki8SyIHqe4II+gt7M2J' +
         'HnYY0VHCYeu/t27I+ueDNpeSnT6goI71c2v8z+61Kfp');
-  if cs_FindBitmapToleranceIn(tBMP, X, Y, 5, toBox(65,50,95,70), cs_CTS) then
+  if findBitmapToleranceIn(tBMP, X, Y, 65, 50, 95, 70, 5) then
     Result := 'Tabbed';
 
   case Result of
@@ -241,7 +241,6 @@ begin
     Col.create(0, 1);
     while not (Col.findIn(toBox(7,460,69,474), pnt)) do
     begin
-      writeln('Waiting for color...');
       Wait(500);
       if not isLoggedIn() then
         Exit;
@@ -303,11 +302,14 @@ begin
         'Y3CMwFcOSqflNV80wl9TGzW2pTyB6VmdvNFp+uBz1cGxpdJ6pwWic' +
         'qy3VBQUFBQUFBQUFBQUFBP1F/FyvOrrE=');
 
-  if not cs_FindBitmapsSpiralTolerance(tBMP, X, Y, fPnts, 5, toBox(58,40,465,80), cs_CTS) then
+  if not findBitmapsSpiralTolerance(tBMP, X, Y, fPnts, 58, 40, 465, 80, 5) then
+  begin
+    freeBitmap(tBMP);
     exit;
+  end;
 
   result := length(fPnts);
-  freeBitmap(tBMP)
+  freeBitmap(tBMP);
 end;
 
 (*

@@ -114,7 +114,7 @@ begin
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if cs_similarColors(getColor(X, Y), Color, Tol, cs_CTS1) then
+    if similarColors(getColor(X, Y), Color, Tol) then
       Exit(True);
     Wait(5 + Random(6));
   end;
@@ -257,7 +257,7 @@ begin
   T.start();
   while T.timeElapsed < MaxTime do
   begin
-    if (not cs_similarColors(getColor(X, Y), Color, Tol, cs_CTS1)) then
+    if (not similarColors(getColor(X, Y), Color, Tol)) then
       Exit(True);
     Wait(10);
   end;
@@ -333,7 +333,7 @@ begin
 
   while T.timeElapsed < MaxTime do
   begin
-    if (cs_findDTM(DTM, x, y, Area, cs_CTS1)) then
+    if findDTM(DTM, x, y, Area.x1, Area.y1, Area.x2, Area.y2) then
       Exit(True);
     wait(WaitPerLoop);
   end;

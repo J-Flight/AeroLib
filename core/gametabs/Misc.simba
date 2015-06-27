@@ -39,9 +39,9 @@ begin
   if not tCol.findAllIn(toBox(695,210,725,222), TPA) then
     Exit;
   Box := getTPABounds(TPA);
-  Result := strToIntDef(ExtractFromStr(cs_getTextAtEx(Box, 0, 5, 1, 3381759, 0, 'UpChars07', cs_CTS1), Numbers), - 1);
+  Result := strToIntDef(ExtractFromStr(getTextAtEx(Box.X1, Box.Y1, Box.X2, Box.Y2, 0, 5, 1, 3381759, 0, 'UpChars07'), Numbers), - 1);
   if (Result = - 1) then
-    Writeln('Failed to get current world');
+    warn('Failed to get current world', WT_CORE);
 end;
 
 (*
@@ -81,7 +81,7 @@ begin
 
   if (not(inRange(Mode, 1, 4))) then
   begin
-    warn('setFightMode ' + toStr(Mode) + ' is not a valid fightmode number.', WT_CORE);
+    warn(toStr(Mode) + ' is not a valid fightmode number.', WT_CORE);
     Exit(false);
   end;
 
@@ -131,7 +131,7 @@ Example:
 Function getWeaponName(): String;
 begin
   if FTab(TAB_COMBAT) then
-    Result := cs_getTextAtEx(toBox(555,210,730,230), 0, 3, 1, 2070783, 0, 'CharsNPC07', cs_CTS1);
+    Result := getTextAtEx(555, 210, 730, 230, 0, 3, 1, 2070783, 0, 'CharsNPC07');
 end;
 
 Function getSpecialPercent(): Integer;
@@ -140,8 +140,8 @@ var
 begin
   if FTab(TAB_COMBAT) then
   begin
-    S := cs_getTextAtEx(toBox(665,415,681,428), 0, 3, 1, 1048576, 0, 'StatChars07', cs_CTS1);
     wait(randomRange(70,130));
+    S := getTextAtEx(665, 415, 681, 428, 0, 3, 1, 1048576, 0, 'StatChars07');
     Result := strToIntDef(S, 0);
   end;
 end;
@@ -173,7 +173,7 @@ begin
     exit;
 
   if Enable then
-    if not (cs_GetTextAtEx(toBox(644,379,667,392), 0, 5, 1, 2070783, 20, 'UpChars07', cs_CTS1) ='(On)') then
+    if (not (getTextAtEx(644, 379, 667, 392, 0, 5, 1, 2070783, 20, 'UpChars07') ='(On)')) then
       mouseBox(toBox(572,362,713,397), MOUSE_LEFT);
   FTab(TAB_INV);
 end;
@@ -510,5 +510,5 @@ begin
   if not FTab(TAB_MUSIC) then
     Exit('');
   Wait(100 + Random(200));
-  Result := Trim(cs_getTextAtEx(toBox(550,239,730,253), 0, 5, 1, 65280, 0, 'UpChars07', cs_CTS1));
+  Result := Trim(getTextAtEx(550, 239, 730, 253, 0, 5, 1, 65280, 0, 'UpChars07'));
 end;

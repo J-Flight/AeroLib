@@ -43,37 +43,36 @@ Begin
   World := self.GetWorld();
   if (World = '') then
   begin
-    Writeln('** Failed to grab world **');
-    Writeln('** Please check your internet connection/firewall **');
+    warn('Failed to grab world; please check your internet connection/firewall', WT_CORE);
     TerminateScript;
     Exit;
   end else
-    Writeln('Best world found: '+World);
+    warn('Best world found: '+World, WT_CORE);
 
   Self.__Target := SmartSpawnClient(path, replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
-  if (Self.__Target = 0) Then
+  if (Self.__Target = 0) then
   begin
-    writeln('Error while finding Java, using default path');
+    warn('Error while finding Java, using default path', WT_CORE);
     Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
   end;
 
-  if (Self.__Target <> 0) Then
+  if (Self.__Target <> 0) then
   begin
     try
       Self.__PID := SmartGetClientPID(Self.__Target);
       SetEIOSTarget('libsmartremote', ToStr(Self.__PID));
-      Writeln('Loading SMART: World ' + World);
+      warn('Loading SMART: World ' + World, WT_CORE);
       Self.__Graphics.Create(Width, Height, SmartDebugArray(Self.__Target));
       Insert(@Self, __Smart__Pointers);
       SmartSetDebug(Self.__Target, True);
     except
-      WriteLn('** Fatal Error: Pairing Clients; Terminating Script **');
+      warn('Fatal error pairing clients; terminating script', WT_CORE);
       SmartFreeClient(Self.__Target);
       TerminateScript;
     end;
   end else
   begin
-    Writeln('** Smart Cannot Spawn Clients **');
+    warn('SMART cannot spawn client', WT_CORE);
     TerminateScript;
   end;
 end;
@@ -97,7 +96,7 @@ Begin
       begin
         Self.__PID := Indices[I];
         SetEIOSTarget('libsmartremote', ToStr(Self.__PID));
-        Writeln('Paired with SMART[' + ToStr(Self.__PID) + ']');
+        warn('Paired with SMART[' + ToStr(Self.__PID) + ']', WT_CORE);
         try
           Self.__Graphics.Create(Self.__Width, Self.__Height, SmartDebugArray(Self.__Target));
         except
@@ -132,7 +131,7 @@ Begin
   if (length(result) > 0) then
     if (inRange(strToIntDef(extractFromStr(result, numbers), -1), 1, 78)) then
     begin
-      writeln('Found best world "' + result + '"');
+      warn('Found best world "' + result + '"', WT_CORE);
       exit;
     end;
   // else something failed, let's pick a random world

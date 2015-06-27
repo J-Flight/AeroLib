@@ -19,7 +19,6 @@ type TPlayer = record
     ModelSet  : boolean;                 // * Has the player's model been set
     Status    : string;                  // * User Status
     Random    : string;                  // * Current random event
-    LampSkill : Integer;                 // * Preferred skill to be increased upon upon XP reward
     Worked    : Integer;                 // * Time User has worked
     Booleans  : array of Boolean;        // * For reports, etc.
     Integers  : TIntegerArray;           // * For reports, etc.
@@ -184,8 +183,8 @@ begin
 
   try
     saveScreenshot(Path + Reason + ' ' + Me.Name + ' ' + theDate(Date_Day) + '.png');
-    WriteLn('Screenshot of: ' + reason + ' ' + TimeRunning);
+    warn('Screenshot of: ' + reason + ' ' + TimeRunning, WT_INTERNAL);
   except
-    Writeln('Failed to save screenshot of: ' + reason);
+    warn('Failed to save screenshot of: ' + reason, WT_INTERNAL);
   end;
 end;

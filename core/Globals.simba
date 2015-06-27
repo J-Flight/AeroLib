@@ -11,7 +11,7 @@ type
 const
   MMX1 = 570;
   MMY1 = 9;
-  MMX2 = 716;
+  MMX2 = 714;
   MMY2 = 155;
 
 { const MMCX, MMCY;

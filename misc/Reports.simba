@@ -158,32 +158,13 @@ begin
 end;
 
 procedure randomsReport();
-var
-  i : integer;
 begin
   writeln('[====================================]');
   writeln('[           Randoms Report           ]');
   writeln('[____________________________________]');
-
-  if DISABLE_RANDOMS then
-  begin
-    WriteLn('[' + centerStringEx('Dismissed '+toStr(dismissedRandoms)+' random events', 36, ' ') + ']');
-    writeln('[====================================]');
-    Exit;
-  end;
-
-  for i:=0 to (RANDOMS_COUNT-1) do
-  begin
-    if (length(RandomEvents[i].name) > 0) then
-    begin
-      if (RandomEvents[i].solved > 0) then
-        WriteLn('[' + centerStringEx('['+RandomEvents[i].name +'] Solved: '+toStr(RandomEvents[i].solved), 36, ' ') + ']');
-
-      if (RandomEvents[i].failed > 0) then
-        WriteLn('[' + centerStringEx('['+RandomEvents[i].name +'] Failed: '+toStr(RandomEvents[i].failed), 36, ' ') + ']');
-    end;
-  end;
+  WriteLn('[' + centerStringEx('Dismissed '+toStr(dismissedRandoms)+' random events', 36, ' ') + ']');
   writeln('[====================================]');
+  Exit;
 end;
 
 function getPerHour(Variable: Integer; IncludeBreakTime: Boolean=True): Integer;

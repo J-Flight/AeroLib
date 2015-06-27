@@ -157,14 +157,14 @@ begin
   Writeln('['+s+'] '+Message);
 end;
 
-procedure AL_InitMessage(_valM, _valS: String);
+procedure AL_InitMessage(_valM, _valS: extended);
 var
   s : String;
 begin
   Writeln('[=================================]');
   Writeln('|        < Aero|Library >         |');
   Writeln('|        ----------------         |');
-  WriteLn('|' + centerStringEx('Version  : '+_valM, 33, ' ') + '|');
-  WriteLn('|' + centerStringEx('Revision : '+_valS, 33, ' ') + '|');
+  WriteLn('|' + centerStringEx('Version  : '+toStr(_valM), 33, ' ') + '|');
+  WriteLn('|' + centerStringEx('Revision : '+toStr(_valS), 33, ' ') + '|');
   Writeln('[=================================]');
 end;

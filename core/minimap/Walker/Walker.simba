@@ -13,6 +13,7 @@ type
   TOnWalkEvent = procedure(Sender:TObject; myPos: TPoint; out keepGoing: Boolean);
   TOnClickEvent = function(Sender:TObject; var Box: TBox): Boolean;
   TWhileWalkingEvent  = procedure(Sender:TObject; myPos: TPoint);
+  type TWalkResult = (FOUND,FINISHED,FAILED);
   
   TRSWalker = record
     worldMap, worldSample: T2DIntArray;
@@ -382,16 +383,6 @@ begin
       end;
   end;
 
-  {
-  if Result then
-  begin
-    Wait(random(200,600));
-    Self.pointToMM(Self.GetMyPos(), path[h], mmPt);
-    if w_Distance(Point(WMM_CX,WMM_CY), mmPt) > 10 then
-      self.WalkToPos(mmPt, path[h]);
-  end;
-  }
-  
   self.minRunEnergy := tmp;
 end;
 
@@ -408,6 +399,166 @@ begin
 
   sortTPAFrom(pnts, M);
   Result := Self.walkPath(pnts);
+end;
+
+function TRSWalker.walkToPosSearch(mmPt: TPoint; SearchObjs: Array of TMSObject; Options: TStringArray): TWalkResult;
+var
+  t : Timer;
+  P : TPoint;
+  j : Integer;
+begin
+  if self.anyAngle then
+    mmPt := RotatePoint(mmpt, w_GetCompassAngle(False), WMM_CX,WMM_CY);
+
+  missMouse(mmPt, 0, 0);
+  fastClick(MOUSE_LEFT);
+  if not waitFunc(@isPlayerWalking, 70, 3000) then
+    exit(FAILED);
+
+  t.start();
+  repeat
+    if length(SearchObjs) > 0 then
+      for j:=0 to high(SearchObjs) do
+        if SearchObjs[j].find() then
+          if (length(Options) <= 0) then
+          begin
+            fastClick(MOUSE_LEFT);
+            if didRedClick() then
+              Exit(FOUND);
+          end else if (length(Options) > 0) then
+          begin
+            fastClick(MOUSE_RIGHT);
+            if waitOptionMulti(Options, 300) then
+              Exit(FOUND);
+          end;
+
+    if (getRunEnergy() >= self.minRunEnergy) then
+      toggleRunning(true);
+
+    if flagDistance() < self.skipClose then
+      exit(FINISHED);
+    waitEx(randomRange(30,60));
+  until not(flagPresent()) or (t.timeElapsed() > 20000);
+end;
+
+function TRSWalker.walkPathSearch(Path: TPointArray; SearchObjs: Array of TMSObject; Options: TStringArray): TWalkResult;
+var
+  T          : Timer;
+  P,mmPnt,
+  myPos      : TPoint;
+  i,H,prev,j,
+  attempts,F,
+  tmp        : integer;
+  tRes       : TWalkResult;
+  function RandomizeRunEnergy(e:Int32):Int32;
+  begin
+    if e > 100 then Exit();
+    Result := Random(max(5,e-10), e+10);
+  end;
+begin
+  Result := FAILED;
+  tmp := self.minRunEnergy;
+  H := High(Path);
+
+  if length(SearchObjs) > 0 then
+    for j:=0 to high(SearchObjs) do
+      if SearchObjs[j].find() then
+        if (length(Options) <= 0) then
+        begin
+          fastClick(MOUSE_LEFT);
+          if didRedClick() then
+            Exit(FOUND);
+        end else if (length(Options) > 0) then
+        begin
+          fastClick(MOUSE_RIGHT);
+          if waitOptionMulti(Options, 300) then
+            Exit(FOUND);
+        end;
+
+  T.start();
+  while (T.timeElapsed() < (1500 + random(700))) do
+  begin
+    if (Result = FOUND) then break;
+    if not isLoggedIn() then Exit;
+    self.minRunEnergy := RandomizeRunEnergy(self.minRunEnergy);
+
+    if length(SearchObjs) > 0 then
+      for j:=0 to high(SearchObjs) do
+        if SearchObjs[j].find() then
+          if (length(Options) <= 0) then
+          begin
+            fastClick(MOUSE_LEFT);
+            if didRedClick() then
+              Exit(FOUND);
+          end else if (length(Options) > 0) then
+          begin
+            fastClick(MOUSE_RIGHT);
+            if waitOptionMulti(Options, 300) then
+              Exit(FOUND);
+          end;
+
+    myPos := Self.GetMyPos();
+    for i:=H downto 0 do
+    begin
+      if not Self.PointToMM(myPos, Path[i], mmPnt) then
+        Continue;
+
+      if prev = i then
+      begin
+        inc(attempts);
+        if attempts > 5 then Exit;
+      end else
+        attempts := 0;
+
+      if distance(mmPnt.X,mmPnt.Y,MMCX,MMCY) <= 5 then
+        continue;
+
+      tRes := Self.walkToPosSearch(mmPnt, SearchObjs, Options);
+      if tRes = FOUND then
+        Exit(FOUND);
+      if tRes = FAILED then
+        Exit(FAILED);
+
+      prev := i;
+      T.start();
+ 	    Break;
+    end;
+
+    if (i = H) then
+    begin
+      while isPlayerWalking() do
+        if length(SearchObjs) > 0 then
+          for j:=0 to high(SearchObjs) do
+            if SearchObjs[j].find() then
+              if (length(Options) <= 0) then
+              begin
+                fastClick(MOUSE_LEFT);
+                if didRedClick() then
+                  Exit(FOUND);
+              end else if (length(Options) > 0) then
+              begin
+                fastClick(MOUSE_RIGHT);
+                if waitOptionMulti(Options, 300) then
+                  Exit(FOUND);
+              end;
+      exit(FINISHED);
+    end;
+  end;
+end;
+
+function TRSWalker.blindWalkSearch(P: TPoint; SearchObjs: Array of TMSObject; Options: TStringArray): TWalkResult;
+var
+  M,pnt : TPoint;
+  i     : Integer;
+  pnts  : TPointArray;
+begin
+  if not isLoggedIn() then Exit;
+
+  M    := Self.GetMyPos();
+  pnts := TPABetweenPoints(M, P, 25 + Random(5), 5);
+
+  sortTPAFrom(pnts, M);
+  Result := Self.walkPathSearch(pnts, SearchObjs, Options);
 end;
 
 function mapFileExists(MapName: String): Boolean;

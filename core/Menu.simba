@@ -24,7 +24,8 @@ function getOptions(): Array of TOptions;
 var
   B,BB,BigBox,Yoff,
   TextSearchBox    : TBox;
-  boxCol,txtCol    : TColEx;
+  boxCol,txtCol,
+  bCol             : TColEx;
   i,w,h,bmp,target : Integer;
   TPA,TPA1         : TPointArray;
   ATPA,tempatpa    : T2DPointArray;
@@ -41,7 +42,8 @@ begin
   B := TPA.getBounds();
   BigBox := B;
   Yoff := toBox(B.X1, B.Y1 + 18, B.X2, B.Y2);
-  cs_findColorsTolerance(TPA1, 0, 0, Yoff, cs_CTS3);
+  bCol.create(0,0);
+  bCol.findAllIn(Yoff, TPA1);
 
   ATPA := clusterTPA(TPA1, 1);
   sortATPASize(ATPA, true);
@@ -126,15 +128,13 @@ function chooseOptionMulti(Texts: TStringArray): Boolean;
 var
   B         : TBox;
   T         : Timer;
-  i,X,Y,ms,
-  R,x2,y2   : Integer;
+  i,X,Y,R,x2,
+  y2        : Integer;
   Options   : Array of TOptions;
 begin
   Options := getOptions();
   if (Length(Options) < 1) then
     Exit(False);
-  ms := MouseSpeed;
-  MouseSpeed := RandomRange(13,17);
 
   for i:=0 to high(Options) do
   begin
@@ -148,13 +148,11 @@ begin
       else
         fastClick(MOUSE_LEFT);
 
-      MouseSpeed := ms;
       Exit(True);
     end;
   end;
 
   exitMenu;
-  MouseSpeed := ms;
 end;
 
 function chooseOption(Txt: String): Boolean;

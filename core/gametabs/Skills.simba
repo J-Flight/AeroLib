@@ -31,7 +31,7 @@ begin
   if not FTab(TAB_COMBAT) then
     exit(-1);
 
-  Result := strToIntDef(ExtractFromStr(cs_GetTextAtEx(toBox(662,230,700,240), 0, 3, 1, 2070783, 0, 'StatChars07', cs_CTS1), Numbers), -1);
+  Result := strToIntDef(ExtractFromStr(getTextAtEx(662, 230, 700, 240, 0, 3, 1, 2070783, 0, 'StatChars07'), Numbers), -1);
 end;
 
 (*
@@ -180,7 +180,7 @@ begin
       'farming','farm'    : SkillPT := Point(3,7);
       else
       begin
-        Writeln('Invalid Skill Name: ''' + tostr(Skill) + '''');
+        warn('Invalid Skill Name: ''' + tostr(Skill) + '''', WT_CORE);
         Exit;
       end;
     end;
@@ -214,14 +214,14 @@ begin
       Skill_Farming       : SkillPT := Point(3,7);
       else
       begin
-        Writeln('Invalid Skill Number: ''' + tostr(Skill) + '''');
+        warn('Invalid Skill Number: ''' + tostr(Skill) + '''', WT_CORE);
         Exit;
       end;
     end;
   end
   else
   begin
-    Writeln('Invalid Skill Variant : ''' + tostr(Skill) + '''');
+    warn('Invalid Skill Variant : ''' + tostr(Skill) + '''', WT_CORE);
     Exit;
   end;
   Result := SkillPT;
@@ -301,7 +301,7 @@ begin
     exit(-1);
 
   Box    := getTPABounds(TPA);
-  Result := strToIntDef(cs_getTextAtEx(toBox(Box.X1-2,Box.Y1-2,Box.X2+2,Box.Y2+2),0,5,1,65535,0,'StatChars07', cs_CTS1),-1);
+  Result := strToIntDef(getTextAtEx(Box.X1-2, Box.Y1-2, Box.X2+2, Box.Y2+2,0,5,1,65535,0,'StatChars07'),-1);
 end;
 
 (*
@@ -377,7 +377,7 @@ begin
     Exit(-1);
 
   Wait(100 + Random(100));
-  Result := strToIntDef(Trim(cs_getTextAtEx(toBox(705,442,735,452),0,5,1,65535,0,'StatChars07', cs_CTS1)),-1);
+  Result := strToIntDef(Trim(getTextAtEx(705,442,735,452,0,5,1,65535,0,'StatChars07')),-1);
 end;
 
 (*
@@ -421,7 +421,7 @@ begin
   begin
     b := getTPABounds(tpa);
     wait(450 + random(150));
-    result := strToIntDef(getNumbers(cs_getTextAtEx(toBox(b.x1+15, b.y1+2,b.x2-2,b.y1+13), 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    result := strToIntDef(getNumbers(getTextAtEx((b.x1+15),(b.y1+2),(b.x2-2),(b.y1+13), 0, 5, 1, 0, 0, 'smallChars07')), -1);
   end;
 end;
 
@@ -479,7 +479,7 @@ Example:
 *)
 function XPTillNextLevel(Skill: Variant): Integer;
 var
-  MouseTB,b,b2: TBox;
+  MouseTB,b: TBox;
   rc: TPoint;
   tpa: TPointArray;
   CXP,XPNLA,x,y: Integer;
@@ -499,8 +499,7 @@ begin
   begin
     b := getTPABounds(tpa);
     if not findText(x, y, 'Remaining', 'smallChars07', b) then Exit(-1);
-    b2 := toBox(x,y,b.X2,b.Y2);
-    result := strToIntDef(getNumbers(cs_getTextAtEx(b2, 0, 5, 1, 0, 0, 'smallChars07', cs_CTS1)), -1);
+    result := strToIntDef(getNumbers(getTextAtEx(x, y, b.X2, b.Y2, 0, 5, 1, 0, 0, 'smallChars07')), -1);
   end;
 end;
 
@@ -532,7 +531,7 @@ begin
     for II := 0 to High(Me.Level) do
       Me.Level[II] := getSkillCurrentLevel(II);
   except
-    warn('Error grabbing player levels...', WT_CORE);
+    warn('Error grabbing player levels.', WT_CORE);
   end;
 end;
 

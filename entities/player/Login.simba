@@ -110,9 +110,13 @@ Var
   LS_WORLDSCREEN  = 3;
 
 function getLoginState(): Integer;
+var
+  tCol : TColEx;
 begin
-  if ((getColor(427,489) = 16777215) or
-      (getColor(369,487) = 16777215)) then
+  if (getColor(427,489) = 16777215) then
+    Exit(LS_LOGGEDIN);
+  tCol.create(12899548, 5);
+  if tCol.findIn(toBox(555,13,569,28)) then
     Exit(LS_LOGGEDIN);
   if (getColor(400,335) = 16777215) then
     Exit(LS_SPLASHSCREEN);
@@ -250,7 +254,8 @@ var
   Box,uBox,pBox  : TBox;
   T              : Timer;
   p              : TPoint;
-  wTxtCol,lCol   : TColEx;
+  wTxtCol,lCol,
+  rCol          : TColEx;
   c,w,typtmp,uL,
   uH,pL,pH,uLen,
   pLen,i,j,
@@ -351,11 +356,18 @@ begin
   if not wTxtCol.findAllIn(toBox(439,313,484,327), TPA) then
   begin
     mouseBox(toBox(EUX1,EUY1,EUX2,EUY2), MOUSE_LEFT);
+    rCol.create(clRed, 5);
     T.start();
     while (T.timeElapsed() < 60000) do
     begin
+      if rCol.findIn(toBox(405,220,430,240)) then
+      begin
+        mouseBox(toBox(236,306,367,337), MOUSE_LEFT);
+        wait(500 + random(500));
+      end;
+
       c := countColor(65535, 238, 215, 526, 230);
-      if c > 1 then
+      if ((c > 1) and (not rCol.findIn(toBox(405,220,430,240)))) then
       begin
         foundLogin := true;
         break;
@@ -477,18 +489,19 @@ begin
       Actions :=       ['One minute has passed... Debug: ' + toStr(CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)),              0,    5,    'Terminate']
     else
     case (CountColor(LOGIN_STATUSCOLOUR, 224, 190, 532, 250)) of
-                        // WriteLn Error                  Wait for   Retrys     Action
-      738:  Actions := ['Invalid Username / Password',           0,    0,    'Terminate'];
+                        // WriteLn Error                  Wait for   Retrys    Action
+      863 : Actions := ['Invalid Username / Password',           0,    0,    'Terminate'];
       1539: Actions := ['Your account has been disabled',        0,    0,    'Terminate'];
-      1073: Actions := ['Your account is already logged in',  5000,    5,    'Retry'];
+      1073: Actions := ['Your account is already logged in',  1700,    5,    'Retry'];
        492: Actions := ['Error Connecting.',                 20000,    10,   'Retry'];
-      1721: Actions := ['Too many incorrect logins.',    5 * 60000,    2,    'Retry'];
-       906: Actions := ['This world is full.',                5000,    2,    'Switch'];
+      1437: Actions := ['Too many incorrect logins.',    5 * 60000,    2,    'Switch'];
+       906: Actions := ['This world is full.',                2000,    3,    'Switch'];
       1227: Actions := ['Login limit exceeded.',              5000,    5,    'Switch'];
       1231: Actions := ['No reply from login server',         5000,    2,    'Switch'];
       1136: Actions := ['Runescape has been updated.',           0,    0,    'RSUpdate'];
-       777: Actions := ['Login limit exceeded.',                 0,    0,    ''];
+       777: Actions := ['Login limit exceeded.',                 0,    2,    'Switch'];
       1700: Actions := ['Members world',                         0,    2,    'Switch'];
+      774 : Actions := ['Login server offline',               1500,    10,   'Retry'];
     end;
                              {Respond}
 

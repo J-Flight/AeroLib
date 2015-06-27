@@ -63,7 +63,6 @@ var
   tCol : TColEx;
   tpa  : TPointArray;
 begin
-  //tCol.create(6806252, 20);
   tCol.create(99749, 20);
   result := tCol.findPie(toBox(571,127,595,152), 0, 360, 0, 72, 582, 140, tpa);
 end;

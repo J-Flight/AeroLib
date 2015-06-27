@@ -316,10 +316,10 @@ begin
   result := False;
   gameTab(TAB_INV);
   if DTMExists(self.DTM) then
-    result := cs_findDTM(self.DTM, x, y, Area, cs_CTS);
+    result := findDTM(self.DTM, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2);
   if not result then
     if bitmapExists(self.BMP) then
-      result := cs_findBitmapToleranceIn(self.BMP, x, y, self.BMP_TOL, Area, cs_CTS);
+      result := findBitmapToleranceIn(self.BMP, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, self.BMP_TOL);
 
   fPnt := point(x, y);
 end;
@@ -331,10 +331,10 @@ begin
   result := False;
   gameTab(TAB_EQUIP);
   if DTMExists(self.DTM) then
-    result := cs_findDTM(self.DTM, x, y, AREA_INV, cs_CTS);
+    result := findDTM(self.DTM, x, y, AREA_INV.X1, AREA_INV.Y1, AREA_INV.X2, AREA_INV.Y2);
   if not result then
     if bitmapExists(self.BMP) then
-      result := cs_findBitmapToleranceIn(self.BMP, x, y, self.BMP_TOL, AREA_INV, cs_CTS);
+      result := findBitmapToleranceIn(self.BMP, x, y, AREA_INV.X1, AREA_INV.Y1, AREA_INV.X2, AREA_INV.Y2, self.BMP_TOL);
 end;
 
 function TItem.inInventory(): Boolean;

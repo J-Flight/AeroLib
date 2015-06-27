@@ -1,9 +1,0 @@
-function Leo_Detect(): boolean;
-begin
-  Result := false;
-end;
-
-function Leo_Solve(): boolean;
-begin
-  Result := false;
-end;

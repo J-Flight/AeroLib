@@ -581,34 +581,29 @@ Example:
 function didClick(Red: Boolean; Time: integer): boolean;
 var
   T : Timer;
-  x, y, w, h, R, G: integer;
-  B: TBox;
+  B : TBox;
+  colR,colG : TColEx;
 begin
-  getMousePos(x, y);
-  getClientDimensions(w, h);
-  B := IntToBox(x - 15, y - 15, x + 15, y + 15);
-  if B.x1 < 0 then B.x1 := 0;
-  if B.y1 < 0 then B.y1 := 0;
-  if B.x2 > w then B.x2 := w;
-  if B.y2 > h then B.y2 := h;
+  B := pointToBox(getMousePnt(), 15);
+  checkAreaBounds(B);
+  colR.create(255, 15);
+  colG.create(65535, 15);
   T.start();
   while (T.timeElapsed < Time) do
   begin
-    R := cs_CountColorTolerance(255, 15, B, cs_CTS1);
-    G := cs_CountColorTolerance(65535, 15, B, cs_CTS1);
     if Red then
     begin
-      if (G > 8) then
+      if (colG.count(B) > 8) then
         Exit;
-      Result := (R > 10);
+      if (colR.count(B) > 10) then
+        Exit(true);
     end else
     begin
-      if (R > 5) then
+      if (colR.count(B) > 5) then
         Exit;
-      Result := (G > 35);
+      if (colG.count(B) > 35) then
+        Exit(true);
     end;
-    if Result then
-      Exit;
   end;
 end;
 

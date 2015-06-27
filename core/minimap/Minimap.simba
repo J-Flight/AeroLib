@@ -257,15 +257,17 @@ Example:
 *)
 function findFlag(var P: TPoint): Boolean;
 var
+  tCol : TColEx;
   I: Integer;
   ColorsArray: TIntegerArray;
-  StaffColors: TPointArray;
+  tpa : TPointArray;
 begin
   Result := False;
   ColorsArray := [1127261, 284358, 255]; //Brown of the flag staff, Orange of the flag staff, Red of the flag.
   for I := 0 to 2 do
   begin
-    if (not cs_FindColors(StaffColors, ColorsArray[i], Area_MM, cs_CTS)) then
+    tCol.create(ColorsArray[i], 1);
+    if (not tCol.findAllIn(AREA_MM, tpa)) then
     begin
       if (I < 2) then
         Continue
@@ -277,13 +279,13 @@ begin
   Result := True;
   if (I <> 3) then //Keeps track of whether we ended up having to search for the red of the flag or not.
   begin //The first two colors checks are for the staff of the flag, which means we sort by Y to get the bottom of the staff.
-    SortTPAByY(StaffColors, False);
-    P := StaffColors[0];
+    SortTPAByY(tpa, False);
+    P := tpa[0];
     Exit;
   end else //The last color check is for the red of the flag, so if the first two colors were not found:
   begin
-    SortTPAByX(StaffColors, True);
-    P := Point(StaffColors[0].x + 7, StaffColors[0].y + 8); //Somewhat rough approximation of where the base of the staff is in relation to the tip of the flag.
+    SortTPAByX(tpa, True);
+    P := Point(tpa[0].x + 7, tpa[0].y + 8); //Somewhat rough approximation of where the base of the staff is in relation to the tip of the flag.
     Exit;
   end;
 end;

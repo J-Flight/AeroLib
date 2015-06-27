@@ -228,11 +228,9 @@ begin
     for i:=0 to High(fonts) do
     begin
       s := createBitmapMaskFromText(ToStr(txt[j]), ToStr(fonts[i]));
+      checkAreaBounds(Area);
 
-      if (Area.X1 < 0) then Area.X1 := 0;
-      if (Area.Y1 < 0) then Area.Y1 := 0;
-
-      Result := cs_findBitmapMaskTolerance(S, 30, 30, Area, cx, cy, cs_CTS1);
+      Result := findBitmapMaskTolerance(S, cx, cy, Area.X1, Area.Y1, Area.X2, Area.Y2, 30, 30);
       freeBitmap(S);
 
       if (result) then
@@ -318,8 +316,11 @@ function loadTextTPA(Text, Chars: string; var height: integer): TPointArray;
 var
   w: integer;
 begin
-  result := TPAFromText(text,chars,w,height);
-  dec(height);
+  try
+    result := TPAFromText(text,chars,w,height);
+    dec(height);
+  except
+  end;
 end;
 
 (*
@@ -350,11 +351,12 @@ function findTextTPAEx(Color, Tol: integer; Area: TBox; var x,y: integer; Txt,Ch
 var
   TextTPA,SearchTPA,
   Matches : TPointArray;
+  tCol    : TColEx;
   Box     : TBox;
   xx,yy   : integer;
 begin
-  cs_findColorsTolerance(SearchTPA, Color, tol, Area, cs_CTS1);
-  if Length(SearchTPA) < 1 then
+  tCol.create(Color, Tol);
+  if not tCol.findAllIn(Area, SearchTPA) then
     Exit(False);
   TextTPA := loadTextTPA(Txt,Chars,yy);
   Result := findTextTPAinTPA(yy, TextTPA, SearchTPA, Matches);

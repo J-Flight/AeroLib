@@ -3,76 +3,10 @@
 Master
 ======
 }
-{$loadlib solvers}
-
-// Working
-{$include_once Misc.simba}
-{$include_once Box.simba}
-{$include_once FrogCave.simba}
-{$include_once SandwichLady.simba}
-{$include_once DrillDemon.simba}
-{$include_once PinBall.simba}
-{$include_once EvilBob.simba}
-{$include_once Pillory.simba}
-{$include_once Certers.simba}
-
-// Disabled
-{$include_once Mordaut.simba}
-{$include_once Quiz.simba}
-{$include_once Maze.simba}
-{$include_once Mime.simba}
-{$include_once Abyss.simba}
-{$include_once Leo.simba}
-{$include_once Molly.simba}
-{$include_once CapnArnav.simba}
-{$include_once Forester.simba}
-{$include_once BeeKeeper.simba}
-{$include_once PrisonPete.simba}
-
-Const
-  RANDOMS_COUNT     = 29;
-  RAND_DEMON        = 0;
-  RAND_MAZE         = 1;
-  RAND_EVILBOB      = 2;
-  RAND_MORDAUT      = 3;
-  RAND_CERTERS      = 4;
-  RAND_SANDWICHLADY = 5;
-  RAND_MIME         = 6;
-  RAND_ABYSS        = 7;
-  RAND_FROG         = 8;
-  RAND_PINBALL      = 9;
-  RAND_PILLORY      = 10;
-  RAND_ARNAV        = 11;
-  RAND_QUIZ         = 12;
-  RAND_LEO          = 13;
-  RAND_PETE         = 14;
-  RAND_FORESTER     = 15;
-  RAND_BEEKEEPER    = 16;
-  RAND_MOLLY        = 17;
-  RAND_STRANGEBOX   = 18;
-  RAND_COMBAT       = 19;
-  RAND_SWARM        = 20;
-  RAND_STRANGEPLANT = 21;
-  RAND_EVILCHICKEN  = 22;
-  RAND_BIGFISH      = 23;
-  RAND_WHIRLPOOL    = 24;
-  RAND_BROKENAXE    = 25;
-  RAND_ENT          = 26;
-  RAND_BROKENPICK   = 27;
-  RAND_GASROCK      = 28;
-
-
-type TRandom = record
-  name: string;
-  solve, detect: function(): boolean;
-  solved, failed: integer;
-  usesInv, hasReward, disabled: boolean;
-end;
 
 Var
-  RandomEvents: array[0..(RANDOMS_COUNT - 1)] of TRandom;
-  RandomsSet, DisableRandoms, RandomScreenShot: boolean;
-  DTM_RoyalFrogA,BMP_PModChat,BMP_JModChat: Integer;
+  BMP_PModChat,BMP_JModChat,
+  NickNameBMP: Integer;
   gtalksBox, YelSkipBoxs: array of TBox;
   gTalksCount,dismissedRandoms : Integer;
   NicknameSet : boolean;
@@ -96,9 +30,6 @@ end;
 
 Procedure rand_FreeGlobals;
 begin
-  freeDTM(DTM_RoyalFrogA);
-  freeBitmap(EC_ScreenText);
-  freeBitmap(EX_ScreenText);
   freeBitmap(BMP_PModChat);
   freeBitmap(BMP_JModChat);
   if NicknameSet then
@@ -110,185 +41,7 @@ end;
  * Description: Sets the SRL_Randoms global array.
  *)
 procedure setupRandoms();
-var
-  i: integer;
 begin
-  if RandomsSet then
-    exit;
-
-  RandomEvents[RAND_STRANGEBOX].name   := 'Strange Box';
-  RandomEvents[RAND_CERTERS].name      := 'Certers';
-  RandomEvents[RAND_SANDWICHLADY].name := 'Sandwich Lady';
-  RandomEvents[RAND_COMBAT].name       := 'Combat';
-  RandomEvents[RAND_SWARM].name        := 'Swarm';
-  RandomEvents[RAND_STRANGEPLANT].name := 'Strange Plant';
-  RandomEvents[RAND_EVILCHICKEN].name  := 'Evil Chicken';
-  RandomEvents[RAND_BIGFISH].name      := 'Big Fish';
-  RandomEvents[RAND_WHIRLPOOL].name    := 'Whirlpool';
-  RandomEvents[RAND_BROKENAXE].name    := 'Broken Axe';
-  RandomEvents[RAND_Ent].name          := 'Ent';
-  RandomEvents[RAND_BROKENPICK].name   := 'Broken Pickaxe';
-  RandomEvents[RAND_GASROCK].name      := 'Gas Rock';
-
-  with RandomEvents[RAND_FROG] do
-  begin
-    name      := 'Frog';
-    solve     := @FrogCave_Solve;
-    detect    := @FrogCave_Detect;
-    usesInv   := false;
-    hasReward := false;
-  end;
-
-  with RandomEvents[RAND_DEMON] do
-  begin
-    name      := 'Drill Demon';
-    solve     := @DD_Solve;
-    detect    := @DD_Detect;
-    usesInv   := false;
-    hasReward := false
-  end;
-
-  with RandomEvents[RAND_PINBALL] do
-  begin
-    name      := 'PinBall';
-    solve     := @PB_Solve;
-    detect    := @PB_Detect;
-    usesInv   := false;
-    hasReward := false
-  end;
-
-  with RandomEvents[RAND_PILLORY] do
-  begin
-    name      := 'Pillory';
-    solve     := @PL_Solve;
-    detect    := @PL_Detect;
-    usesInv   := false;
-    hasReward := false;
-  end;
-
-  with RandomEvents[RAND_EVILBOB] do
-  begin
-    name      := 'Evil Bob';
-    solve     := @EB_solve;
-    detect    := @EB_Detect;
-    usesInv   := false;
-    hasReward := false
-  end;
-
-  with RandomEvents[RAND_MORDAUT] do
-  begin
-    name      := 'Mordaut';
-    solve     := @MD_Solve;
-    detect    := @MD_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_QUIZ] do
-  begin
-    name      := 'Quiz Master';
-    solve     := @Quiz_Solve;
-    detect    := @Quiz_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_MAZE] do
-  begin
-    name      := 'Maze';
-    solve     := @Maze_Solve;
-    detect    := @Maze_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_MIME] do
-  begin
-    name      := 'Mime';
-    solve     := @Mime_Solve;
-    detect    := @Mime_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_ABYSS] do
-  begin
-    name      := 'Abyss';
-    solve     := @Abyss_Solve;
-    detect    := @Abyss_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_LEO] do
-  begin
-    name      := 'Leo';
-    solve     := @Leo_Solve;
-    detect    := @Leo_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_PETE] do
-  begin
-    name      := 'Prison Pete';
-    solve     := @PP_Solve;
-    detect    := @PP_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_MOLLY] do
-  begin
-    name      := 'Molly';
-    solve     := @Molly_Solve;
-    detect    := @Molly_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_BEEKEEPER] do
-  begin
-    name      := 'Beekeeper';
-    solve     := @BK_Solve;
-    detect    := @BK_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_FORESTER] do
-  begin
-    name      := 'Freaky Forester';
-    solve     := @FF_Solve;
-    detect    := @FF_Detect;
-    usesInv   := false;
-    hasReward := false;
-    disabled  := true;
-  end;
-
-  with RandomEvents[RAND_ARNAV] do
-  begin
-    name      := 'Cap'#39'n Arnav';
-    solve     := @CA_Solve;
-    detect    := @CA_Detect;
-    usesInv   := false;
-    hasReward := true;
-    disabled  := true;
-  end;
-
-  DTM_RoyalFrogA := DTMFromString('mggAAAHicY2NgYFjPyMCwAYg3AfFqIF4DxU+Bco+A+AkDhP0ciF8B8eH5kgxfjssx/D6rwfDCUI7h1X45Bs4sPgY5oBw2zIQDQwAASOcTBQ==');
-  EC_ScreenText  := BitmapFromText('lee', 'UpChars07');
-  EX_ScreenText  := BitmapFromText('xam', 'UpChars07');
-
   rand_TxtCol.create(65535, 1);
 
   BMP_PModChat := BitmapFromString(13, 11, 'meJybNm0aAyqYhk3kwYMHyOJA7q' +
@@ -301,203 +54,6 @@ begin
 
   setScreenName(Me.Nick);
   addOnTerminate('rand_FreeGlobals');
-
-  // disable all randoms if set to
-  if (DisableRandoms) then
-    for i := 0 to high(RandomEvents) do
-      RandomEvents[i].disabled := true;
-
-  RandomsSet := true;
-end;
-
-(**
- * Author: Coh3n
- * Description: Detects and solves the random of index 'rand' in the SRL_Randoms
- * array.  Returns true if a random is found, not necessarily if it is solved.
- * Manually returns true if the random was solved by hand using SRL's Random
- * tool.
- *)
-function _SolveRandom(rand: integer): boolean;
-var
-  solved: boolean;
-  oldCompass: extended;
-begin
-  if not isLoggedIn() then
-    exit;
-
-  if (@RandomEvents[rand].detect <> nil) and (RandomEvents[rand].detect()) then
-  begin
-    Me.Random := RandomEvents[rand].name;
-    result := true;
-
-    if al_HasProc(al_OnFindRandom) then
-      al_Procs[al_OnFindRandom]();
-
-    // only take a screenshot if needed
-    if (not RandomEvents[rand].usesInv) then
-      takeScreen(RandomEvents[rand].name, includePath+'AeroLib/screenshots/Randoms/');
-
-    // if solver isn't disabled, solve it
-    if (not RandomEvents[rand].disabled) then
-    begin
-      oldCompass := getCompassAngle();
-
-      if (@RandomEvents[rand].solve <> nil) and (RandomEvents[rand].solve()) then
-      begin
-        warn('Successfully solved the '+RandomEvents[rand].name+' random event', WT_RANDOM);
-        Me.Random := '';
-        inc(RandomEvents[rand].solved);
-        solved := true;
-      end;
-
-      setCompass(oldCompass);
-    end;
-
-    if (not solved) then
-    begin
-      if (not RandomEvents[rand].disabled) then
-        inc(RandomEvents[rand].failed);
-
-      warn('Failed the '+RandomEvents[rand].name+' random even, disabling player', WT_RANDOM);
-      Me.Active := false;
-      result    := false;
-      logoutPlayer();
-    end;
-  end;
-end;
-
-(**
-* Author: Flight
-* Description: Handles solving the random event.
-*)
-function Frog_Solve(): Boolean;
-var
-  T         : Timer;
-  Pnt       : TPoint;
-  cRan      : Boolean;
-  i,F       : Integer;
-  responses : TStringArray;
-label
-  Start;
-begin
-  Start:
-  cRan := false;
-  responses := ['lrigh','All right','ll rig','Okay','kay.','Yes','I supp','pose so','yeah','Yeah','Sure','ure'];
-  for i:=1 to 5 do
-    if DTM_findBestPointEx([DTM_RoyalFrog], AREA_MS, pnt) then
-    begin
-      missMouse(pnt, 2, 2);
-      if waitUpTextMulti(['Frog','to Fr'], 300) then
-      begin
-        warn('Found royal frog', WT_RANDOM);
-        fastClick(MOUSE_RIGHT);
-        wait(randomRange(100,250));
-        cRan := waitOptionMulti(['Talk-to Frog','to Fr','Frog'], 500);
-        if cRan then
-          break
-        else
-          mouseBox(AREA_CB, -1);
-      end;
-    end;
-
-  if not cRan then
-  begin
-    warn('Failed to locate the royal frog, exiting', WT_RANDOM);
-    Exit;
-  end;
-
-  warn('Talking to royal frog...', WT_RANDOM);
-  if not waitFunc(@areTalking, 10, 6000) then
-  begin
-    Inc(F);
-    if (F > 4) then
-    begin
-      warn('Failed to talk to the royal frog, exiting', WT_RANDOM);
-      Exit(false);
-    end;
-    GoTo Start;
-  end;
-
-  T.start();
-  repeat
-    if doConversation(responses) then
-    begin
-      warn('Chose correct response', WT_RANDOM);
-      break;
-    end;
-  until(T.timeElapsed() > 15000)
-
-  if waitFunc(@areTalking, 10, 10000) then
-    Result := clickContinue(True);
-
-  if Result then
-  begin
-    warn('Successfully solved the Royal Frog random', WT_RANDOM);
-    inc(RandomEvents[RAND_FROG].solved);
-  end;
-end;
-
-{*******************************************************************************
-function solveTalkingRandom(RawMenuText: String): Boolean;
-By: ??
-Last modified: 23/1/14 by Flight
-Description: Handles all standard talking Random Events
-*******************************************************************************}
-function solveTalkingRandom(NPCName: string): Boolean;
-var
-  IC,FI: Byte;
-begin
-  takeScreen(NPCName, includePath+'AeroLib/screenshots/Randoms/');
-  warn('Found talking random: '+NPCName, WT_RANDOM);
-  doConversation([]);
-
-  case lowercase(NPCName) of
-    'security guard','security g..ard':
-      begin
-        // inc(rand_SGuardCount);
-        Exit(True);
-      end;
-    'rick turpentine':
-      begin
-        // inc(rand_SGuardCount);
-        Exit(True);
-      end;
-    'drunken dwarf':
-      begin
-        // inc(rand_SGuardCount);
-        Exit(True);
-      end;
-    'sandwich lady','s.ndwich lady':
-      begin
-        if SL_Solve() then
-        begin
-          closeInterface();
-          inc(RandomEvents[RAND_SANDWICHLADY].solved);
-          Exit(true);
-        end else
-        begin
-          closeInterface();
-          inc(RandomEvents[RAND_SANDWICHLADY].failed);
-          logoutPlayer();
-          Exit(false);
-        end;
-      end;
-    'miles','giles','niles':
-      begin
-        if CT_Solve() then
-        begin
-          inc(RandomEvents[RAND_CERTERS].solved);
-          Exit(true);
-        end else
-        begin
-          inc(RandomEvents[RAND_CERTERS].failed);
-          logoutPlayer();
-          Exit(False);
-        end;
-      end;
-    else
-      //Writeln('Incorrect random?');
-  end;
 end;
 
 {*******************************************************************************
@@ -507,7 +63,7 @@ Description: Searches screen for NickName and handles ALL Talking Randoms
 *******************************************************************************}
 function findTalk(): Boolean;
 var
-  Pnt    : TPoint;
+  Pnt : TPoint;
   ax,ay,yCount,zCount,Count2,x1,y1,x2,y2,
   X,Y,Count1,bmpScreen: Integer;
   NPCName: String;
@@ -589,56 +145,20 @@ begin
     begin
       for yCount := 0 to GetArrayLength(gtalksBox) - 1 do
       begin
-        if cs_FindBitmapMaskTolerance(NickNameBMP, 0, 40, gtalksBox[yCount], ax, ay, cs_CTS) then
+        if findBitmapMaskTolerance(NickNameBMP, ax, ay, gtalksBox[yCount].x1, gtalksBox[yCount].y1,
+           gtalksBox[yCount].x2, gtalksBox[yCount].y2, 0, 40) then
         begin
           warn('Found NickName', WT_RANDOM);
           ax := (gtalksBox[yCount].x2 + gtalksBox[yCount].x1) shr 1;
           ay := gtalksBox[yCount].y2 - 2;
-
-          if findBitmapMaskTolerance(EX_ScreenText, x, y, MSX1, MSY1, MSX2, MSY2, 0, 40) then
+          missMouse(point(ax,ay), 0, 0);
+          if waitUpTextMulti(['Talk','lk-to','ttack','ard','curity'], RandomRange(150,300)) then
           begin
-            wait(randomRange(2500,3500));
-            Exit(false);
-          end;
-
-          if DISABLE_RANDOMS then
-          begin
-            missMouse(point(ax,ay), 0, 0);
-            if waitUpTextMulti(['Talk','lk-to','ttack','ard','curity'], RandomRange(150,300)) then
-            begin
-              fastClick(MOUSE_RIGHT);
-              if waitOptionMulti(['Dismi','smis'], 300) then
-                inc(dismissedRandoms);
-              FFlag(0);
-              Exit(true);
-            end;
-          end;
-
-          if not findDTM(DTM_RoyalFrog, x, y, MSX1, MSY1, MSX2, MSY2) then
-          begin
-            missMouse(point(ax,ay), 0, 0);
-            if waitUpTextMulti(['Talk','lk-to','ttack','ard','curity'], RandomRange(150,300)) then
-            begin
-              NPCName := extractNPCNameUptext();
-              fastClick(MOUSE_RIGHT);
-              rTalkStrings := ['o Sec','o San','o Gen','o Mil','o Gil','o Nil','o Ric',
-                               'o Dru','o Cap','o Mys','o Dr'];
-              if waitOptionMulti(rTalkStrings, RandomRange(150,300)) then
-              begin
-                warn('Found talking Random Event', WT_RANDOM);
-                FFlag(0);
-                waitFunc(@areTalking, 10, 3000);
-                if solveTalkingRandom(NPCName) then
-                  Result := True;
-                Exit;
-              end;
-            end;
-          end else
-          begin
-            warn('Found Royal Frog Random Event', WT_RANDOM);
-            takeScreen('RoyalFrog', includePath+'AeroLib/screenshots/Randoms/');
-            if Frog_Solve then
-              Exit(true);
+            fastClick(MOUSE_RIGHT);
+            if waitOptionMulti(['Dismi','smis'], 300) then
+              inc(dismissedRandoms);
+            FFlag(0);
+            Exit(true);
           end;
         end;
       end;
@@ -646,50 +166,38 @@ begin
   end;
 end;
 
-procedure findMod();
+function findMod(): Boolean;
 var
   X,Y : Integer;
 begin
   if not isLoggedIn() then Exit;
   if not AL_HANDLEMODS then Exit;
-  if ((not cs_FindBitmapToleranceIn(BMP_PModChat, X, Y, 20, toBox(MCX1,MCY1,MCX1+50,MCY2), cs_CTS)) and
-      (not cs_FindBitmapToleranceIn(BMP_JModChat, X, Y, 20, toBox(MCX1,MCY1,MCX1+50,MCY2), cs_CTS))) then Exit;
+  if ((not findBitmapToleranceIn(BMP_PModChat, X, Y, MCX1, MCY1, (MCX1+50), MCY2, 20)) and
+      (not findBitmapToleranceIn(BMP_JModChat, X, Y, MCX1, MCY1, (MCX1+50), MCY2, 20))) then Exit;
 
-  warn('PMod detected, logging out...', WT_RANDOM);
-
-  logoutPlayer();
-  Me.Active := False;
+  warn('PMod/JMod detected.', WT_RANDOM);
+  result := true;
 end;
 
 function foundRandoms(): boolean;
-var
-  i,x : integer;
-  manually,customSolved : boolean;
-  custom : T2DPointArray;
-  tmpTS : LongInt;
-  tmpH,tmpS,tmpMod : Extended;
 begin
-  // no tabs exists if bank is open; could throw false positives
   if (not isLoggedIn()) or (isBankOpen()) then
     exit;
-
-  if (not RandomsSet) then
-    setupRandoms();
 
   if findTalk() then
     Exit(True);
 
-  for i:=0 to high(RandomEvents) do
+  if findMod() then
   begin
-    result := _SolveRandom(i)
-
-    // don't want to keep looking for randoms if one was already detected, but failed
-    if ((result) or (not isLoggedIn())) then
-      break;
+    if al_HasProc(al_OnFindMod) then
+      al_Procs[al_OnFindMod]()
+    else
+    begin
+      logoutPlayer();
+      Me.Active := False;
+      terminateScript();
+    end;
   end;
-
-  //findDead();
-  findMod();
 end;
 
 {*******************************************************************************
@@ -702,8 +210,9 @@ var
   T : Timer;
 begin
   T.start();
-  repeat
+  while (T.timeElapsed() < WaitTime) do
+  begin
     if foundRandoms() then Exit(true);
-    Wait(randomRange(90,130));
-  until (T.timeElapsed > WaitTime);
+    wait(randomRange(40,90));
+  end;
 end;

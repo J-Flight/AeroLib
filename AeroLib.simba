@@ -1,12 +1,13 @@
+{$DEFINE Aerolib}
+
 {$include_once core/engine/Boxes.simba}
 {$include_once core/Globals.simba}
 {$include_once core/engine/TPA.simba}
-{$include_once core/engine/Color.simba}
 {$include_once core/engine/DTM.simba}
 {$include_once core/engine/Time.simba}
 {$include_once core/engine/Math.simba}
+{$include_once core/engine/Color.simba}
 {$include_once core/engine/SimbaEx.simba}
-{$include_once core/engine/ColorEx.simba}
 
 {$include_once misc/Graphics.simba}
 {$include_once misc/Debugging.simba}
@@ -53,10 +54,64 @@
 {$ENDIF}
 
 Const
-  AL_VERSION_MAIN = '1.1';
-  AL_VERSION_SUB  = '11';
+  AL_VERSION_MAIN = 1.2;
+  AL_VERSION_SUB  = 0;
+  AL_GITURL       = 'https://github.com/J-Flight/AeroLib';
 
-procedure AL_checkVersion();
+procedure AL_Update();
+const
+  GitHead    = 'https://github.com/';
+  RawGitHead = 'https://raw.githubusercontent.com/';
+  MasterHead = 'https://codeload.github.com/';
+  MasterFoot = '/zip/master';
+var
+  hFile,hZip,i,P: Integer;
+  ZipData,RepoName: String;
+Begin
+  warn('Updating AeroLib...', WT_CORE);
+  P := -1;
+  for i := 1 To Length(AL_GITURL) Do
+    if (AL_GITURL[i] = '/') Then
+      P := i + 1;
+
+  RepoName := Copy(AL_GITURL, P, Length(AL_GITURL) - P + 1);
+
+  ZipData := Copy(AL_GITURL, Length(GitHead) + 1, Length(AL_GITURL) - Length(GitHead) + 1);
+  ZipData := PS_GetPage(MasterHead + ZipData + MasterFoot);
+  hZip := RewriteFile(IncludePath + RepoName + '.zip', False);
+  if (hZip <> -1) Then
+  begin
+    if (not WriteFileString(hZip, ZipData)) Then
+    begin
+      warn('Failed to download AeroLib from GitHub.', WT_CORE);
+      Exit;
+    end;
+
+    If (hFile <> 0) Then
+      CloseFile(hFile);
+
+    CloseFile(hZip);
+    UnzipFile(IncludePath + RepoName + '.zip', IncludePath);
+    DeleteFile(IncludePath + RepoName + '.zip');
+    RenameFile(IncludePath + RepoName + '-master', IncludePath + RepoName + '_TEST'); // CHANGE THIS!
+    warn('Successfully updated AeroLib, please restart the script.', WT_CORE);
+    TerminateScript;
+  end else
+  begin
+    if (hFile <> 0) Then
+      CloseFile(hFile);
+
+    if (hZip <> 0) Then
+      CloseFile(hZip);
+
+    Exit;
+  end;
+
+  if (hFile <> 0) Then
+    CloseFile(hFile);
+end;
+
+procedure AL_CheckVersion();
 var
   Page,vM,vS : String;
 begin
@@ -77,20 +132,25 @@ begin
     Exit;
   end;
 
-  if (not (AL_VERSION_MAIN = vM)) then
-    showMessage('There'#39's a major update available for AeroLib!');
-  if (not (AL_VERSION_SUB = vS)) then
+  if ((AL_VERSION_MAIN >= strToFloat(vM)) and (AL_VERSION_SUB >= strToFloat(vS))) then
+  begin
+    warn('Currently up to date.', WT_CORE);
+    exit;
+  end;
+
+  if (AL_VERSION_MAIN < strToFloat(vM)) then
+    warn('There'#39's a major update available for AeroLib.', WT_CORE);
+  if (AL_VERSION_SUB < strToFloat(vS)) then
     warn('There'#39's a minor update available for AeroLib.', WT_CORE);
 
-  if ((AL_VERSION_MAIN = vM) and (AL_VERSION_SUB = vS)) then
-    warn('Currently up to date.', WT_CORE);
+  AL_Update();
 end;
 
 procedure initAL();
 begin
   AL_InitMessage(AL_VERSION_MAIN, AL_VERSION_SUB);
   warn('Initiating AeroLib...', WT_CORE);
-  AL_checkVersion();
+  AL_CheckVersion();
   setupGauss();
   loadObjDB();
 

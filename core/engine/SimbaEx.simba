@@ -284,13 +284,15 @@ function IsTextInAreaEx(xs, ys, xe, ye: Integer; var x, y: Integer; S: string; T
 var
   TextTPA,SearchTPA, Matches: TPointArray;
   Box : TBox;
+  tCol : TColEx;
   xx,yy,i,len : integer;
 begin
   if TextColor = -1 then
     raiseexception(ercustomerror,'IsTextInArea with color = -1, is not supported');
   Result := False;
-  cs_findColorsTolerance(SearchTPA, TextColor, tolerance, intToBox(xs,ys,xe,ye), cs_CTS1);
-  if Length(SearchTPA) < 1 then
+
+  tCol.create(TextColor, tolerance);
+  if not tCol.findAllIn(toBox(xs,ys,xe,ye), SearchTPA) then
     Exit;
   TextTPA:= TPAFromText(S,Chars,xx,yy);
   Result := FindTextTPAinTPA(yy ,TextTPA,SearchTPA,Matches);
@@ -316,15 +318,6 @@ end;
 procedure ColorToleranceSpeed(cts : integer);
 begin;
   SetColorToleranceSpeed(cts);
-end;
-
-type
-  TColorComp = (ccRed, ccGreen, ccBlue, ccHue, ccSat, ccLum);
-
-function FindColorComp(var x, y: Integer; Comp: Variant; CompType: TColorComp; xs, ys, xe, ye: Integer; Tolerance: Extended): Boolean;
-begin
-  Writeln('FindColorComp is not yet implemented! Use another color finder ;-)');
-  Result := false;
 end;
 
 procedure SetColorspeed2Modifiers(huemodifier, saturationmodifier: Extended);
@@ -483,20 +476,6 @@ begin
   Pointers := Ptrs;
 end;
 
-function getGithubPage(const URL: String): String;
-var
-  NewURL: String;
-  p: Integer;
-begin
-  Result := '';
-  p := Pos('.com/', URL);
-  if (p = 0) then
-    Exit;
-
-  NewURL := Copy(URL, p + Length('.com/'), Length(URL) - p + Length('.com/'));
-  Result := GetPage('http://cdn.rawgit.com/' +  Replace(NewURL, 'blob/', '', [rfReplaceAll]));
-end;
-
 Function getDirectoryName(Directory, Path: String): String;
 var
   I: Integer;
@@ -606,7 +585,7 @@ begin
   end;
 end;
 
-function FindAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean;
+function findAndSetTarget(TitlePrefix: String; SetAsTarget: Boolean): Boolean;
 var
   T : TSysProcArr;
   I : Integer;
@@ -619,6 +598,36 @@ begin
       if SetAsTarget then SetTarget(T[I]);
       Exit;
     end;
+end;
+
+function getFileSize(path: string): Integer;
+var
+  s: Integer;
+begin
+  try
+    s := OpenFile(path, True);
+    Result := FileSize(s);
+    CloseFile(s);
+  except
+    writeln('Failed to load file');
+    Result := -1;
+  end;
+end;
+
+{$loadlib prosocks}
+function PS_GetPage(Url: string): string;
+var
+  S: SSLSocket;
+  Res: ProMemoryStruct;
+begin
+  Pro_InitSocket(S, nil, nil, nil, nil);
+  Pro_CreateSocket(S, '');
+  Pro_SetSSL(S, false, false, true);
+  Pro_SetURL(S, URL);
+  Pro_DoGetEx(S, Res);
+  SetLength(Result, Res.size);
+  MemMove(Res.Memory^, Result[1], Res.Size);
+  Pro_FreeSocket(S);
 end;
 
 // by Brandon
@@ -654,19 +663,5 @@ Begin
         Result[J] := Result[J] + Str[I]
       else
         Inc(J);
-  end;
-end;
-
-function getFileSize(path: string): Integer;
-var
-  s: Integer;
-begin
-  try
-    s := OpenFile(path, True);
-    Result := FileSize(s);
-    CloseFile(s);
-  except
-    writeLn('Failed to load file');
-    Result := -1;
   end;
 end;

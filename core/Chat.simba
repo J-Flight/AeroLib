@@ -812,13 +812,13 @@ var
   pnt       : TPoint;
   colO,colB : TColEx;
 begin
-  colO.create(125, 5);
-  colB.create(7238703, 25);
+  colO.create(128, 10);
+  colB.create(6383633, 25);
 
-  if not colB.findIn(toBox(33,371,39,375), pnt) then
+  if not colB.findIn(toBox(MCX1,MCY1,MCX2,390), pnt) then
     Exit(False);
 
-  result := colO.findIn(toBox(90,363,430,377), pnt);
+  result := colO.findIn(toBox(MCX1,MCY1,MCX2,390), pnt);
 end;
 
 function findNPCChatTextMulti(txt: TStringArray; Click, DoWait: Boolean): boolean;

@@ -1,488 +1,190 @@
-//By Janilabo
+{
+=======
+ColorEx
+=======
+}
 
-{==============================================================================]
-  Explanation: Constants for Simba's default CTS-related settings. Used in cs_CTS(Ex) functions.
-[==============================================================================}
-const
-  cs_DEFAULT_HUE_MODIFIER = 0.2;
-  cs_DEFAULT_SATURATION_MODIFIER = 0.2;
-  cs_DEFAULT_SENSITIVITY_MODIFIER = 1;
-  cs_DEFAULT_CTS = 1;
+Type TColEx = record
+  Col   : Integer;
+  Tol   : Integer;
+  hMod  : Extended;
+  sMod  : Extended;
+end;
 
-{==============================================================================]
-  Explanation: Used for easy storing/setting of Color (Tolerance) Speed settings.
-[==============================================================================}
-type
-  cs_TColorSettings = record
-    CTS: Integer;
-    modifier: record
-      hue, saturation, sensitivity: Extended;
-    end;
+
+procedure TColEx.create(_Col, _Tol: Integer; _hMod, _sMod: Extended);
+begin
+  Self.Col  := _Col;
+  Self.Tol  := _Tol;
+  Self.hMod := _hMod;
+  Self.sMod := _sMod;
+end;
+
+procedure TColEx.create(_Col, _Tol: Integer); overload;
+begin
+  Self.Col  := _Col;
+  Self.Tol  := _Tol;
+  Self.hMod := 0.2;
+  Self.sMod := 0.2;
+end;
+
+function createCol(_Col, _Tol: Integer; _hMod, _sMod: Extended): TColEx;
+begin
+  Result.Col  := _Col;
+  Result.Tol  := _Tol;
+  Result.hMod := _hMod;
+  Result.sMod := _sMod;
+end;
+
+function createCol(_Col, _Tol: Integer): TColEx;  overload;
+begin
+  Result.Col  := _Col;
+  Result.Tol  := _Tol;
+  Result.hMod := 0.2;
+  Result.sMod := 0.2;
+end;
+
+function NULL_TColEx: TColEx;
+begin
+  Result.Col  := -1;
+  Result.Tol  := -1;
+  Result.hMod := 0.0;
+  Result.sMod := 0.0;
+end;
+
+function TColEx.findIn(Area: TBox; var Point: TPoint): Boolean;
+var
+  tmpCTS : Integer;
+begin
+  tmpCTS := getToleranceSpeed();
+  if ((Self.hMod <> 0.2) or (Self.sMod <> 0.2)) then
+  begin
+    setColorToleranceSpeed(2);
+    setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
   end;
-
-{==============================================================================]
-  Explanation: Converts parameters to cs_TColorSettings type. Without Tolerance Speed 3 modifier!
-[==============================================================================}
-function cs_ToColorSettings(CTS: Integer; hueModifier, saturationModifier: Extended): cs_TColorSettings;
-begin
-  Result.CTS := CTS;
-  Result.modifier.hue := hueModifier;
-  Result.modifier.saturation := saturationModifier;
-end;
-
-{==============================================================================]
-  Explanation: Converts parameters to cs_TColorSettings type. Contains field for Tolerance Speed 3 modifier aswell.
-[==============================================================================}
-function cs_ToColorSettings2(CTS: Integer; hueModifier, saturationModifier, sensitivityModifier: Extended): cs_TColorSettings;
-begin
-  Result.CTS := CTS;
-  Result.modifier.hue := hueModifier;
-  Result.modifier.saturation := saturationModifier;
-  Result.modifier.sensitivity := sensitivityModifier;
-end;
-
-{==============================================================================]
-  Explanation: Returns current Color (Tolerance) Speed settings as TColorSettings.
-[==============================================================================}
-function cs_GetColorSettings: cs_TColorSettings;
-begin
-  Result.CTS := GetToleranceSpeed;
-  Result.modifier.sensitivity := GetToleranceSpeed3Modifier;
-  GetToleranceSpeed2Modifiers(Result.modifier.hue, Result.modifier.saturation);
-end;
-
-{==============================================================================]
-  Explanation: Sets Color (Tolerance) Speed settings with settings.
-[==============================================================================}
-procedure cs_SetColorSettings(settings: cs_TColorSettings);
-begin
-  SetColorToleranceSpeed(settings.CTS);
-  SetToleranceSpeed2Modifiers(settings.modifier.hue, settings.modifier.saturation);
-  SetToleranceSpeed3Modifier(settings.modifier.sensitivity);
-end;
-
-{==============================================================================]
-  function wrappers BELOW - they perform these steps:
-    1. Captures original (current) color settings in the begin to 'cs' variable
-    2. Sets custom color settings (by settings) to Simba
-    3. Performs the function [ex. FindColorTolerance()], just like it should - with custom settings!
-    4. Restores the original color settings from 'cs' variable to Simba
-[==============================================================================}
-
-{==============================================================================]
-  Explanation: FindColors(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindColors(var points: TPointArray; color: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
   checkAreaBounds(Area);
-  Result := findColors(points, color, Area.X1, Area.Y1, Area.X2, Area.Y2);
-  cs_SetColorSettings(cs);
+  Result := findColorTolerance(Point.x, Point.y, Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  setColorToleranceSpeed(tmpCTS);
 end;
 
-{==============================================================================]
-  Explanation: FindColorTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindColorTolerance(var x, y: Integer; color, tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
+function TColEx.findIn(Area: TBox): Boolean; overload;
 var
-  cs: cs_TColorSettings;
+  pnt    : TPoint;
+  tmpCTS : Integer;
 begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
+  tmpCTS := getToleranceSpeed();
+  if ((Self.hMod <> 0.2) or (Self.sMod <> 0.2)) then
+  begin
+    setColorToleranceSpeed(2);
+    setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
+  end;
   checkAreaBounds(Area);
-  Result := FindColorTolerance(x, y, color, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
+  Result := findColorTolerance(Pnt.x, Pnt.y, Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  setColorToleranceSpeed(tmpCTS);
 end;
 
-{==============================================================================]
-  Explanation: FindColorsTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindColorsTolerance(var points: TPointArray; color, tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
+function TColEx.findAllIn(Area: TBox; var Points: TPointArray): Boolean;
 var
-  cs: cs_TColorSettings;
+  tmpCTS : Integer;
 begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
+  tmpCTS := getToleranceSpeed();
+  if ((Self.hMod <> 0.2) or (Self.sMod <> 0.2)) then
+  begin
+    setColorToleranceSpeed(2);
+    setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
+  end;
   checkAreaBounds(Area);
-  Result := FindColorsTolerance(points, color, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
+  try
+    Result := findColorsTolerance(Points, Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  except
+  end;
+  setColorToleranceSpeed(tmpCTS);
 end;
 
-{==============================================================================]
-  Explanation: FindColorSpiralTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindColorSpiralTolerance(var x, y: Integer; color, tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
+function TColEx.count(Area: TBox): Integer;
 var
-  cs: cs_TColorSettings;
+  tmpCTS : Integer;
 begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
+  tmpCTS := getToleranceSpeed();
+  if ((Self.hMod <> 0.2) or (Self.sMod <> 0.2)) then
+  begin
+    setColorToleranceSpeed(2);
+    setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
+  end;
   checkAreaBounds(Area);
-  Result := FindColorSpiralTolerance(x, y, color, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
+  Result := countColorTolerance(Self.Col, Area.X1, Area.Y1, Area.X2, Area.Y2, Self.Tol);
+  setColorToleranceSpeed(tmpCTS);
 end;
 
-{==============================================================================]
-  Explanation: FindColorsSpiralTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindColorsSpiralTolerance(x, y: Integer; var points: TPointArray; color, tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
+function TColEx.findPie(Area: TBox; StartD, EndD, MinR, MaxR: Extended; MidX, MidY: Integer; var Points: TPointArray): Boolean;
 var
-  cs: cs_TColorSettings;
+  tmpCTS : Integer;
+  tmpRes : Boolean;
 begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
+  tmpCTS := getToleranceSpeed();
+  if ((Self.hMod <> 0.2) or (Self.sMod <> 0.2)) then
+  begin
+    setColorToleranceSpeed(2);
+    setToleranceSpeed2Modifiers(Self.hMod, Self.sMod);
+  end;
   checkAreaBounds(Area);
-  Result := FindColorsSpiralTolerance(x, y, points, color, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
-end;
-
-(*
-cs_FindColorsPie
-~~~~~~~~~~~~~
-
-.. code-block:: pascal
-
-
-    function cs_FindColorsPie(var Points: TPointArray; Color, Tol: Integer; StartD,
-    EndD, MinR, MaxR: Extended; Mx, My: Integer; Area: TBox; cs_CTS): Boolean;
-
-Finds all Colors with tolerance in the Pie, defined by x1, y1, x2, y2, Mx, My,
-StartDegree, EndDegree, MinRadius and MaxRadius.
-
-.. note::
-
-    by Wizzup?, edit by EvilChicken!
-
-Example:
-
-.. code-block:: pascal
-
-
-*)
-function cs_FindColorsPie(var Points: TPointArray; Color, Tol: Integer; StartD,
-  EndD, MinR, MaxR: Extended; Mx, My: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs : cs_TColorSettings;
-  f  : boolean;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  f := FindColorsTolerance(points, color, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
-  if not f then Exit(false);
-  filterPointsPie(Points, StartD, EndD, MinR, MaxR, Mx, My);
+  tmpRes := Self.findAllIn(Area, Points);
+  setColorToleranceSpeed(tmpCTS);
+  if not tmpRes then Exit(false);
+  filterPointsPie(Points, StartD, EndD, MinR, MaxR, MidX, MidY);
   Result := (length(Points) > 0);
 end;
 
-{==============================================================================]
-  Explanation: FindColoredAreaTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindColoredAreaTolerance(var x, y: Integer; color, minArea, tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
+// By ProphesyOfWolf
+procedure TColEx.autoCreate(colors: TIntegerArray);
+Var
+  h, s, t: Extended;
+  I,II : integer;
+  HSLColor : Array[1..3] of Extended;
+  HSL : Array[0..1] of Array[1..3] of Extended;
 begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindColoredAreaTolerance(x, y, color, Area.X1, Area.Y1, Area.X2, Area.Y2, minArea, tol);
-  cs_SetColorSettings(cs);
-end;
+  For I:= 1 to 3 do
+  begin;
+    HSL[0][i] := 255;
+  end;
 
-{==============================================================================]
-  Explanation: SimilarColors(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_SimilarColors(col1, col2, tol: Integer; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  Result := SimilarColors(col1, col2, tol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: CountColorTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_CountColorTolerance(color, tol: Integer; Area: TBox; settings: cs_TColorSettings): Integer;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := CountColorTolerance(color, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindBitmapToleranceIn(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindBitmapToleranceIn(bitmap: Integer; var x, y: Integer; tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindBitmapToleranceIn(bitmap, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindBitmapSpiralTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindBitmapSpiralTolerance(bitmap: Integer; var x, y: Integer; tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindBitmapSpiralTolerance(bitmap, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindBitmapsSpiralTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindBitmapsSpiralTolerance(bitmap: Integer; x, y: Integer; var points: TPointArray; tol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindBitmapsSpiralTolerance(bitmap, x, y, points, Area.X1, Area.Y1, Area.X2, Area.Y2, tol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindBitmapMaskTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindBitmapMaskTolerance(mask, tol, contourTol: Integer; Area: TBox; var x, y: Integer; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindBitmapMaskTolerance(mask, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, tol, contourTol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDeformedBitmapToleranceIn(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDeformedBitmapToleranceIn(bitmap: Integer; var x, y: Integer; tol, range: Integer; Area: TBox; allowPartialAccuracy: Boolean; var accuracy: Extended; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDeformedBitmapToleranceIn(bitmap, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, tol, range, allowPartialAccuracy, accuracy);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: GetTextAt(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len: Integer; font: string; settings: cs_TColorSettings): string;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  Result := GetTextAt(atX, atY, minvspacing, maxvspacing, hspacing, color, tol, len, font);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: GetTextAtEx(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_GetTextAtEx(Area: TBox; minvspacing, maxvspacing, hspacing, color, tol: Integer; font: string; settings: cs_TColorSettings): string;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  Result := GetTextAtEx(Area.X1, Area.Y1, Area.X2, Area.Y2, minvspacing, maxvspacing, hspacing, color, tol, font);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindMaskTolerance(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindMaskTolerance(mask: TMask; var x, y: Integer; tol, contourTol: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindMaskTolerance(mask, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, tol, contourTol);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDTM(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDTM(DTM: Integer; var x, y: Integer; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDTM(DTM, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDTM(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDTMs(DTM: Integer; var points: TPointArray; Area: TBox; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDTMs(DTM, points, Area.X1, Area.Y1, Area.X2, Area.Y2);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDTMRotatedSE(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDTMRotatedSE(DTM: Integer; var x, y: Integer; Area: TBox; sAngle, eAngle, aStep: Extended; var aFound: Extended; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDTMRotatedSE(DTM, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, sAngle, eAngle, aStep, aFound);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDTMRotatedAlternating(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDTMRotatedAlternating(DTM: Integer; var x, y: Integer; Area: TBox; sAngle, eAngle, aStep: Extended; var aFound: Extended; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDTMRotatedAlternating(DTM, x, y, Area.X1, Area.Y1, Area.X2, Area.Y2, sAngle, eAngle, aStep, aFound);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDTMsRotatedSE(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDTMsRotatedSE(DTM: Integer; var points: TPointArray; Area: TBox; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDTMsRotatedSE(DTM, points, Area.X1, Area.Y1, Area.X2, Area.Y2, sAngle, eAngle, aStep, aFound);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: FindDTMsRotatedAlternating(), with parameter for custom color settings (settings)
-[==============================================================================}
-function cs_FindDTMsRotatedAlternating(DTM: Integer; var points: TPointArray; Area: TBox; sAngle, eAngle, aStep: Extended; var aFound: T2DExtendedArray; settings: cs_TColorSettings): Boolean;
-var
-  cs: cs_TColorSettings;
-begin
-  cs := cs_GetColorSettings;
-  cs_SetColorSettings(settings);
-  checkAreaBounds(Area);
-  Result := FindDTMsRotatedAlternating(DTM, points, Area.X1, Area.Y1, Area.X2, Area.Y2, sAngle, eAngle, aStep, aFound);
-  cs_SetColorSettings(cs);
-end;
-
-{==============================================================================]
-  Explanation: Returns cs_TColorSettings with CTS mode as x.
-               IF x is HIGHER than 3, then this function will set mode as the current one with GetColorToleranceSpeed.
-               ..and if its LOWER than 0 then this will return as Simba's DEFAULT CTS settings (note: this includes hue, saturation and sensitivity modifiers aswell). ;)
-  NOTE: If you set CTS as 2/3 with this function, this will set the CURRENT hue, saturation and sensitivity modifiers - with GetToleranceSpeed2Modifiers() & GetToleranceSpeed3Modifier.
-[==============================================================================}
-function cs_CTSEx(x: Integer): cs_TColorSettings;
-begin
-  case (x > -1) of
-    True:
-    begin
-      GetToleranceSpeed2Modifiers(Result.modifier.hue, Result.modifier.saturation);
-      Result.modifier.sensitivity := GetToleranceSpeed3Modifier;
-      case (x > 3) of
-        True: Result.CTS := GetToleranceSpeed;
-        False: Result.CTS := x;
-      end;
-    end;
-    False:
-    begin
-      Result.modifier.hue := cs_DEFAULT_HUE_MODIFIER;
-      Result.modifier.saturation := cs_DEFAULT_SATURATION_MODIFIER;
-      Result.modifier.sensitivity := cs_DEFAULT_SENSITIVITY_MODIFIER;
-      Result.CTS := cs_DEFAULT_CTS;
+  For I:= 0 to High(Colors) do
+  begin;
+    ColortoHSL(Colors[i],HSLColor[1],HSLColor[2],HSLColor[3]);
+    For II:= 1 to 3 do
+    begin;
+      HSL[0][II] := MinE(HSLColor[II],HSL[0][II]);
+      HSL[1][II] := MaxE(HSLColor[II],HSL[1][II]);
     end;
   end;
+
+  H := (HSL[1][1] - HSL[0][1]);
+  S := (HSL[1][2] - HSL[0][2]);
+  T := (HSL[1][3] - HSL[0][3]);
+
+  try
+    Self.hMod := (H/T);
+    Self.sMod := (S/T);
+    Self.Tol  := Round(t);
+  except
+    Self.hMod := 0;
+    Self.sMod := 0;
+    Self.Tol  := Round(0.0);
+  end;
+
+  Self.Col := HSLToColor((HSL[1][1] + HSL[0][1]) / 2,(HSL[1][2] + HSL[0][2]) / 2,(HSL[1][3] + HSL[0][3]) / 2);
 end;
 
-{==============================================================================]
-  Explanation: Returns cs_TColorSettings with Simba's DEFAULT CTS settings.
-[==============================================================================}
-function cs_CTS: cs_TColorSettings;
+function TColEx.waitFindIn(Area: TBox; waitPerLoop, maxWait: Integer): Boolean;
+var
+  T: Timer;
 begin
-  Result := cs_CTSEx(-1);
+  T.start;
+  repeat
+    if Self.findIn(Area) then Exit(true);
+    wait(waitPerLoop);
+  until(T.timeElapsed > maxWait);
 end;
-
-{==============================================================================]
-  Explanation: Returns cs_TColorSettings with CTS mode as 0.
-[==============================================================================}
-function cs_CTS0: cs_TColorSettings;
-begin
-  Result := cs_CTSEx(0);
-end;
-
-{==============================================================================]
-  Explanation: Returns cs_TColorSettings with CTS mode as 1.
-[==============================================================================}
-function cs_CTS1: cs_TColorSettings;
-begin
-  Result := cs_CTSEx(1);
-end;
-
-{==============================================================================]
-  Explanation: Returns cs_TColorSettings with CTS mode as 2.
-  NOTE: This will use the CURRENT hue and saturation modifiers - with GetToleranceSpeed2Modifiers().
-[==============================================================================}
-function cs_CTS2: cs_TColorSettings;
-begin
-  Result := cs_CTSEx(2);
-end;
-
-{==============================================================================]
-  Explanation: Returns cs_TColorSettings with CTS mode as 3.
-  NOTE: This will use the CURRENT sensitivity modifier with GetToleranceSpeed3Modifier.
-[==============================================================================}
-function cs_CTS3: cs_TColorSettings;
-begin
-  Result := cs_CTSEx(3);
-end;
-
 
 (*
 ReturnTPAExceptColors
@@ -509,13 +211,17 @@ Example:
 *)
 function returnTPAExceptColors(cols, tols: TIntegerArray; area: TBox): TPointArray;
 var
+  tCol : TColEx;
   i    : integer;
   tpa  : TPointArray;
   atpa : T2DpointArray;
 begin
   setLength(atpa, length(cols));
   for i := 0 to high(cols) do
-    cs_findColorsTolerance(atpa[i], cols[i], tols[i], area, cs_CTS);
+  begin
+    tCol.create(cols[i], tols[i]);
+    tCol.findAllIn(area, atpa[i]);
+  end;
 
   tpa := mergeATPA(atpa);
   clearDoubleTPA(tpa);

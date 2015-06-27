@@ -57,7 +57,7 @@ var
 begin
   if not (getLoginState() = LS_LOGGEDOUT) then
     exit(-1);
-  txt    := cs_GetTextAtEx(toBox(61,465,88,480), 0, 5, 2, 16777215, 2, 'UpChars07', cs_CTS);
+  txt    := getTextAtEx(61, 465, 88, 480, 0, 5, 2, 16777215, 2, 'UpChars07');
   result := strToIntDef(txt, 0);
 end;
 
@@ -284,7 +284,7 @@ begin
   if not (getLoginState() = LS_WORLDSCREEN) then
     exit(false);
   checkbox := worldIndexToMSBox(World);
-  txt := cs_GetTextAtEx(toBox(checkbox.x1+44,checkbox.y1,checkbox.x2-10,checkbox.y2), 0, 4, 2, 16777215, 0, 'StatChars07', cs_CTS);
+  txt := getTextAtEx((checkbox.x1+44), checkbox.y1, (checkbox.x2-10), checkbox.y2, 0, 4, 2, 16777215, 0, 'StatChars07');
   result:= arrinstr(['FULL','ENLL','FNLL','EULL'],txt);
 end;
 
@@ -318,7 +318,7 @@ begin
   begin
     if not orderWorlds() then
     begin
-      Writeln('Could not order worlds properly.');
+      warn('Could not order worlds properly.', WT_CORE);
       exitWorldScreen();
       Exit;
     end;
@@ -327,7 +327,7 @@ begin
 
   if fullworld(W) then
   begin
-    Writeln('World selected is currently full');
+    warn('World selected is currently full.', WT_CORE);
     exitWorldScreen();
     exit;
   end;
