@@ -5,6 +5,7 @@
 {$I Base.pas}
 
 const
+  RSW_MaxWalkDist = 60;
   RSW_Path = IncludePath + 'AeroLib\maps\';
   RSW_Extension = '.png';
 
@@ -205,7 +206,7 @@ end;
 function TRSWalker.PointToMM(myPos, pt: TPoint; out mmPos:TPoint): Boolean;
 begin
   Result := False;
-  if (w_Distance(myPos, pt) < 66) then
+  if (w_Distance(myPos, pt) < RSW_MaxWalkDist) then
   begin
     mmPos.x := (pt.x - myPos.x);
     mmPos.y := (pt.y - myPos.y);

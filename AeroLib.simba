@@ -55,7 +55,7 @@
 
 Const
   AL_VERSION_MAIN = 1.2;
-  AL_VERSION_SUB  = 0;
+  AL_VERSION_SUB  = 1;
   AL_GITURL       = 'https://github.com/J-Flight/AeroLib';
 
 procedure AL_Update();

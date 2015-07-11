@@ -327,7 +327,7 @@ Example:
 function getTextCoords(textn: Integer): TPoint;
 begin
   Result.X := 15;
-  Result.Y := 347 + (14 * (textn - 1));
+  Result.Y := 346 + (14 * (textn - 1));
 end;
 
 (*

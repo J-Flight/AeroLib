@@ -131,44 +131,44 @@ begin
     Result.X := 205
   else if inRange(Index, 320, 342) then
     Result.X := 300
-  else if inRange(Index, 343, 365) then
+  else if inRange(Index, 343, 368) then
     Result.X := 392
-  else if inRange(Index, 366, 394) then
+  else if inRange(Index, 369, 394) then
     Result.X := 485;
 
-  if ((Index=301)or(Index=320)or(Index=343)or(Index=366)) then
+  if ((Index=301)or(Index=320)or(Index=343)or(Index=369)) then
     Result.Y := 63
-  else if ((Index=302)or(Index=321)or(Index=344)or(Index=367)) then
+  else if ((Index=302)or(Index=321)or(Index=344)or(Index=370)) then
     Result.Y := 86
-  else if ((Index=303)or(Index=322)or(Index=345)or(Index=368)) then
+  else if ((Index=303)or(Index=322)or(Index=345)or(Index=373)) then
     Result.Y := 111
-  else if ((Index=304)or(Index=325)or(Index=346)or(Index=369)) then
+  else if ((Index=304)or(Index=325)or(Index=346)or(Index=374)) then
     Result.Y := 134
-  else if ((Index=305)or(Index=326)or(Index=349)or(Index=370)) then
+  else if ((Index=305)or(Index=326)or(Index=349)or(Index=375)) then
     Result.Y := 158
-  else if ((Index=306)or(Index=327)or(Index=350)or(Index=373)) then
+  else if ((Index=306)or(Index=327)or(Index=350)or(Index=376)) then
     Result.Y := 182
-  else if ((Index=308)or(Index=328)or(Index=351)or(Index=374)) then
+  else if ((Index=308)or(Index=328)or(Index=351)or(Index=377)) then
     Result.Y := 206
-  else if ((Index=309)or(Index=329)or(Index=352)or(Index=375)) then
+  else if ((Index=309)or(Index=329)or(Index=354)or(Index=378)) then
     Result.Y := 231
-  else if ((Index=310)or(Index=330)or(Index=353)or(Index=376)) then
+  else if ((Index=310)or(Index=330)or(Index=358)or(Index=381)) then
     Result.Y := 255
-  else if ((Index=311)or(Index=333)or(Index=354)or(Index=377)) then
+  else if ((Index=311)or(Index=333)or(Index=359)or(Index=382)) then
     Result.Y := 278
-  else if ((Index=312)or(Index=334)or(Index=357)or(Index=378)) then
+  else if ((Index=312)or(Index=334)or(Index=360)or(Index=383)) then
     Result.Y := 302
-  else if ((Index=313)or(Index=335)or(Index=358)or(Index=381)) then
+  else if ((Index=313)or(Index=335)or(Index=361)or(Index=384)) then
     Result.Y := 326
-  else if ((Index=314)or(Index=336)or(Index=359)or(Index=382)) then
+  else if ((Index=314)or(Index=336)or(Index=362)or(Index=385)) then
     Result.Y := 350
-  else if ((Index=316)or(Index=337)or(Index=360)or(Index=383)) then
+  else if ((Index=316)or(Index=337)or(Index=365)or(Index=386)) then
     Result.Y := 375
-  else if ((Index=317)or(Index=338)or(Index=361)or(Index=384)) then
+  else if ((Index=317)or(Index=338)or(Index=366)or(Index=393)) then
     Result.Y := 398
-  else if ((Index=318)or(Index=341)or(Index=362)or(Index=393)) then
+  else if ((Index=318)or(Index=341)or(Index=367)or(Index=394)) then
     Result.Y := 423
-  else if ((Index=319)or(Index=342)or(Index=365)or(Index=394)) then
+  else if ((Index=319)or(Index=342)or(Index=368)) then
     Result.Y := 446;
 
 end;
@@ -366,23 +366,23 @@ begin
     exit(true);
 
   WorldArr :=
-  [301,320,343,366,+
-   302,321,344,367,+
-   303,322,345,368,+
-   304,325,346,369,+
-   305,326,349,370,+
-   306,327,350,373,+
-   308,328,351,374,+
-   309,329,352,375,+
-   310,330,353,376,+
-   311,333,354,377,+
-   312,334,357,378,+
-   313,335,358,381,+
-   314,336,359,382,+
-   316,337,360,383,+
-   317,338,361,384,+
-   318,341,362,393,+
-   319,342,365,394];
+  [301,320,343,369,+
+  302,321,344,370,+
+  303,322,345,373,+
+  304,325,346,374,+
+  305,326,349,375,+
+  306,327,350,376,+
+  308,328,351,377,+
+  309,329,354,378,+
+  310,330,358,381,+
+  311,333,359,382,+
+  312,334,360,383,+
+  313,335,361,384,+
+  314,336,362,385,+
+  316,337,365,386,+
+  317,338,366,393,+
+  318,341,367,394,+
+  319,342,368];
 
   if inIntArray(WorldArr, W) then
     validworld := true
@@ -452,27 +452,27 @@ var
   FreeWorlds : TIntegerArray;
 begin
    MemWorlds :=
-  [320,343,366,+
-   302,321,344,367,+
-   303,322,345,368,+
-   304,325,346,369,+
-   305,349,370,+
-   306,327,350,373,+
-   328,351,374,+
-   309,329,352,375,+
-   310,330,353,376,+
-   311,333,354,377,+
-   312,334,357,378,+
-   313,358,+
-   314,336,359,+
-   337,360,+
-   317,338,361,+
-   318,341,362,+
-   319,342,365];
+  [    320,343,369,+
+   302,321,344,370,+
+   303,322,345,373,+
+   304,    346,374,+
+   305,    349,375,+
+   306,327,350,376,+
+       328,351,377,+
+   309,329,354,378,+
+   310,330,358,    +
+   311,333,359,    +
+   312,334,360,    +
+   313,    361,    +
+   314,336,362,    +
+           365,386,+
+   317,338,366,    +
+   318,341,367,    +
+   319,342,368];
 
    FreeWorlds :=
-  [301,308,316,335,381,
-   382,383,384,393,394];
+  [301,308,316,335,381, +
+   382,383,384,385,393,394];
 
   case Member of
     True  :
