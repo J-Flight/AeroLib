@@ -93,7 +93,7 @@ Begin
     CloseFile(hZip);
     UnzipFile(IncludePath + RepoName + '.zip', IncludePath);
     DeleteFile(IncludePath + RepoName + '.zip');
-    RenameFile(IncludePath + RepoName + '-master', IncludePath + RepoName + '_TEST'); // CHANGE THIS!
+    RenameFile(IncludePath + RepoName + '-master', IncludePath + RepoName);
     warn('Successfully updated AeroLib, please restart the script.', WT_CORE);
     TerminateScript;
   end else
