@@ -23,7 +23,7 @@ var
 begin
   Result := 'Standard';
   if not isBankOpen() then
-    exit('');
+    exit;
 
 // The bitmap is loaded each time the function is called, possible issues?
   tBMP := BitmapFromString(23, 14, 'meJydk7EOgzAMRPN7Ra3YWChiYi' +
@@ -447,14 +447,22 @@ begin
   result := searchItem.findIn(AREA_MS, Pt);
 end;
 
-function scrollToItem(Item: TItem; var Pnt: TPoint): Boolean;
+{*******************************************************************************
+function scrollToItem(Item: TItem; var Pnt: TPoint; scrollBar: Boolean = False): Boolean;
+By: Flight
+Description: Scroll to a bank item via the mouse scroll wheel.  If scrollBar is
+             set to true then the bank scroll bar will be used instead.
+*******************************************************************************}
+function scrollToItem(Item: TItem; var Pnt: TPoint; scrollBar: Boolean = False): Boolean;
 var
-  T     : Timer;
-  mPnt  : TPoint;
-  X,Y,A : integer;
-  rS    : extended;
+  T       : Timer;
+  mPnt    : TPoint;
+  X,Y,A,I : integer;
+  rS      : extended;
 begin
-  if not isBankOpen() then Exit(false);
+  if (not isBankOpen()) then
+    Exit(false);
+
   waitFunc(@itemsInBank, 60, 4000); // Anti-lag
 
   searchItem := Item;
@@ -470,31 +478,55 @@ begin
     if Item.findIn(AREA_MS, Pnt) then
       Exit(true);
 
-  A := MouseSpeed;
-  if getBankMode() = 'Standard' then
-    brakeMMouse(Point(490,81), 5, 3, True)
-  else if getBankMode() = 'Tabbed' then
-    brakeMMouse(Point(490,104), 5, 3, True);
+  if scrollBar then
+  begin
+    A := MouseSpeed;
+    if getBankMode() = 'Standard' then
+      brakeMMouse(Point(490,81), 5, 3, True)
+    else if getBankMode() = 'Tabbed' then
+      brakeMMouse(Point(490,104), 5, 3, True);
+  end else
+    if (not mouseInBox(AREA_BS)) then
+      mouseBox(AREA_BS, MOUSE_MOVE);
 
   getMousePos(X, Y);
-  holdMouse(X, Y, MOUSE_LEFT);
 
-  mouseSpeed := 1;
-  rS  := (random(30) / 30) / 10.0;
-  if rS = 0.0 then
-    rS := 0.1;
+  if scrollBar then
+  begin
+    holdMouse(X, Y, MOUSE_LEFT);
+    mouseSpeed := 1;
+    rS  := (random(30) / 30) / 10.0;
+    if rS = 0.0 then
+      rS := 0.1;
 
-  if getBankMode() = 'Standard' then
-    result := windMouseFunc(X, Y, 490+randomRange(-5,5), 265+randomRange(-3,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank)
-  else if getBankMode() = 'Tabbed' then
-    result := windMouseFunc(X, Y, 490+randomRange(-5,5), 275+randomRange(-5,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank);
+    if getBankMode() = 'Standard' then
+      result := windMouseFunc(X, Y, 490+randomRange(-5,5), 265+randomRange(-3,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank, True)
+    else if getBankMode() = 'Tabbed' then
+      result := windMouseFunc(X, Y, 490+randomRange(-5,5), 275+randomRange(-5,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank, True);
+  end else
+    while (not Item.findIn(AREA_MS, Pnt)) do
+    begin
+      if (not itemsInBank()) then
+        exit(false);
+      scrollMouse(X, Y, 1);
+      inc(I);
+      if I = (randomRange(5,7)) then // Average number of scrolls before moving finger to the front wheel
+      begin
+        wait(randomRange(800,1200)); // Simulate moving finger to starting position
+        I := 0;
+      end else
+       wait(randomRange(60,120));
+    end;
 
-  wait(randomRange(400,800));
-  getMousePos(X, Y);
-  releaseMouse(X, Y, MOUSE_LEFT);
+  if scrollBar then
+  begin
+    wait(randomRange(400,800));
+    getMousePos(X, Y);
+    releaseMouse(X, Y, MOUSE_LEFT);
+    mouseSpeed := A;
+  end;
   wait(randomRange(200,400));
   result := Item.findIn(AREA_MS, Pnt);
-  mouseSpeed := A;
 end;
 
 (*

@@ -71,6 +71,8 @@ var
   MBY2 : Integer = 288;
   AREA_BS : TBox = [60,60,446,288];
 
+  AREA_XPBAR : TBox = [430,10,511,25];
+
 { const MBCX, MBCY;
   Description: Bank Screen Centre Points. }
 const

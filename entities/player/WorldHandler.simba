@@ -127,49 +127,51 @@ end;
 // by Flight
 function rsWorldToMS(Index: Integer): TPoint;
 begin
-  if inRange(Index, 301, 319) then
+  if inRange(Index, 301, 320) then
     Result.X := 205
-  else if inRange(Index, 320, 342) then
+  else if inRange(Index, 321, 344) then
     Result.X := 300
-  else if inRange(Index, 343, 368) then
+  else if inRange(Index, 345, 368) then
     Result.X := 392
   else if inRange(Index, 369, 394) then
     Result.X := 485;
 
-  if ((Index=301)or(Index=320)or(Index=343)or(Index=369)) then
-    Result.Y := 63
-  else if ((Index=302)or(Index=321)or(Index=344)or(Index=370)) then
-    Result.Y := 86
-  else if ((Index=303)or(Index=322)or(Index=345)or(Index=373)) then
-    Result.Y := 111
-  else if ((Index=304)or(Index=325)or(Index=346)or(Index=374)) then
-    Result.Y := 134
-  else if ((Index=305)or(Index=326)or(Index=349)or(Index=375)) then
-    Result.Y := 158
-  else if ((Index=306)or(Index=327)or(Index=350)or(Index=376)) then
-    Result.Y := 182
-  else if ((Index=308)or(Index=328)or(Index=351)or(Index=377)) then
-    Result.Y := 206
-  else if ((Index=309)or(Index=329)or(Index=354)or(Index=378)) then
-    Result.Y := 231
-  else if ((Index=310)or(Index=330)or(Index=358)or(Index=381)) then
-    Result.Y := 255
-  else if ((Index=311)or(Index=333)or(Index=359)or(Index=382)) then
-    Result.Y := 278
-  else if ((Index=312)or(Index=334)or(Index=360)or(Index=383)) then
-    Result.Y := 302
-  else if ((Index=313)or(Index=335)or(Index=361)or(Index=384)) then
-    Result.Y := 326
-  else if ((Index=314)or(Index=336)or(Index=362)or(Index=385)) then
-    Result.Y := 350
-  else if ((Index=316)or(Index=337)or(Index=365)or(Index=386)) then
-    Result.Y := 375
-  else if ((Index=317)or(Index=338)or(Index=366)or(Index=393)) then
-    Result.Y := 398
-  else if ((Index=318)or(Index=341)or(Index=367)or(Index=394)) then
-    Result.Y := 423
-  else if ((Index=319)or(Index=342)or(Index=368)) then
-    Result.Y := 446;
+  if ((Index=301)or(Index=321)or(Index=345)or(Index=369)) then
+    Result.Y := 51
+  else if ((Index=302)or(Index=322)or(Index=346)or(Index=370)) then
+    Result.Y := 75
+  else if ((Index=303)or(Index=325)or(Index=349)or(Index=373)) then
+    Result.Y := 99
+  else if ((Index=304)or(Index=326)or(Index=350)or(Index=374)) then
+    Result.Y := 123
+  else if ((Index=305)or(Index=327)or(Index=351)or(Index=375)) then
+    Result.Y := 147
+  else if ((Index=306)or(Index=382)or(Index=352)or(Index=376)) then
+    Result.Y := 171
+  else if ((Index=308)or(Index=329)or(Index=353)or(Index=377)) then
+    Result.Y := 195
+  else if ((Index=309)or(Index=330)or(Index=354)or(Index=378)) then
+    Result.Y := 219
+  else if ((Index=310)or(Index=333)or(Index=357)or(Index=381)) then
+    Result.Y := 243
+  else if ((Index=311)or(Index=334)or(Index=358)or(Index=382)) then
+    Result.Y := 267
+  else if ((Index=312)or(Index=335)or(Index=359)or(Index=383)) then
+    Result.Y := 291
+  else if ((Index=313)or(Index=336)or(Index=360)or(Index=384)) then
+    Result.Y := 315
+  else if ((Index=314)or(Index=337)or(Index=361)or(Index=385)) then
+    Result.Y := 339
+  else if ((Index=316)or(Index=338)or(Index=362)or(Index=386)) then
+    Result.Y := 363
+  else if ((Index=317)or(Index=341)or(Index=365)or(Index=393)) then
+    Result.Y := 387
+  else if ((Index=318)or(Index=342)or(Index=366)or(Index=394)) then
+    Result.Y := 411
+  else if ((Index=319)or(Index=343)or(Index=367)) then
+    Result.Y := 435
+  else if ((Index=320)or(Index=344)or(Index=368)) then
+    Result.Y := 459;
 
 end;
 

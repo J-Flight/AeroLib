@@ -283,6 +283,7 @@ begin
     MoveMouse(Round(xe), Round(ye));
 end;
 
+function itemsInBank(): Boolean; forward;
 {*******************************************************************************
 Function windMouseFunc(xs, ys, xe, ye, gravity, wind, minWait, maxWait,
           targetArea: extended; Func: function: Boolean);
@@ -290,7 +291,7 @@ By: Flight
 Description: "Slowly" moves the mouse until either the target coordinate is
              reached or the condition 'Func' is met.
 *******************************************************************************}
-Function windMouseFunc(xs, ys, xe, ye, gravity, wind, minWait, maxWait, targetArea: extended; Func: function: Boolean): Boolean;
+Function windMouseFunc(xs, ys, xe, ye, gravity, wind, minWait, maxWait, targetArea: extended; Func: function: Boolean; Bank: Boolean = False): Boolean;
 var
   veloX,veloY,windX,windY,veloMag,dist,randomDist,lastDist,step: extended;
   lastX,lastY,MSP,W,maxStep,X,Y: integer;
@@ -341,7 +342,18 @@ begin
     if (lastX <> Round(xs)) or (lastY <> Round(ys)) then
       MoveMouse(Round(xs), Round(ys));
 
-    if (Func()) then Exit(True);
+    if (Func()) then
+    begin
+      MouseSpeed := MSP;
+      Exit(True);
+    end;
+
+    if Bank then
+      if (not itemsInBank()) then
+      begin
+        MouseSpeed := MSP;
+        Exit(false);
+      end;
 
     if RBool then
       W := (MSP + (Random(Round(MSP/4))))

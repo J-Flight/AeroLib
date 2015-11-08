@@ -1,0 +1,110 @@
+{
+=======
+Prayer
+=======
+}
+
+// Prayer routines by Dan the man
+
+
+function getPrayerBox(Name: Variant): Tbox;
+begin
+  if VariantIsString(Name) then
+  begin
+    case Capitalize(LowerCase(Name)) of
+      'Thick Skin':             Result := toBox(551, 214, 584, 247);
+      'Burst Of Strength':      Result := toBox(588, 214, 621, 247);
+      'Clarity Of Thought':     Result := toBox(625, 214, 658, 247);
+      'Sharp Eye':              Result := toBox(662, 214, 695, 247);
+      'Mystic Will':            Result := toBox(699, 214, 732, 247);
+      'Rock Skin':              Result := toBox(551, 251, 584, 284);
+      'Superhuman Strength':    Result := toBox(588, 251, 621, 284);
+      'Improved Reflexes':      Result := toBox(625, 251, 658, 284);
+      'Rapid Restore':          Result := toBox(662, 251, 695, 284);
+      'Rapid Heal':             Result := toBox(699, 251, 732, 284);
+      'Protect Items':          Result := toBox(551, 288, 584, 321);
+      'Hawk Eye':               Result := toBox(588, 288, 621, 321);
+      'Mystic Lore':            Result := toBox(625, 288, 658, 321);
+      'Steel Skin':             Result := toBox(662, 288, 695, 321);
+      'Ultimate Strength':      Result := toBox(699, 288, 732, 321);
+      'Incredible Reflexes':    Result := toBox(551, 325, 584, 358);
+      'Protect From Magic':     Result := toBox(588, 325, 621, 358);
+      'Protect From Missiles':  Result := toBox(625, 325, 658, 358);
+      'Protect From Melee':     Result := toBox(662, 325, 695, 358);
+      'Eagle Eye':              Result := toBox(699, 325, 732, 358);
+      'Mystic Might':           Result := toBox(551, 362, 584, 395);
+      'Retribution':            Result := toBox(588, 362, 621, 395);
+      'Redemption':             Result := toBox(625, 362, 658, 395);
+      'Smite':                  Result := toBox(662, 362, 695, 395);
+      'Chivalry':               Result := toBox(699, 362, 732, 395);
+      'Piety':                  Result := toBox(551, 399, 584, 432);
+    end;
+  end;
+end;
+
+{*
+IsPrayerActive
+~~~~~~~~~~~~
+
+.. code-block:: AeroLib
+
+    isPrayerActive(PrayerName: String): Boolean;
+
+Returns true if the specified prayer string is active.
+
+Example:
+
+    if isPrayerActive('Protect From Melee') then
+      WriteLn('Melee protection is active');
+
+*}
+
+function isPrayerActive(PrayerName: String): Boolean;
+var
+  Color_PrayerActive: TColEx;
+begin
+  if GameTab(TAB_PRAYER) then
+  begin
+    // Creates the color and checks to see if its located within Tbox meaning prayer is active
+    Color_PrayerActive.create(7318465, 3, 0.02, 1.96);
+    result := Color_PrayerActive.findIn(getPrayerBox(PrayerName));
+  end;
+end;
+
+{*
+TogglePrayer
+~~~~~~~~~~~~
+
+.. code-block:: AeroLib
+
+    togglePrayer(PrayerName: string; Enable: Boolean): Boolean;
+
+Enables or disables prayer based on PrayerName.  'True' for enable,
+'False' for disable.
+
+Example:
+
+    if togglePrayer('Protect From Magic', True) then
+
+*}
+function togglePrayer(PrayerName: string; Enable: Boolean): Boolean;
+var
+  PBox: Tbox;
+  Color_PrayerActive: TColEx;
+  foundPnt: Tpoint;
+begin
+  if GameTab(TAB_PRAYER) then
+  begin
+    if Enable then
+      if isPrayerActive(PrayerName) then
+        exit(true)
+      else
+        mouseBox(getPrayerBox(PrayerName), MOUSE_LEFT);
+
+    if (not Enable) then
+      if isPrayerActive(PrayerName) then
+        mouseBox(getPrayerBox(PrayerName), MOUSE_LEFT)
+      else
+        exit(true);
+  end;
+end;

@@ -47,6 +47,21 @@ end;
             - Display settings -
 }
 
+procedure setDefaultZoom(Lock: Boolean = false);
+var
+  col : TColEx;
+begin
+  openSettingsTab(1);
+  mouseBox(toBox(560,260,584,282), MOUSE_RIGHT);
+  chooseOption('Restore');
+  if Lock then
+  begin
+    col.create(200, 10);
+    if (not col.findIn(toBox(560,260,584,282))) then
+      mouseBox(toBox(560,260,584,282), MOUSE_LEFT);
+  end;
+end;
+
 function setBrightness(Brightness: Integer): Boolean;
 var
   Pnt    : TPoint;
@@ -61,7 +76,7 @@ begin
     exit(false);
   end else
   begin
-    PntArr := [Point(600, 277),Point(631, 277),Point(661, 277),Point(694, 277)];
+    PntArr := [Point(607, 304),Point(638, 304),Point(669, 304),Point(703, 304)];
     Pnt    := PntArr[(Brightness - 1)];
     if (not (getColor(Pnt.X, Pnt.Y) = 16777215)) then
     begin
@@ -81,11 +96,11 @@ begin
     Exit;
 
   tCol.create(1777019, 15);
-  if (tCol.count(toBox(573,308,632,359)) > 50) then
+  if (tCol.count(toBox(573,327,632,377)) > 50) then
     exit(true)
   else
   begin
-    mouseBox(toBox(573,308,632,359), MOUSE_LEFT);
+    mouseBox(toBox(573,327,632,377), MOUSE_LEFT);
     exit(true);
   end;
 end;
@@ -101,7 +116,7 @@ begin
 
   if not waitFindColor(Pnt, 2070783, 5, toBox(255,85,265,95), 100) then
   begin
-    mouseBox(toBox(577,377,693,394), MOUSE_LEFT);
+    mouseBox(toBox(577,385,693,410), MOUSE_LEFT);
     waitFindColor(Pnt, 2070783, 5, toBox(255,85,265,95), 3500);
   end;
   tCol.create(1777019, 15);
@@ -418,6 +433,7 @@ Example:
 *)
 procedure fixGraphics();
 begin
+  setDefaultZoom(true);
   if setBrightness(4) then Wait(90 + Random(200));
   setFixedClient();
   setAudioLevels(1, 1, 1);

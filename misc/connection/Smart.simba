@@ -30,7 +30,7 @@ End;
 
 Procedure TSmart.Create(Width, Height: Integer; UserAgent: String; Plugins: TStringArray = []); overload;
 var
-  World,path: String;
+  World,path,C: String;
 Begin
   Self.__Width := Width;
   Self.__Height := Height;
@@ -39,7 +39,6 @@ Begin
   if (Not Self.__ForceNew And Self.Pair()) then
     Exit;
 
-  path := getJavaPath(SMART_ShowConsole);
   World := self.GetWorld();
   if (World = '') then
   begin
@@ -49,11 +48,16 @@ Begin
   end else
     warn('Best world found: '+World, WT_CORE);
 
-  Self.__Target := SmartSpawnClient(path, replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+  if SMART_ShowConsole then
+    Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '')
+  else
+    Self.__Target := SmartSpawnClient('javaw.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+
   if (Self.__Target = 0) then
   begin
-    warn('Error while finding Java, using default path', WT_CORE);
-    Self.__Target := SmartSpawnClient('java.exe', replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
+    warn('Error while finding default Java, searching for Java...', WT_CORE);
+    path := getJavaPath(SMART_ShowConsole);
+    Self.__Target := SmartSpawnClient(path, replaceWrap(PluginPath, '\', '/', [rfReplaceAll]), 'http://oldschool' + World + '.runescape.com/', 'j1', Width, Height, '', UserAgent, '', '');
   end;
 
   if (Self.__Target <> 0) then

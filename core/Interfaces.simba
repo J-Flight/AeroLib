@@ -46,8 +46,8 @@ begin
     FontType  := 'SmallChars07';
     FontColor := 2070783;
     ColorTol  := 5;
-    Text      := 'Insert';
-    TxtBounds := toBox(125, 304, 170, 327);
+    Text      := 'mode';
+    TxtBounds := toBox(85, 280, 200, 335);
   end;
   with Interfaces[PINSCREEN] do
   begin

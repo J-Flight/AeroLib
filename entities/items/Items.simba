@@ -236,7 +236,8 @@ begin
     if not variantIsInteger(action) then
       exit;
 
-  mouseBox(invBox(Slot), MOUSE_MOVE);
+  if (not mouseInBox(invBox(Slot))) then
+    mouseBox(invBox(Slot), MOUSE_MOVE);
   if variantIsInteger(action) then
   begin
     if (action = MOUSE_MOVE) then

@@ -5,6 +5,71 @@ Orbs
 }
 
 
+procedure clickNorth(RightClick: Boolean=False);
+begin
+  mouseBox(toBox(548,7,572,33), MOUSE_MOVE);
+  if RightClick then
+  begin
+    fastClick(MOUSE_RIGHT);
+    chooseOption('Look North');
+  end else
+    fastClick(MOUSE_LEFT);
+end;
+
+function getXPBarAmount(): Integer;
+begin
+  Result := -1;
+  Result := strToIntDef(ExtractFromStr(getTextAtEx(AREA_XPBAR.X1, AREA_XPBAR.Y1, AREA_XPBAR.X2, AREA_XPBAR.Y2, 0, 3, 1, 16777215, 5, 'StatChars07'), Numbers), -1);
+end;
+
+function XPBarOpen(): Boolean;
+begin
+  Result := getXPBarAmount() > -1;
+end;
+
+procedure toggleXPBar(Enable: Boolean; DoWait: Boolean = False);
+var
+  T : Timer;
+begin
+  if Enable then
+    if (not XPBarOpen) then
+      mouseBox(toBox(520,23,540,44), MOUSE_LEFT);
+
+  if (not Enable) then
+    if XPBarOpen then
+      mouseBox(toBox(520,23,540,44), MOUSE_LEFT);
+
+  if DoWait then
+  begin
+    T.Start();
+    while T.timeElapsed() < 4000 do
+    begin
+      if Enable then
+        if XPBarOpen then
+          exit;
+      if (not Enable) then
+        if (not XPBarOpen) then
+          exit;
+    end;
+  end;
+end;
+
+function waitXPBarChange(WaitTime: Integer): Boolean;
+var
+  T : Timer;
+  i : Integer;
+begin
+  i := getXPBarAmount();
+  T.Start();
+
+  while T.timeElapsed() < WaitTime do
+  begin
+    if i <> getXPBarAmount() then
+      exit(True);
+    wait(5 + Random(6));
+  end;
+end;
+
 function getHealthPercent(): Integer;
 var
   i    : Integer;

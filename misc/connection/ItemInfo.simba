@@ -40,7 +40,7 @@ begin
   S := SArray[0];
   if (S = '') then
   begin
-    warn(StringName + ' not be found', WT_CORE);
+    warn(StringName + ' could not be found.', WT_CORE);
     Result := - 1;
     Exit;
   end;
@@ -87,4 +87,31 @@ begin
   result.buy := strToInt(buySource);
   result.sell := strToInt(sellSource);
   result.med := strToInt(medSource);
+end;
+
+function getGEPrice(itemName: String): Integer;
+var
+  rawStr,rawPage: String;
+  itemID,rawPrice: Integer;
+begin
+  itemID := stringToID(itemName);
+  if (itemID = -1) then
+    exit;
+  try
+    rawPage := getPage('http://services.runescape.com/m=itemdb_oldschool/api/catalogue/detail.json?item=' + toStr(itemID));
+  except
+    warn('Failed to connect to OldSchool GE database.', WT_CORE);
+    exit;
+  end;
+  try
+    rawStr   := between('"price":"', '"}', rawPage);
+    rawPrice := strToInt(extractFromStr(rawStr, numbers));
+  except
+    warn('Error getting OldSchool GE database page', WT_CORE);
+    exit;
+  end;
+  if (Pos('k', rawStr) <> 0) then
+    result := (rawPrice * 100);
+  if (Pos('m', rawStr) <> 0) then
+    result := (rawPrice * 100000);
 end;
