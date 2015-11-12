@@ -56,7 +56,7 @@
 
 Const
   AL_VERSION_MAIN = 1.2;
-  AL_VERSION_SUB  = 2;
+  AL_VERSION_SUB  = 3;
   AL_GITURL       = 'https://github.com/J-Flight/AeroLib';
 
 procedure AL_Update();
@@ -94,6 +94,7 @@ Begin
     CloseFile(hZip);
     UnzipFile(IncludePath + RepoName + '.zip', IncludePath);
     DeleteFile(IncludePath + RepoName + '.zip');
+    RenameFile(IncludePath + 'AeroLib', IncludePath + 'AeroLib_Old');
     RenameFile(IncludePath + RepoName + '-master', IncludePath + RepoName);
     warn('Successfully updated AeroLib, please restart the script.', WT_CORE);
     TerminateScript;
@@ -151,6 +152,14 @@ procedure initAL();
 begin
   AL_InitMessage(AL_VERSION_MAIN, AL_VERSION_SUB);
   warn('Initiating AeroLib...', WT_CORE);
+  if DirectoryExists(IncludePath + 'AeroLib_Old') then
+  begin
+    warn('Removing old AeroLib files...', WT_CORE);
+    if not DeleteDirectory(IncludePath + 'AeroLib_Old', True) then
+      warn('Error deleting old AeroLib', WT_CORE)
+    else
+      warn('Old AeroLib deleted', WT_CORE);
+  end;
   AL_CheckVersion();
   setupGauss();
   loadObjDB();
