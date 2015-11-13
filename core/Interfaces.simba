@@ -129,6 +129,22 @@ begin
     Text      := 'hides';
     TxtBounds := toBox(140, 30, 375, 50);
   end;
+  with Interfaces[TRADESCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 2070783;
+    ColorTol  := 5;
+    Text      := 'Trading';
+    TxtBounds := toBox(177, 28, 233, 45);
+  end;
+  with Interfaces[TRADECSCREEN] do
+  begin
+    FontType  := 'UpChars07';
+    FontColor := 65535;
+    ColorTol  := 5;
+    Text      := 'about';
+    TxtBounds := toBox(118, 70, 160, 85);
+  end;
 end;
 
 function TInterface.isVisible(): boolean;
