@@ -426,7 +426,7 @@ begin
 end;
 
 {*******************************************************************************
-function humanMMouse(Pnt: TPoint; ranX, ranY: Integer): Boolean;
+procedure humanMMouse(Pnt: TPoint; ranX, ranY: Integer);
 By: Flight
 Description:...
 *******************************************************************************}
