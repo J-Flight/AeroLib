@@ -620,14 +620,12 @@ var
   S: SSLSocket;
   Res: ProMemoryStruct;
 begin
-  Pro_InitSocket(S, nil, nil, nil, nil);
-  Pro_CreateSocket(S, '');
-  Pro_SetSSL(S, false, false, true);
-  Pro_SetURL(S, URL);
-  Pro_DoGetEx(S, Res);
-  SetLength(Result, Res.size);
+  S.init();
+  S.setURLFollow(true);
+  S.setURL(URL);
+  S.doGet(Res);
   MemMove(Res.Memory^, Result[1], Res.Size);
-  Pro_FreeSocket(S);
+  S.free;
 end;
 
 // by Brandon

@@ -381,6 +381,16 @@ begin
   result := Self.getAmount(False);
 end;
 
+function TItem.getStoreAmount(): Integer;
+var
+  pnt : TPoint;
+begin
+  result := 0;
+
+  if Self.findIn([30,60,475,160], pnt) then
+    exit(getItemAmount(pnt));
+end;
+
 function TItem.getSlots(): TIntegerArray;
 var
   i,c : Integer;

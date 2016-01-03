@@ -146,7 +146,7 @@ begin
     Result.Y := 123
   else if ((Index=305)or(Index=327)or(Index=351)or(Index=375)) then
     Result.Y := 147
-  else if ((Index=306)or(Index=382)or(Index=352)or(Index=376)) then
+  else if ((Index=306)or(Index=328)or(Index=352)or(Index=376)) then
     Result.Y := 171
   else if ((Index=308)or(Index=329)or(Index=353)or(Index=377)) then
     Result.Y := 195

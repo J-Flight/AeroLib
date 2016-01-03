@@ -168,13 +168,28 @@ Example:
 
 *)
 procedure setRetaliate(Enable: Boolean);
+var
+  Pnt : TPoint;
 begin
   if not FTab(TAB_COMBAT) then
     exit;
 
   if Enable then
-    if (not (getTextAtEx(644, 379, 667, 392, 0, 5, 1, 2070783, 20, 'UpChars07') ='(On)')) then
+  begin
+    if not waitFindColor(Pnt, 1974404, 5, toBox(600,380,635,400), 100) then
+    begin
       mouseBox(toBox(572,362,713,397), MOUSE_LEFT);
+      waitFindColor(Pnt, 2070783, 5, toBox(572,362,713,397), 3500);
+    end;
+  end else
+  begin
+    if waitFindColor(Pnt, 1974404, 5, toBox(600,380,635,400), 100) then
+    begin
+      mouseBox(toBox(572,362,713,397), MOUSE_LEFT);
+      waitFindColor(Pnt, 2070783, 5, toBox(572,362,713,397), 3500);
+    end;
+  end;
+
   FTab(TAB_INV);
 end;
 

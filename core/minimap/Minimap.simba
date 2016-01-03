@@ -525,6 +525,7 @@ var
 begin
   dots := getMiniMapDots(WhatDot);
   if (length(dots) < 1) then Exit(point(0,0));
+  sortTPAFrom(dots, MMCP);
   result := dots[0];
 end;
 

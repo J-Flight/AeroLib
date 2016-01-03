@@ -286,7 +286,7 @@ end;
 function itemsInBank(): Boolean; forward;
 {*******************************************************************************
 Function windMouseFunc(xs, ys, xe, ye, gravity, wind, minWait, maxWait,
-          targetArea: extended; Func: function: Boolean);
+          targetArea: extended; Func: function: Boolean): Boolean;
 By: Flight
 Description: "Slowly" moves the mouse until either the target coordinate is
              reached or the condition 'Func' is met.

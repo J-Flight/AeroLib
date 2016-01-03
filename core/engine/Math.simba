@@ -891,7 +891,7 @@ begin
   Yh := Abs(Y + yM);
   Result.x := Round( (263.5+Xmod) + (X*9.75/(12.8-(Yh/yM*3.15))) * 9.75);
   Result.y := Round( (182.0+Ymod) + Y * (6.3 + ((Yh/yM)*2.4)));
-  if not pointInBox(Result, intToBox(MSX1,MSY1,MSX2,MSY2)) then
+  if not pointInBox(Result, AREA_MS) then
     Result := Point(-1, -1);
 end;
 

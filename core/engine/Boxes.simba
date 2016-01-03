@@ -11,7 +11,7 @@ end;
 
 Function pointToBox(Point: TPoint; Size: Integer): TBox; overload;
 begin
-  Result := intToBox(Point.X-Size, Point.Y-Size, Point.X+Size, Point.Y+Size);
+  Result := intToBox(Point.X-round(Size/2), Point.Y-round(Size/2), Point.X+round(Size/2), Point.Y+round(Size/2));
 end;
 
 function TBox.Width(): Integer;

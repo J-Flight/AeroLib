@@ -994,6 +994,7 @@ begin
       Interfaces[PINSCREEN].isVisible()) then
         break;
     if areTalking() then exit(false);
+    if findBlackChatMessage('reach that!') then exit(false);
     wait(randomRange(60,90));
   until(T.timeElapsed() > 7000);
 

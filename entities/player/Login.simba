@@ -204,7 +204,8 @@ begin
   terminateScript();
 end;
 
-function WS_toggle(Open: Boolean = True): Boolean; forward;
+function WS_enabled(): Boolean; forward;
+function WS_logout(): Boolean; forward;
 function logoutPlayer(): Boolean;
 var
   T : Timer;
@@ -218,7 +219,8 @@ begin
   if not gametab(TAB_LOGOUT) then
     exit(false);
 
-  WS_toggle(False);
+  if WS_enabled() then
+    if WS_logout() then exit(true);
   T.start();
   while (Me.inCombat() and (T.timeElapsed() < 5000)) do
     wait(1);

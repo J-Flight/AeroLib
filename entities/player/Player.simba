@@ -78,7 +78,7 @@ begin
     B.Y2   := Pnt.Y;
     Result := foundHPBarIn(B);
   end else
-    Result := foundHPBarIn(toBox(220, 120, 295, 168));
+    Result := foundHPBarIn(toBox(220, 120, 296, 171));
 end;
 
 Procedure definePlayerModel(maxW, maxH: Integer);

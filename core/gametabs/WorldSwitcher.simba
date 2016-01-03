@@ -5,9 +5,10 @@ WorldSwitcher
 }
 
 Const
-  WS_BoxMain  : TBox = [575,349,706,374];
-  WS_BoxClose : TBox = [717,208,733,224];
-  WS_WorldBox : TBox = [566,240,585,431];
+  WS_BoxMain   : TBox = [575,349,706,374];
+  WS_BoxClose  : TBox = [717,208,733,224];
+  WS_WorldBox  : TBox = [566,240,585,431];
+  WS_LogoutBox : TBox = [717,438,733,462];
 
 Var
   WS_World : Integer;
@@ -138,6 +139,19 @@ begin
     while not isLoggedIn() do
       wait(60);
   end;
+
   wait(randomRange(700,1300));
   result := (WS_getWorld()-300) = World;
+end;
+
+function WS_logout(): Boolean;
+begin
+  if not isLoggedIn() then exit(true);
+  if WS_enabled() then
+  begin
+    mouseBox(WS_LogoutBox, MOUSE_LEFT);
+    while isLoggedIn() do
+      wait(35);
+  end;
+  result := (not isLoggedIn());
 end;
