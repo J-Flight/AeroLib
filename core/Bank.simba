@@ -444,7 +444,7 @@ var
   Pt : TPoint;
 begin
   if not isBankOpen() then Exit(false);
-  result := searchItem.findIn(AREA_MS, Pt);
+  result := searchItem.findIn(AREA_BS, Pt);
 end;
 
 {*******************************************************************************
@@ -468,14 +468,14 @@ begin
   searchItem := Item;
   T.start();
   while T.timeElapsed() <= randomRange(400,900) do
-    if Item.findIn(AREA_MS, Pnt) then
+    if Item.findIn(AREA_BS, Pnt) then
       Exit(true);
 
   fixBank();
   wait(randomRange(400,900));
 
   while T.timeElapsed() <= randomRange(400,900) do
-    if Item.findIn(AREA_MS, Pnt) then
+    if Item.findIn(AREA_BS, Pnt) then
       Exit(true);
 
   if scrollBar then
@@ -504,7 +504,7 @@ begin
     else if getBankMode() = 'Tabbed' then
       result := windMouseFunc(X, Y, 490+randomRange(-5,5), 275+randomRange(-5,3), 9.0,3.0,10.0/rS,15.0/rS,10.0*rS, @searchItemInBank, True);
   end else
-    while (not Item.findIn(AREA_MS, Pnt)) do
+    while (not Item.findIn(AREA_BS, Pnt)) do
     begin
       if (not itemsInBank()) then
         exit(false);
@@ -526,7 +526,7 @@ begin
     mouseSpeed := A;
   end;
   wait(randomRange(200,400));
-  result := Item.findIn(AREA_MS, Pnt);
+  result := Item.findIn(AREA_BS, Pnt);
 end;
 
 (*
@@ -839,7 +839,7 @@ var
   P : TPoint;
 begin
   waitFunc(@itemsInBank, 60, 4000); // Anti-lag
-  if not Item.findIn(AREA_MS, P) then exit(false);
+  if not Item.findIn(AREA_BS, P) then exit(false);
   Result := withdrawPoint(P, Amount, Uptexts);
 end;
 
@@ -848,7 +848,7 @@ var
   P : TPoint;
 begin
   waitFunc(@itemsInBank, 60, 4000); // Anti-lag
-  if not Item.findIn(AREA_MS, P) then exit(false);
+  if not Item.findIn(AREA_BS, P) then exit(false);
   Result := withdrawPoint(P, Amount);
 end;
 
