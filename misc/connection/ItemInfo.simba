@@ -89,14 +89,11 @@ begin
   result.med := strToInt(medSource);
 end;
 
-function getGEPrice(itemName: String): Integer;
+function getGEPrice(itemID: Integer): Integer;
 var
   rawStr,rawPage: String;
-  itemID,rawPrice: Integer;
+  rawPrice: Integer;
 begin
-  itemID := stringToID(itemName);
-  if (itemID = -1) then
-    exit;
   try
     rawPage := getPage('http://services.runescape.com/m=itemdb_oldschool/api/catalogue/detail.json?item=' + toStr(itemID));
   except
@@ -104,14 +101,27 @@ begin
     exit;
   end;
   try
-    rawStr   := between('"price":"', '"}', rawPage);
+    rawStr   := between('"price":', '},"today":{"trend":', rawPage);
     rawPrice := strToInt(extractFromStr(rawStr, numbers));
   except
     warn('Error getting OldSchool GE database page', WT_CORE);
     exit;
   end;
+  result := rawPrice;
   if (Pos('k', rawStr) <> 0) then
     result := (rawPrice * 100);
   if (Pos('m', rawStr) <> 0) then
     result := (rawPrice * 100000);
+  if (Pos('b', rawStr) <> 0) then
+    result := (rawPrice * 100000000);
+end;
+
+function getGEPrice(itemName: String): Integer; overload;
+var
+  itemID: Integer;
+begin
+  itemID := stringToID(itemName);
+  if (itemID = -1) then
+    exit;
+  result := getGEPrice(itemID);
 end;
