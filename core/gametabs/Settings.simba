@@ -135,6 +135,9 @@ begin
       mouseBox(toBox(334,113,370,149), MOUSE_LEFT);
       Result := True;
     end;
+
+  mouseBox(toBox(356,80,371,96), MOUSE_LEFT);
+  waitColorGone(2070783, 262, 88, 20, 3000);
 end;
 
 function toggleRoofRemoval(Enable: Boolean): Boolean;
@@ -167,6 +170,9 @@ begin
       mouseBox(toBox(272,113,308,149), MOUSE_LEFT);
       Result := True;
     end;
+
+  mouseBox(toBox(356,80,371,96), MOUSE_LEFT);
+  waitColorGone(2070783, 262, 88, 20, 3000);
 end;
 
 function toggleRemainingXP(Enable: Boolean): Boolean;
@@ -199,6 +205,9 @@ begin
       mouseBox(toBox(211,113,247,149), MOUSE_LEFT);
       Result := True;
     end;
+
+  mouseBox(toBox(356,80,371,96), MOUSE_LEFT);
+  waitColorGone(2070783, 262, 88, 20, 3000);
 end;
 
 {

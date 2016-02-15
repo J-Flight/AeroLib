@@ -43,11 +43,10 @@ function invBox(I : Integer): TBox;
 var
   Slot1, Slot6: TBox;
 begin
-  if not InRange(I, 1, 28) then
+  if not inRange(I, 1, 28) then
   begin
-    Result := toBox(-1,-1,-1,-1);
-    warn('Incorrect index: ' + IntToStr(i), WT_CORE);
-    Exit;
+    warn('Incorrect item index: ' + toStr(i), WT_CORE);
+    exit;
   end;
   Slot1 := toBox(563, 213, 594, 244);
   Slot6 := toBox(605, 249, 31415, 92653);
@@ -295,6 +294,11 @@ var
   TB  : TBox;
 begin
   result := false;
+  if not inRange(Slot, 1, 28) then
+  begin
+    warn('Incorrect item index: ' + toStr(Slot), WT_CORE);
+    exit;
+  end;
   if not gameTab(TAB_INV) then
     exit;
   TB := invBox(Slot);

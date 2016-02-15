@@ -247,7 +247,7 @@ begin
       begin
         b := atpaI[i].getBounds();
         if (inRange(B.Height, Self.Height-SizeTol, Self.Height+SizeTol) and
-            inRange(B.Height, Self.Width-SizeTol, Self.Width+SizeTol)) then
+            inRange(B.Width, Self.Width-SizeTol, Self.Width+SizeTol)) then
         begin
           setArrayLength(tpa, Length(tpa)+1);
           tpa[High(tpa)] := atpaI[i].midPnt();

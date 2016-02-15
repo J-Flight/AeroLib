@@ -57,7 +57,7 @@
 
 Const
   AL_VERSION_MAIN = 1.2;
-  AL_VERSION_SUB  = 4;
+  AL_VERSION_SUB  = 5;
   AL_GITURL       = 'https://github.com/J-Flight/AeroLib';
 
 procedure AL_Update();
@@ -142,7 +142,12 @@ begin
   end;
 
   if (AL_VERSION_MAIN < strToFloat(vM)) then
+  begin
     warn('There'#39's a major update available for AeroLib.', WT_CORE);
+    AL_Update();
+    exit;
+  end;
+
   if (AL_VERSION_SUB < strToFloat(vS)) then
     warn('There'#39's a minor update available for AeroLib.', WT_CORE);
 
