@@ -429,3 +429,18 @@ begin
   if slot < 1 then Exit(false);
   result := interactSlot(slot, action);
 end;
+
+procedure waitInvStopChange(MaxTime: Integer);
+var
+  T        : Timer;
+  tmpCount : Integer;
+begin
+  tmpCount := getInvCount();
+  T.Start();
+  while (T.timeElapsed() < MaxTime) and (not isInvFull()) do
+    if (tmpCount <> getInvCount) then
+    begin
+      tmpCount := getInvCount();
+      T.Start();
+    end;
+end;
