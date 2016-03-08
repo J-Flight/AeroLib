@@ -1,16 +1,43 @@
 // Timer type & functions by Brandon
 type Timer = record
-  Time: Int64;
+  Time, StartTime: Int64;
+  IsRunning: Boolean;
 end;
 
-Procedure Timer.start();
-Begin
-  Time := getSystemTime();
-End;
+procedure Timer.pause;
+begin
+  if not self.IsRunning then
+    Exit;
+  self.IsRunning := False;
+  Inc(self.Time, getSystemTime() - self.StartTime);
+end;
+
+procedure Timer.reset;
+begin
+  self.Time := 0;
+  self.StartTime := self.Time;
+  self.IsRunning := False;
+end;
+
+procedure Timer.start;
+begin
+  if self.IsRunning then
+    exit();
+  self.IsRunning := True;
+  self.StartTime := getSystemTime();
+end;
+
+procedure Timer.restart();
+begin
+  self.reset;
+  self.start;
+end;
 
 Function Timer.timeElapsed(): Integer;
 Begin
-  Result := getSystemTime() - Time;
+  Result := self.Time;
+  if self.IsRunning then
+    Inc(Result, GetSystemTime() - self.StartTime);
 End;
 
 const
