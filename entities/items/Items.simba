@@ -356,6 +356,17 @@ begin
   result := Self.findIn(AREA_MS, Pnt);
 end;
 
+function TItem.getStoreAmount(): Integer; overload;
+var
+  i,c : Integer;
+  pnt : TPoint;
+begin
+  result := 0;
+
+  if Self.findIn([30,60,475,160], pnt) then
+    exit(getItemAmount(pnt));
+end;
+
 function isBankOpen(): Boolean; forward;
 function TItem.getAmount(ExcludeBank: Boolean): Integer;
 var
