@@ -51,6 +51,8 @@
 {$include_once misc/randomsolvers/Master.simba}
 {$include_once misc/Reports.simba}
 
+{$include_once core/Magic.simba}
+
 {$IFDEF WALKER}
   {$include_once core/minimap/Walker/Walker.simba}
 {$ENDIF}
