@@ -243,7 +243,7 @@ begin
   begin
     mmPos.x := (pt.x - myPos.x);
     mmPos.y := (pt.y - myPos.y);
-    mmPos   := RotatePoint(mmPos, radians(finder.mmOffset), 0,0);
+    mmPos   := RotatePoint(mmPos, radians(finder.GetMMAngle()), 0,0);
     mmPos.x += WMM_CX;
     mmPos.y += WMM_CY;
     Result := True;
